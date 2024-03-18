@@ -192,7 +192,7 @@ fun NutritionTrackerApp() {
         Food(3, "Chicken Breast", "https://example.com/chicken.jpg", 165, 31.0f, 0.0f, 3.6f),
         Food(4, "Salmon Fillet", "https://example.com/salmon.jpg", 220, 25.0f, 0.0f, 14.0f)
     )
-    var foods by remember { mutableStateOf(dummyFoods) }
+    val foods by remember { mutableStateOf(dummyFoods) }
 
     Scaffold(
         topBar = {
