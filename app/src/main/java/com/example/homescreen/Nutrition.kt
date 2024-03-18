@@ -200,7 +200,7 @@ fun NutritionTrackerApp() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nutrition Tracker") },
+                title = { Text("Nutrition Tab") },
                 actions = {
                     IconButton(onClick = { showForm = true }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Food")
@@ -213,6 +213,7 @@ fun NutritionTrackerApp() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .padding(top = 64.dp)
         ) {
             FoodList(foods = foods) { food ->
                 // Handle item click here
