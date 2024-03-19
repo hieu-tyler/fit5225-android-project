@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,12 +53,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
 import androidx.navigation.compose.rememberNavController
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -294,47 +311,103 @@ fun RegistrationScreen(
     }
 }
 
+sealed class Screen(val route: String)
+
+object DailyActivities : Screen("Daily Activities")
+object NutritionalIntake : Screen("Nutritional Intake")
+object HealthMetrics : Screen("Health Metrics")
+object ProfileAndSettings : Screen("Profile and Settings")
+
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun HomeScreen() {
-    val tabs = listOf(
-        "Daily Activities",
-        "Nutritional Intake",
-        "Health Metrics",
-        "Profile and Setting Management"
-    )
-
-    var selectedTabIndex by mutableStateOf(0)
-
-    Surface(color = MaterialTheme.colorScheme.background) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            TabRow(selectedTabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index }
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-            TabContent(tabs[selectedTabIndex])
+    val navController = rememberNavController()
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(navController)
+        }
+    ) {
+        NavHost(navController = navController, startDestination = DailyActivities.route) {
+            composable(DailyActivities.route) { DailyActivitiesScreen() }
+            composable(NutritionalIntake.route) { NutritionalIntakeScreen() }
+            composable(HealthMetrics.route) { HealthMetricsScreen() }
+            composable(ProfileAndSettings.route) { ProfileAndSettingsScreen() }
         }
     }
+}
+
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(DailyActivities, NutritionalIntake, HealthMetrics, ProfileAndSettings)
+    BottomNavigation(
+        backgroundColor = Color.Yellow, // Set the background color to yellow
+    ) {
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        items.forEach { screen ->
+            val icon = getIconForScreen(screen)
+            BottomNavigationItem(
+                icon = { Icon(icon, contentDescription = null) },
+                label = {
+                    Text(
+                        text = screen.route,
+                        textAlign = TextAlign.Center,
+                    )
+                },
+                selected = currentRoute == screen.route,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        navController.graph.startDestinationRoute?.let { route -> popUpTo(route) {
+                            saveState = true
+                        }
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun getIconForScreen(screen: Screen): ImageVector {
+    return when (screen) {
+        DailyActivities -> Icons.Filled.Create
+        NutritionalIntake -> Icons.Filled.Info
+        HealthMetrics -> Icons.Filled.Star
+        ProfileAndSettings -> Icons.Filled.Settings
+    }
+}
+
+@Composable
+fun DailyActivitiesScreen() {
+    Text("Daily Activities")
+}
+
+@Composable
+fun NutritionalIntakeScreen() {
+    Text("Nutritional Intake")
+}
+
+@Composable
+fun HealthMetricsScreen() {
+    Text("Health Metrics")
+}
+
+@Composable
+fun ProfileAndSettingsScreen() {
+    Text("Profile and Settings")
 }
 
 @Composable
 fun TabContent(title: String) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(24.dp)) {
-            Text(text = title,
+            Text(
+                text = title,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface)
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -342,9 +415,5 @@ fun TabContent(title: String) {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreenTheme {
-//        LoginScreen({ _, _ ->})
-//        RegistrationScreen({ _, _, _, _, _, _, _ ->}, {->})
-        HomeScreen()
-    }
+    HomeScreen()
 }
