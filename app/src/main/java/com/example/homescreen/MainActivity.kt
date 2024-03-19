@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.example.homescreen.ui.theme.HomeScreenTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -36,7 +35,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TextButton
@@ -54,7 +52,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.navigation.compose.rememberNavController
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -67,7 +64,8 @@ class MainActivity : ComponentActivity() {
         setContent {
 //            LoginScreen({ _, _ ->})
 //            RegistrationScreen({ _, _, _, _, _, _, _ ->}, {->})
-            HomeScreen()
+//            HomeScreen()
+            NutritionTracker()
         }
     }
 }
@@ -78,7 +76,9 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -114,7 +114,9 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { onLoginClicked(email, password) },
-            modifier = Modifier.height(46.dp).width(190.dp)
+            modifier = Modifier
+                .height(46.dp)
+                .width(190.dp)
         ) {
             Text("Login")
         }
@@ -131,14 +133,18 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
         // Google Sign-In Button
         Button(
             onClick = { /* Implement Google Sign-In logic here */ },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             colors = ButtonDefaults.buttonColors(Color.Transparent),
             contentPadding = PaddingValues(0.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.android_light_rd),
                 contentDescription = "Sign in with Google",
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             )
         }
     }
@@ -168,7 +174,9 @@ fun RegistrationScreen(
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var selectedDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -218,9 +226,13 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(8.dp))
         ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = { isExpanded = it }) {
             TextField(
-                modifier = Modifier.menuAnchor().fillMaxWidth().focusProperties {
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+                    .focusProperties {
                         canFocus = false
-                    }.padding(bottom = 8.dp),
+                    }
+                    .padding(bottom = 8.dp),
                 readOnly = true,
                 value = selectedGender,
                 onValueChange = {},
@@ -256,7 +268,9 @@ fun RegistrationScreen(
         ) {
             OutlinedButton(
                 onClick = { showDatePicker = true },
-                modifier = Modifier.weight(1f).height(46.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .height(46.dp)
             ) { Text(text = "Enter Date of Birth") }
             Spacer(modifier = Modifier.width(12.dp))
             val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
@@ -282,7 +296,9 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(22.dp))
         Button(
             onClick = { onRegisterClicked(firstName, lastName, email, password, selectedGender, phone, Date(selectedDate)) },
-            modifier = Modifier.height(46.dp).width(190.dp)
+            modifier = Modifier
+                .height(46.dp)
+                .width(190.dp)
         ) { Text("Register") }
         Row(
             modifier = Modifier.padding(top = 16.dp),
@@ -307,7 +323,9 @@ fun HomeScreen() {
     var selectedTabIndex by mutableStateOf(0)
 
     Surface(color = MaterialTheme.colorScheme.background) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)) {
             TabRow(selectedTabIndex) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
