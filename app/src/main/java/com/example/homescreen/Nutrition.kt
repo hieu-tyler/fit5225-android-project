@@ -2,7 +2,11 @@ package com.example.homescreen
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,9 +14,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,12 +30,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import coil.compose.rememberImagePainter
 
 @Composable
 fun NutritionTrackerScreen() {
@@ -184,13 +192,13 @@ fun NutritionTrackerScreen() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
-fun NutritionTrackerApp() {
+fun NutritionTracker() {
     var showForm by remember { mutableStateOf(false) }
     val dummyFoods = listOf(
-        Food(1, "Apple", "https://example.com/apple.jpg", 95, 0.5f, 25f, 0.3f),
-        Food(2, "Banana", "https://example.com/banana.jpg", 105, 1.3f, 27f, 0.4f),
-        Food(3, "Chicken Breast", "https://example.com/chicken.jpg", 165, 31.0f, 0.0f, 3.6f),
-        Food(4, "Salmon Fillet", "https://example.com/salmon.jpg", 220, 25.0f, 0.0f, 14.0f)
+        Food(1, "Apple", "https://picsum.photos/id/1/200/300", 95, 0.5f, 25f, 0.3f),
+        Food(2, "Banana", "https://picsum.photos/id/2/200/300", 105, 1.3f, 27f, 0.4f),
+        Food(3, "Chicken Breast", "https://picsum.photos/id/3/200/300", 165, 31.0f, 0.0f, 3.6f),
+        Food(4, "Salmon Fillet", "https://picsum.photos/id/4/200/300", 220, 25.0f, 0.0f, 14.0f)
     )
     val foods by remember { mutableStateOf(dummyFoods) }
 
@@ -212,10 +220,7 @@ fun NutritionTrackerApp() {
                 .padding(16.dp)
                 .padding(top = 64.dp)
         ) {
-            FoodList(foods = foods) { food ->
-                // Handle item click here
-            }
-
+            FoodList(foods = foods) {}
             if (showForm) {
                 NutritionTrackerScreen()
             }
@@ -223,10 +228,56 @@ fun NutritionTrackerApp() {
     }
 }
 
-//@Preview()
-//@Composable
-//fun NutritionTrackerApp() {
-//    Surface(color = MaterialTheme.colorScheme.background) {
-////        NutritionTrackerScreen()
-//    }
-//}
+@Composable
+fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {
+    LazyColumn {
+        itemsIndexed(foods) { _, food ->
+            FoodListItem(food = food,onFoodClick = onFoodClick)
+        }
+    }
+}
+
+@Composable
+fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onFoodClick(food) }
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Image(
+                painter = rememberImagePainter(food.imageUrl), // Placeholder image
+                contentDescription = "Food Image",
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(end = 8.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            Column {
+                Text(text = food.name, style = MaterialTheme.typography.headlineMedium)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.padding(end = 6.dp)) {
+                    Column (modifier = Modifier.padding(end = 4.dp)) {
+                        Text(text = "Calories: ${food.calories} Kj")
+                    }
+                    Column(modifier = Modifier.padding(end = 4.dp)) {
+                        Text(text = "Protein: ${food.protein}g")
+
+                    }
+                }
+                Row(modifier = Modifier.padding(top = 6.dp)) {
+                    Column (modifier = Modifier.padding(end = 4.dp)) {
+                        Text(text = "Carbs: ${food.carbs}g")
+                    }
+                    Column (modifier = Modifier.padding(end = 4.dp)) {
+                        Text(text = "Fats: ${food.fats}g")
+                    }
+                }
+            }
+        }
+    }
+}
