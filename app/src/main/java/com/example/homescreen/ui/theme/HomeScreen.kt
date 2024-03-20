@@ -27,7 +27,7 @@ import androidx.navigation.compose.composable
 
 sealed class Screen(val route: String)
 
-object DailyActivities : Screen("Daily Activities")
+object PhysicalActivities : Screen("Physical Activities")
 object NutritionalIntake : Screen("Nutritional Intake")
 object HealthMetrics : Screen("Health Metrics")
 object ProfileAndSettings : Screen("Profile and Settings")
@@ -41,8 +41,8 @@ fun HomeScreen() {
             BottomNavigationBar(navController)
         }
     ) {
-        NavHost(navController = navController, startDestination = DailyActivities.route) {
-            composable(DailyActivities.route) { DailyActivitiesScreen() }
+        NavHost(navController = navController, startDestination = PhysicalActivities.route) {
+            composable(PhysicalActivities.route) { PhysicalActivitiesScreen() }
             composable(NutritionalIntake.route) { NutritionalIntakeScreen() }
             composable(HealthMetrics.route) { HealthMetricsScreen() }
             composable(ProfileAndSettings.route) { ProfileAndSettingsScreen() }
@@ -52,7 +52,7 @@ fun HomeScreen() {
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(DailyActivities, NutritionalIntake, HealthMetrics, ProfileAndSettings)
+    val items = listOf(PhysicalActivities, NutritionalIntake, HealthMetrics, ProfileAndSettings)
     BottomNavigation(
         backgroundColor = Color.Yellow, // Set the background color to yellow
     ) {
@@ -86,7 +86,7 @@ fun BottomNavigationBar(navController: NavController) {
 @Composable
 fun getIconForScreen(screen: Screen): ImageVector {
     return when (screen) {
-        DailyActivities -> Icons.Filled.Create
+        PhysicalActivities -> Icons.Filled.Create
         NutritionalIntake -> Icons.Filled.Info
         HealthMetrics -> Icons.Filled.Star
         ProfileAndSettings -> Icons.Filled.Settings
@@ -95,7 +95,7 @@ fun getIconForScreen(screen: Screen): ImageVector {
 }
 
 @Composable
-fun DailyActivitiesScreen() {
+fun PhysicalActivitiesScreen() {
     Text("Daily Activities")
 }
 
