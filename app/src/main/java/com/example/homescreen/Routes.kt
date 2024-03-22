@@ -2,7 +2,7 @@ package com.example.homescreen
 
 enum class Routes (val value: String) {
     Home("HomeScreen"),
-    Walk("Walk"),
+    Exercise("Exercise"),
     Profile("Profile"),
     ExerciseReport("ActivityTracking"),
     Nutrition("Nutrition")

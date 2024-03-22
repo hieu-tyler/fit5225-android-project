@@ -1,6 +1,7 @@
 package com.example.homescreen
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Person
@@ -25,9 +26,9 @@ data class NavBarItem (
                 route = Routes.ExerciseReport.value
             ),
             NavBarItem(
-                label = "Walk",
-                icon = Icons.Filled.AddCircle,
-                route = Routes.Walk.value
+                label = "Start",
+                icon = Icons.Filled.Add,
+                route = Routes.Exercise.value
             ),
             NavBarItem(
                 label = "Nutrition",

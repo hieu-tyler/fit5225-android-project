@@ -72,8 +72,8 @@ fun BottomNavigationBar () {
             composable(Routes.ExerciseReport.value) {
                 ActivityTrackerScreen(navController)
             }
-            composable(Routes.Walk.value) {
-                Walk(navController)
+            composable(Routes.Exercise.value) {
+                Exercise(navController)
             }
             composable(Routes.Profile.value) {
                 Profile(navController)
