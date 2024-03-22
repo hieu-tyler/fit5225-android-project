@@ -52,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavHostController
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -62,14 +63,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HomeScreen()
+//            HomeScreen()
+
+            BottomNavigationBar()
         }
     }
 }
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navHostController: NavHostController) {
     val tabs = listOf(
         "Daily Activities",
         "Nutritional Intake",
@@ -118,6 +121,6 @@ fun TabContent(title: String) {
 @Composable
 fun HomeScreenPreview() {
     HomeScreenTheme {
-        HomeScreen()
+
     }
 }
