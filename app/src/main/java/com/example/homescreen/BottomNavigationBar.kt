@@ -64,7 +64,7 @@ fun BottomNavigationBar () {
             Modifier.padding(paddingValues)
         ) {
             composable(Routes.Home.value) {
-                HomeScreen(navController)
+                HomeScreen()
             }
             composable(Routes.Nutrition.value) {
                 NutritionTracker()

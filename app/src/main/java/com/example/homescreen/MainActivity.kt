@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-//            HomeScreen()
+            HomeScreen()
 
             BottomNavigationBar()
         }
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun HomeScreen(navHostController: NavHostController) {
+fun HomeScreen() {
     val tabs = listOf(
         "Daily Activities",
         "Nutritional Intake",
@@ -121,6 +121,6 @@ fun TabContent(title: String) {
 @Composable
 fun HomeScreenPreview() {
     HomeScreenTheme {
-
+        HomeScreen()
     }
 }
