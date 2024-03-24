@@ -55,17 +55,16 @@ fun RegistrationScreen(
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
-    val genders = listOf("Male", "Female")
+    val gender = listOf("Male", "Female")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedGender by rememberSaveable { mutableStateOf(genders[0]) }
+    var selectedGender by rememberSaveable { mutableStateOf(gender[0]) }
     var phone by rememberSaveable { mutableStateOf("") }
     val calendar = Calendar.getInstance()
-    calendar.set(2024, 0, 1) // month (0) is January
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = Instant.now().toEpochMilli()
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
-    var selectedDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
+    var birthDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -136,7 +135,7 @@ fun RegistrationScreen(
                 expanded = isExpanded,
                 onDismissRequest = { isExpanded = false })
             {
-                genders.forEach { selectionOption ->
+                gender.forEach { selectionOption ->
                     DropdownMenuItem(
                         text = { Text(selectionOption) },
                         onClick = {
@@ -168,7 +167,7 @@ fun RegistrationScreen(
             Spacer(modifier = Modifier.width(12.dp))
             val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
             Text(
-                text = "${formatter.format(Date(selectedDate))}",
+                text = "${formatter.format(Date(birthDate))}",
                 modifier = Modifier.weight(1f)
             )
         }
@@ -178,7 +177,7 @@ fun RegistrationScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         showDatePicker = false
-                        selectedDate = datePickerState.selectedDateMillis!!
+                        birthDate = datePickerState.selectedDateMillis!!
                     }) { Text(text = "OK") }
                 },
                 dismissButton = {
@@ -188,7 +187,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(22.dp))
         Button(
-            onClick = { onRegisterClicked(firstName, lastName, email, password, selectedGender, phone, Date(selectedDate)) },
+            onClick = { onRegisterClicked(firstName, lastName, email, password, selectedGender, phone, Date(birthDate)) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
