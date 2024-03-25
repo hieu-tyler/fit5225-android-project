@@ -23,10 +23,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -44,11 +47,13 @@ import coil.compose.rememberImagePainter
 @Composable
 fun NutritionTracker() {
     var showForm by remember { mutableStateOf(false) }
+    var selectedFood by remember { mutableStateOf<Food?>(null) } // Hold the selected food item
+
     val dummyFoods = listOf(
-        Food(1, "Apple", "https://picsum.photos/id/1/200/300", 95, 0.5f, 25f, 0.3f),
-        Food(2, "Banana", "https://picsum.photos/id/2/200/300", 105, 1.3f, 27f, 0.4f),
-        Food(3, "Chicken Breast", "https://picsum.photos/id/3/200/300", 165, 31.0f, 0.0f, 3.6f),
-        Food(4, "Salmon Fillet", "https://picsum.photos/id/4/200/300", 220, 25.0f, 0.0f, 14.0f)
+        Food(1, "Apple", "apple", 95, 0.5f, 25f, 0.3f),
+        Food(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
+        Food(3, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
+        Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f)
     )
     val foods by remember { mutableStateOf(dummyFoods) }
 
@@ -69,8 +74,9 @@ fun NutritionTracker() {
                 .fillMaxSize()
                 .padding(top = 64.dp)
         ) {
-            NutritionFormView()
-
+            if (showForm && selectedFood != null) {
+                NutritionFormView(food = selectedFood!!, onCloseForm = { selectedFood = null })
+            }
         }
         Column(
             modifier = Modifier
@@ -78,128 +84,42 @@ fun NutritionTracker() {
                 .padding(16.dp)
                 .padding(top = 64.dp)
         ) {
-//            if (showForm) {
-//                CreateNutritionForm()
-//            }
-//            FoodList(foods = foods) {}
+            FoodList(foods = foods) { clickedFood ->
+                selectedFood = clickedFood
+                showForm = true
+            }
         }
     }
 }
 
-
 @Composable
-fun NutritionFormView() {
-    val foodName by remember { mutableStateOf("Banana") }
-    val calories by remember { mutableStateOf(103) }
-    val description by remember {mutableStateOf("The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.")}
-    val protein by remember { mutableStateOf(0) }
-    val carbs by remember { mutableStateOf(0) }
-    val fats by remember { mutableStateOf(0) }
+fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
+    Image(
+        painter = painterResource(R.drawable.banana),
+        contentDescription = "Food Image",
+        modifier = Modifier.size(200.dp),
+        contentScale = ContentScale.Crop
+    )
 
-    Image(painter = painterResource(R.drawable.banana), contentDescription = "Food Image")
+    // Display food details
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Text(text = food.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Calories: ${food.calories} kJ")
+        Text(text = "Protein: ${food.protein} g")
+        Text(text = "Carbs: ${food.carbs} g")
+        Text(text = "Fats: ${food.fats} g")
 
-    Row {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Close button
+        Button(
+            onClick = { onCloseForm() },
+            modifier = Modifier.align(Alignment.End)
         ) {
-
-            Text(
-                text = foodName,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            if (description != "") {
-                Text(
-                    text = "The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.",
-                    textAlign = TextAlign.Justify,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Card{
-                Column(Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Protein",
-                        )
-                        Text(
-                            text = "$protein g",
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Calories",
-                        )
-                        Text(
-                            text = "$calories kJ",
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Carbs",
-                        )
-                        Text(
-                            text = "$carbs g",
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Fats",
-                        )
-                        Text(
-                            text = "$fats g",
-                        )
-                    }
-
-//                    Text(
-//                        text = "Protein: $protein g",
-//                        fontSize = 16.sp,
-//                    )
-//
-//                    Text(
-//                        text = "Carbs: $carbs g",
-//                        fontSize = 16.sp,
-//                    )
-//
-//                    Text(
-//                        text = "Fats: $fats g",
-//                        fontSize = 16.sp,
-//                    )
-                }
-            }
-
-
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Close")
         }
     }
 }
@@ -368,24 +288,27 @@ fun CreateNutritionForm() {
 fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {
     LazyColumn {
         itemsIndexed(foods) { _, food ->
-            FoodListItem(food = food,onFoodClick = onFoodClick)
+            FoodListItem(food = food, onFoodClick = onFoodClick)
         }
     }
 }
 
+@SuppressLint("DiscouragedApi")
 @Composable
 fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
+    val context = LocalContext.current
+    val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onFoodClick(food) }
+            .clickable { onFoodClick(food) } // Call the lambda function on click
     ) {
         Row(
             modifier = Modifier.padding(8.dp)
         ) {
             Image(
-                painter = rememberImagePainter(food.imageUrl), // Placeholder image
+                painter = rememberImagePainter(resourceId), // Placeholder image
                 contentDescription = "Food Image",
                 modifier = Modifier
                     .size(100.dp)
