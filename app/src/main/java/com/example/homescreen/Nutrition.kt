@@ -47,6 +47,7 @@ import coil.compose.rememberImagePainter
 @Composable
 fun NutritionTracker() {
     var showForm by remember { mutableStateOf(false) }
+    var showCreate by remember { mutableStateOf(false) }
     var selectedFood by remember { mutableStateOf<Food?>(null) } // Hold the selected food item
 
     val dummyFoods = listOf(
@@ -62,7 +63,7 @@ fun NutritionTracker() {
             TopAppBar(
                 title = { Text("Nutrition Tab") },
                 actions = {
-                    IconButton(onClick = { showForm = true }) {
+                    IconButton(onClick = { showCreate = true; showForm = false }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Food")
                     }
                 }
@@ -75,25 +76,40 @@ fun NutritionTracker() {
                 .padding(top = 64.dp)
         ) {
             if (showForm && selectedFood != null) {
-                NutritionFormView(food = selectedFood!!, onCloseForm = { selectedFood = null })
+                NutritionFormView(food = selectedFood!!, onCloseForm = { selectedFood = null; showForm = false })
             }
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .padding(top = 64.dp)
-        ) {
-            FoodList(foods = foods) { clickedFood ->
-                selectedFood = clickedFood
-                showForm = true
+
+            if (!showForm && selectedFood == null) {
+                FoodList(foods = foods) { clickedFood ->
+                    selectedFood = clickedFood
+                    showForm = true
+                }
             }
+//            if (!showForm && showCreate && selectedFood != null) {
+//                CreateNutritionForm()
+//            }
         }
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(16.dp)
+//                .padding(top = 64.dp)
+//        ) {
+//
+//
+//        }
     }
 }
 
 @Composable
 fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
+    val foodName by remember { mutableStateOf("Banana") }
+    val calories by remember { mutableIntStateOf(103) }
+    val description by remember { mutableStateOf("The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.") }
+    val protein by remember { mutableIntStateOf(0) }
+    val carbs by remember { mutableIntStateOf(0) }
+    val fats by remember { mutableIntStateOf(0) }
+
     Image(
         painter = painterResource(R.drawable.banana),
         contentDescription = "Food Image",
@@ -101,25 +117,119 @@ fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
         contentScale = ContentScale.Crop
     )
 
-    // Display food details
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Text(text = food.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Calories: ${food.calories} kJ")
-        Text(text = "Protein: ${food.protein} g")
-        Text(text = "Carbs: ${food.carbs} g")
-        Text(text = "Fats: ${food.fats} g")
+    Image(painter = painterResource(R.drawable.banana), contentDescription = "Food Image")
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Close button
-        Button(
-            onClick = { onCloseForm() },
-            modifier = Modifier.align(Alignment.End)
+    Row {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Text(text = "Close")
+
+            Text(
+                text = foodName,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            if (description != "") {
+                Text(
+                    text = "The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.",
+                    textAlign = TextAlign.Justify,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Card {
+                Column(
+                    Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Protein",
+                        )
+                        Text(
+                            text = "$protein g",
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Calories",
+                        )
+                        Text(
+                            text = "$calories kJ",
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Carbs",
+                        )
+                        Text(
+                            text = "$carbs g",
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Fats",
+                        )
+                        Text(
+                            text = "$fats g",
+                        )
+                    }
+
+//                    Text(
+//                        text = "Protein: $protein g",
+//                        fontSize = 16.sp,
+//                    )
+//
+//                    Text(
+//                        text = "Carbs: $carbs g",
+//                        fontSize = 16.sp,
+//                    )
+//
+//                    Text(
+//                        text = "Fats: $fats g",
+//                        fontSize = 16.sp,
+//                    )
+                }
+            }
+
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Close button
+            Button(
+                onClick = { onCloseForm() },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(text = "Close")
+            }
         }
     }
 }
@@ -169,15 +279,6 @@ fun CreateNutritionForm() {
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-
-//                OutlinedTextField(
-//                    value = imageUrl,
-//                    onValueChange = { imageUrl = it },
-//                    label = { Text("Image URL") },
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//
-//                Spacer(modifier = Modifier.height(8.dp))
             }
 
         }
