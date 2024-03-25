@@ -3,12 +3,16 @@ package com.example.homescreen
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -29,6 +33,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -85,49 +91,37 @@ fun NutritionTracker() {
                     showForm = true
                 }
             }
-//            if (!showForm && showCreate && selectedFood != null) {
-//                CreateNutritionForm()
-//            }
         }
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp)
-//                .padding(top = 64.dp)
-//        ) {
-//
-//
-//        }
     }
 }
 
+@SuppressLint("DiscouragedApi")
 @Composable
 fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
-    val foodName by remember { mutableStateOf("Banana") }
-    val calories by remember { mutableIntStateOf(103) }
     val description by remember { mutableStateOf("The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.") }
-    val protein by remember { mutableIntStateOf(0) }
-    val carbs by remember { mutableIntStateOf(0) }
-    val fats by remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
+    val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
 
     Image(
-        painter = painterResource(R.drawable.banana),
+        painter = painterResource(resourceId),
         contentDescription = "Food Image",
-        modifier = Modifier.size(200.dp),
-        contentScale = ContentScale.Crop
-    )
-
-    Image(painter = painterResource(R.drawable.banana), contentDescription = "Food Image")
+        contentScale = ContentScale.Fit,
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(512.dp, 255.dp)
+            .background(Color.Gray))
 
     Row {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+
         ) {
 
             Text(
-                text = foodName,
+                text = food.name,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -158,7 +152,7 @@ fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
                             text = "Protein",
                         )
                         Text(
-                            text = "$protein g",
+                            text = "${food.protein} g",
                         )
                     }
 
@@ -172,7 +166,7 @@ fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
                             text = "Calories",
                         )
                         Text(
-                            text = "$calories kJ",
+                            text = "${food.calories} kJ",
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -185,7 +179,7 @@ fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
                             text = "Carbs",
                         )
                         Text(
-                            text = "$carbs g",
+                            text = "${food.carbs} g",
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -198,29 +192,11 @@ fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
                             text = "Fats",
                         )
                         Text(
-                            text = "$fats g",
+                            text = "${food.fats} g",
                         )
                     }
-
-//                    Text(
-//                        text = "Protein: $protein g",
-//                        fontSize = 16.sp,
-//                    )
-//
-//                    Text(
-//                        text = "Carbs: $carbs g",
-//                        fontSize = 16.sp,
-//                    )
-//
-//                    Text(
-//                        text = "Fats: $fats g",
-//                        fontSize = 16.sp,
-//                    )
                 }
             }
-
-
-
             Spacer(modifier = Modifier.height(16.dp))
 
             // Close button
@@ -403,17 +379,17 @@ fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onFoodClick(food) } // Call the lambda function on click
+            .clickable { onFoodClick(food) }
     ) {
         Row(
             modifier = Modifier.padding(8.dp)
         ) {
             Image(
-                painter = rememberImagePainter(resourceId), // Placeholder image
+                painter = rememberImagePainter(resourceId),
                 contentDescription = "Food Image",
                 modifier = Modifier
                     .size(100.dp)
-                    .padding(end = 8.dp),
+                    .padding(8.dp),
                 contentScale = ContentScale.Crop
             )
 
