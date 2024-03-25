@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,7 +61,10 @@ fun NutritionTracker() {
         Food(1, "Apple", "apple", 95, 0.5f, 25f, 0.3f),
         Food(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
         Food(3, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-        Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f)
+        Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f),
+        Food(6, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
+        Food(8, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
+
     )
     val foods by remember { mutableStateOf(dummyFoods) }
 
@@ -116,7 +120,6 @@ fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState())
 
         ) {
 
@@ -363,7 +366,10 @@ fun CreateNutritionForm() {
 
 @Composable
 fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {
-    LazyColumn {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         itemsIndexed(foods) { _, food ->
             FoodListItem(food = food, onFoodClick = onFoodClick)
         }
