@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.homescreen.ui.theme.HomeScreenTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -43,6 +44,7 @@ import kotlin.math.pow
 
 @Composable
 fun ProfileSettingsScreen(
+    navController: NavHostController,
     userProfile: UserProfile, // Assuming UserProfile is a data class containing user info
     onSaveProfile: (UserProfile) -> Unit, // Callback when Save button is clicked
     onSignOut: () -> Unit // Callback when Sign Out button is clicked
