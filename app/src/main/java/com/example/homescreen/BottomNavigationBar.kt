@@ -19,6 +19,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun BottomNavigationBar () {
@@ -60,11 +63,29 @@ fun BottomNavigationBar () {
     ) { paddingValues ->
         NavHost(
             navController,
-            startDestination = Routes.Home.value,
+//            startDestination = Routes.Home.value,
+            startDestination = Routes.HealthMetrics.value,
             Modifier.padding(paddingValues)
         ) {
-            composable(Routes.Home.value) {
-                HomeScreen()
+//            composable(Routes.Home.value) {
+//                HomeScreen()
+//            }
+            composable(Routes.HealthMetrics.value) {
+                val sampleMetrics = UserHealthMetrics(
+                    userId = 1,
+                    entryDate = Date(),
+                    weight = 70f,
+                    height = 175f,
+                    bmi = 22.9f,
+                    waist = 87f,
+                    exerciseType = "running",
+                    exerciseFreq = 3,
+                    exerciseTime = 30,
+                    exerciseNote = "",
+                    systolicBP = 160f,
+                    diastolicBP = 95f
+                )
+                UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2, actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
             }
             composable(Routes.Nutrition.value) {
                 NutritionTracker()
@@ -76,7 +97,20 @@ fun BottomNavigationBar () {
                 Exercise(navController)
             }
             composable(Routes.Profile.value) {
-                Profile(navController)
+                val sampleUserProfile = UserProfile(
+                    userId = 1,
+                    firstName = "John",
+                    lastName = "Doe",
+                    email = "johndoe@example.com",
+                    password = "password123",
+                    selectedGender = "Male",
+                    phone = "0412345678",
+                    birthDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/01/1990") ?: Date(),
+                    allowLocation = true,
+                    allowActivityShare = true,
+                    allowHealthDataShare = false
+                )
+                ProfileSettingsScreen(navController, sampleUserProfile, {}, {})
             }
         }
 

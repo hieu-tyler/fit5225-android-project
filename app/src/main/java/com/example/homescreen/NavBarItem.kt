@@ -15,10 +15,15 @@ data class NavBarItem (
 ) {
     fun NavBarItems(): List<NavBarItem> {
         return listOf(
+//            NavBarItem(
+//                label = "Home",
+//                icon = Icons.Filled.Home,
+//                route = Routes.Home.value
+//            ),
             NavBarItem(
-                label = "Home",
+                label = "Health Metrics",
                 icon = Icons.Filled.Home,
-                route = Routes.Home.value
+                route = Routes.HealthMetrics.value
             ),
             NavBarItem(
                 label = "Exercises",

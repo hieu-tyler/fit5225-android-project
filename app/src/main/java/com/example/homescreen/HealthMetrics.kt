@@ -1,10 +1,13 @@
 package com.example.homescreen
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,16 +28,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import kotlin.math.abs
-
 
 @Composable
 fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
     actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics) {
     // Create a temporary list of data for "userHealthMetricsLast"
     var userIdLast = 1
-    var entryDateLast = Date(124, 1, 1)
+    var entryDateLast = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/02/2024") ?: Date()
     var weightLast = 68F
     var heightLast = 171F
     val bmiLast = 23.3F
@@ -60,7 +64,10 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
     var systolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.systolicBP) }
     var diastolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.diastolicBP) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier
+        .padding(16.dp)
+        .verticalScroll(rememberScrollState())
+    ) {
         // Top Card 1 - Exercise goal
         Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
@@ -93,7 +100,6 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                 }
             }
         }
-
         // Top Card 2 - Steps
         Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
@@ -125,6 +131,13 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                 }
             }
         }
+        Button(
+            onClick = { },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Create New Health Record")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         // Bottom Cards - Horizontal Arrangement
         Column(modifier = Modifier) {
             // Left Card - Weight, BMI, Waist
