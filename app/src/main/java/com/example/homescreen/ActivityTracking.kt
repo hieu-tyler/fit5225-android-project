@@ -1,6 +1,7 @@
 package com.example.homescreen
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,25 +35,41 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.twotone.Info
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.homescreen.R
+import com.example.homescreen.ui.theme.Purple80
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityTrackerScreen(navHostController: NavHostController) {
+
+    val barChartInputsPercent = (0..10).map { (1..100).random().toFloat() }
 
     val activitiesList = listOf(
         Activity(1, "Walking", 12, 185, "", 0.25, 0),
@@ -61,7 +81,8 @@ fun ActivityTrackerScreen(navHostController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Activity Screen") }
+                title = { Text("Activity Screen") },
+                modifier = Modifier.padding(bottom = 8.dp)
             )
         }
 
@@ -72,15 +93,18 @@ fun ActivityTrackerScreen(navHostController: NavHostController) {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                text = "Activity Tracking",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+            Spacer(modifier = Modifier.padding(24.dp))
             Text(text = "Total Activities this week",
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 24.dp))
             ActivityItemsList(activities = activities)
+            ReportGraph(data = mapOf(
+                Pair(0.5f, 10),
+                Pair(0.6f, 12),
+                Pair(0.4f, 8),
+                Pair(0.2f, 4),
+                Pair(0.9f, 18),
+            ), maxValue = 1000)
             MapScreen()
 
         }
@@ -105,27 +129,38 @@ fun ActivityItemsList(activities: List<Activity>) {
 @Composable
 fun ActivityItems(index: Int, activity: Activity) {
 
-    var lastItemPadding = 0.dp
+    var lastItemPadding = 8.dp
 
     if (index - 1 == 0)
     {
         lastItemPadding = 16.dp
     }
 
-    Box(modifier = Modifier
-        .padding(start = 16.dp, end = lastItemPadding)) {
+    Card(modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 8.dp, end = lastItemPadding),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
         Column (
             modifier = Modifier
                 .clip(RoundedCornerShape(25.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .width(250.dp)
+                .width(200.dp)
                 .height(150.dp)
                 .clickable { }
                 .padding(vertical = 12.dp, horizontal = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
 
         ){
-            Text(text = activity.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
+            Row {
+
+                Text(
+                    text = activity.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp, end = 24.dp)
+                )
+
+                Icon(Icons.Outlined.Info, contentDescription = null)
+            }
             Row(modifier = Modifier.padding(horizontal = 10.dp)) {
                 Column (modifier = Modifier.padding(vertical = 10.dp),
                     verticalArrangement = Arrangement.SpaceEvenly) {
@@ -146,6 +181,97 @@ fun ActivityItems(index: Int, activity: Activity) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            }
+        }
+    }
+
+
+}
+
+@Composable
+fun ReportGraph(
+    data: Map<Float, Int>,
+    maxValue: Int
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(50.dp)
+    ) {
+        Text(text = "Graph", style = MaterialTheme.typography.headlineSmall)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .padding(),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Box(modifier = Modifier
+                .fillMaxHeight()
+                .width(50.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+
+                //scale
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    Text(text = maxValue.toString())
+                    Spacer(modifier = Modifier.fillMaxHeight())
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    Text(text = (maxValue/2).toString())
+                    Spacer(modifier = Modifier.fillMaxHeight(0.5f))
+                }
+            }
+
+            //graph
+            Box(modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp)
+                .background(Color.Black)
+            )
+             data.forEach {
+                 Box(modifier = Modifier
+                     .padding(start = 20.dp)
+                     .clip(RoundedCornerShape(10.dp))
+                     .width(20.dp)
+                     .fillMaxHeight(it.key)
+                     .background(Purple80)
+                     .clickable {
+                         Toast
+                             .makeText(context, it.key.toString(), Toast.LENGTH_SHORT)
+                             .show()
+                     }
+                 )
+             }
+
+        }
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(2.dp)
+            .background(Color.Black)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 72.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            data.values.forEach {
+                Text(
+                    modifier = Modifier.width(20.dp),
+                    text = it.toString(),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
