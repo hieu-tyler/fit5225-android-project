@@ -36,6 +36,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -200,4 +201,10 @@ fun RegistrationScreen(
             TextButton(onClick = onNavigateToLogin) { Text("Login here!") }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Registration() {
+    RegistrationScreen({ _, _, _, _, _, _, _ -> }, {})
 }

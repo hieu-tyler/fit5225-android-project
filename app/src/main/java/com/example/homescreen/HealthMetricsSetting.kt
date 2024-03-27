@@ -201,13 +201,13 @@ fun HealthMetricsSettingsScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
         IntMetricSlider(
-            label = "Exercise Frequency: ${exerciseFreq}",
+            label = "Exercise Frequency: ${exerciseFreq} time(s)",
             value = exerciseFreq,
             onValueChange = { exerciseFreq = it },
             valueRange = 0..7
         )
         IntMetricSlider(
-            label = "Exercise Time: ${exerciseTime}",
+            label = "Exercise Time: ${exerciseTime} minute(s)",
             value = exerciseTime,
             onValueChange = { exerciseTime = it },
             valueRange = 0..180
@@ -272,26 +272,24 @@ fun IntMetricSlider(label: String, value: Int, onValueChange: (Int) -> Unit, val
 @RequiresApi(64)
 @Preview(showBackground = true)
 @Composable
-fun HealthMetricsSettingsScreenPreview() {
-    HomeScreenTheme {
-        val sampleUserHealthMetrics = UserHealthMetrics(
-            userId = 1,
-            entryDate = Date(120, 9, 21),
-            weight = 60F,
-            height = 170F,
-            bmi = 20F,
-            waist = 100F,
-            exerciseType = "running",
-            exerciseFreq = 3,
-            exerciseTime = 30,
-            exerciseNote = "",
-            systolicBP = 120F,
-            diastolicBP = 80F
-        )
-        HealthMetricsSettingsScreen(
-            userHealthMetrics = sampleUserHealthMetrics,
-            onSaveMetrics = {}, // In preview, actions don't need to do anything
-            onSignOut = {} // In preview, actions don't need to do anything
-        )
-    }
+fun CreateHealthMetricsRecord() {
+    val sampleUserHealthMetrics = UserHealthMetrics(
+        userId = 1,
+        entryDate = Date(),
+        weight = 60F,
+        height = 170F,
+        bmi = 20F,
+        waist = 100F,
+        exerciseType = "running",
+        exerciseFreq = 3,
+        exerciseTime = 30,
+        exerciseNote = "",
+        systolicBP = 120F,
+        diastolicBP = 80F
+    )
+    HealthMetricsSettingsScreen(
+        userHealthMetrics = sampleUserHealthMetrics,
+        onSaveMetrics = {}, // In preview, actions don't need to do anything
+        onSignOut = {} // In preview, actions don't need to do anything
+    )
 }
