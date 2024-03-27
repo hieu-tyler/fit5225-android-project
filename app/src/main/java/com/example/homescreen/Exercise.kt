@@ -39,6 +39,8 @@ fun Exercise(navController: NavHostController) {
     )
     {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+
             ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = {isExpanded = it}) {
                 TextField(
                     modifier = Modifier
@@ -73,10 +75,10 @@ fun Exercise(navController: NavHostController) {
                 }
             }
 
-            FilledTonalButton(
+            Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                        .padding(16.dp)
+                    .padding(16.dp)
                 ,
                 onClick = { /*TODO*/ }
             ) {
