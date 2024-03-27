@@ -26,7 +26,7 @@ data class NavBarItem (
                 route = Routes.HealthMetrics.value
             ),
             NavBarItem(
-                label = "Exercises",
+                label = "Exercise",
                 icon = Icons.Filled.DateRange,
                 route = Routes.ExerciseReport.value
             ),

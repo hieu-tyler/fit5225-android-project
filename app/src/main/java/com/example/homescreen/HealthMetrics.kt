@@ -66,8 +66,15 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
 
     Column(modifier = Modifier
         .padding(16.dp)
-        .verticalScroll(rememberScrollState())
+        .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = "My Health Dashboard",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
         // Top Card 1 - Exercise goal
         Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
@@ -93,7 +100,7 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                         OutlinedButton(onClick = {}) {
                             Text(
                                 text = "Change your exercise goal",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.titleSmall
                             )
                         }
                     }
@@ -124,7 +131,7 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                         OutlinedButton(onClick = {}) {
                             Text(
                                 text = "Change your steps goal",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.titleSmall
                             )
                         }
                     }
@@ -217,7 +224,7 @@ fun MetricComparison(metricName: String, lastValue: Float, newValue: Float, unit
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewUserHealthDashboard() {
+fun HealthMetricsDashboard() {
     val sampleMetrics = UserHealthMetrics(
         userId = 1,
         entryDate = Date(),

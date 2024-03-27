@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -205,10 +206,12 @@ fun NutritionTracker() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nutrition Tab") },
+                title = { Text("Nutrition Tab",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(12.dp)) },
                 actions = {
                     IconButton(onClick = { showForm = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Food")
+                        Icon(Icons.Default.AddCircle, contentDescription = "Add Food")
                     }
                 }
             )
@@ -218,7 +221,7 @@ fun NutritionTracker() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-                .padding(top = 64.dp)
+                .padding(top = 42.dp)
         ) {
             FoodList(foods = foods) {}
             if (showForm) {
@@ -232,7 +235,7 @@ fun NutritionTracker() {
 fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {
     LazyColumn {
         itemsIndexed(foods) { _, food ->
-            FoodListItem(food = food,onFoodClick = onFoodClick)
+            FoodListItem(food = food, onFoodClick = onFoodClick)
         }
     }
 }
@@ -252,13 +255,13 @@ fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
                 painter = rememberImagePainter(food.imageUrl), // Placeholder image
                 contentDescription = "Food Image",
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(85.dp)
                     .padding(end = 8.dp),
                 contentScale = ContentScale.Crop
             )
 
             Column {
-                Text(text = food.name, style = MaterialTheme.typography.headlineMedium)
+                Text(text = food.name, style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.padding(end = 6.dp)) {
                     Column (modifier = Modifier.padding(end = 4.dp)) {

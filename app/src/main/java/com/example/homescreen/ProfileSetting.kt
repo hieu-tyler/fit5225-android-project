@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.homescreen.ui.theme.HomeScreenTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -83,7 +84,9 @@ fun ProfileSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "First Name: ", modifier = Modifier)
+                Text(text = "First Name: ",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier)
                 if (editingFirstName) {
                     OutlinedTextField(
                         value = firstName,
@@ -99,6 +102,7 @@ fun ProfileSettingsScreen(
                 } else {
                     Text(
                         text = firstName,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
                             .weight(1f)
                             .clickable { editingFirstName = true }
@@ -113,7 +117,9 @@ fun ProfileSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Last Name: ", modifier = Modifier)
+                Text(text = "Last Name: ",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier)
                 if (editingLastName) {
                     OutlinedTextField(
                         value = lastName,
@@ -129,6 +135,7 @@ fun ProfileSettingsScreen(
                 } else {
                     Text(
                         text = lastName,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
                             .weight(1f)
                             .clickable { editingLastName = true }
@@ -146,6 +153,7 @@ fun ProfileSettingsScreen(
         ) {
             Text(
                 "Gender:    $selectedGender",
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)
             )
         }
@@ -156,6 +164,7 @@ fun ProfileSettingsScreen(
             val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
             Text(
                 "Date of Birth:    ${formatter.format(birthDate)}",
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -164,7 +173,9 @@ fun ProfileSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Phone Number: ", modifier = Modifier)
+                Text(text = "Phone Number: ",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier)
                 if (editingPhone) {
                     OutlinedTextField(
                         value = phone,
@@ -180,6 +191,7 @@ fun ProfileSettingsScreen(
                 } else {
                     Text(
                         text = phone,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
                             .weight(1f)
                             .clickable { editingPhone = true }
@@ -191,6 +203,7 @@ fun ProfileSettingsScreen(
                 }
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 12.dp)) {
             Switch(
@@ -198,7 +211,7 @@ fun ProfileSettingsScreen(
                 onCheckedChange = { allowLocation = it },
                 modifier = Modifier.padding(end = 16.dp)
             )
-            Text("Share Location Data")
+            Text("Share Location Data", style = MaterialTheme.typography.titleMedium)
         }
         Row(verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 12.dp)) {
@@ -207,7 +220,7 @@ fun ProfileSettingsScreen(
                 onCheckedChange = { allowActivityShare = it },
                 modifier = Modifier.padding(end = 16.dp)
             )
-            Text("Share Activity Data")
+            Text("Share Activity Data", style = MaterialTheme.typography.titleMedium)
         }
         Row(verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 12.dp)) {
@@ -216,7 +229,7 @@ fun ProfileSettingsScreen(
                 onCheckedChange = { allowHealthDataShare = it },
                 modifier = Modifier.padding(end = 16.dp)
             )
-            Text("Share Health Data")
+            Text("Share Health Data", style = MaterialTheme.typography.titleMedium)
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
@@ -233,4 +246,24 @@ fun ProfileSettingsScreen(
             Text("Cancel")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PofileSetting() {
+    val navController = rememberNavController()
+    val sampleUserProfile = UserProfile(
+        userId = 1,
+        firstName = "John",
+        lastName = "Doe",
+        email = "johndoe@example.com",
+        password = "password123",
+        selectedGender = "Male",
+        phone = "0412345678",
+        birthDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/01/1990") ?: Date(),
+        allowLocation = true,
+        allowActivityShare = true,
+        allowHealthDataShare = false
+    )
+    ProfileSettingsScreen(navController, sampleUserProfile, {}, {})
 }
