@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.homescreen.R
 
 @Composable
 fun LoginScreen(onLoginClicked: (String, String) -> Unit) {

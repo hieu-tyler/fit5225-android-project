@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.nutrition
 
 data class Food(
     val id: Long,

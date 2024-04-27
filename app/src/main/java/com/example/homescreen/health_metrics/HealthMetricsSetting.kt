@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.health_metrics
 
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +25,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.homescreen.ui.theme.HomeScreenTheme
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar

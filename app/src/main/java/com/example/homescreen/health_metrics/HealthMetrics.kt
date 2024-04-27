@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.health_metrics
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +35,8 @@ import kotlin.math.abs
 
 @Composable
 fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
-    actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics) {
+    actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics
+) {
     // Create a temporary list of data for "userHealthMetricsLast"
     var userIdLast = 1
     var entryDateLast = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/02/2024") ?: Date()

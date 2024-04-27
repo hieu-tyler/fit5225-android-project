@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.profile
 
 import java.util.Date
 
