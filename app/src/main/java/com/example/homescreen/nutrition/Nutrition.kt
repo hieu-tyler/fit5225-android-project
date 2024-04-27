@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -39,13 +40,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview
 @Composable
-fun NutritionTracker() {
+fun NutritionTracker(navController: NavController) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
     var selectedFood by remember { mutableStateOf<Food?>(null) } // Hold the selected food item
@@ -69,7 +71,14 @@ fun NutritionTracker() {
                     IconButton(onClick = { showCreate = true; showForm = false }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Food")
                     }
-                }
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.navigateUp()
+                    }) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, "")
+                    }
+                },
             )
         }
     ) {
