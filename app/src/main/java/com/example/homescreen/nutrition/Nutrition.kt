@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.nutrition
 
 import android.annotation.SuppressLint
 import android.widget.Toast

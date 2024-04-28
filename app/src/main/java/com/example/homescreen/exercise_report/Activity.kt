@@ -1,4 +1,4 @@
-package com.example.homescreen
+package com.example.homescreen.exercise_report
 
 data class Activity(
     val id: Long,
