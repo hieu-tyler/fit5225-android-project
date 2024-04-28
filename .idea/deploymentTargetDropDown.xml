@@ -2,7 +2,16 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="app">
+      <entry key="CreateHealthMetricsRecord">
+        <State />
+      </entry>
+      <entry key="Login">
+        <State />
+      </entry>
+      <entry key="Registration">
+        <State />
+      </entry>
+      <entry key="Unnamed">
         <State />
       </entry>
     </value>
