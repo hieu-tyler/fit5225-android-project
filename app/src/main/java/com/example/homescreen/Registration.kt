@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.homescreen.ui.theme.HomeScreenTheme
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -206,5 +207,7 @@ fun RegistrationScreen(
 @Preview(showBackground = true)
 @Composable
 fun Registration() {
-    RegistrationScreen({ _, _, _, _, _, _, _ -> }, {})
+    HomeScreenTheme {
+        RegistrationScreen({ _, _, _, _, _, _, _ -> }, {})
+    }
 }
