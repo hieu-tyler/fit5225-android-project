@@ -12,6 +12,7 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -70,59 +71,112 @@ fun PersonalNutrition(navController: NavController) {
                 .padding(horizontal = 12.dp)
         ) {
 
-            Card (
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 6.dp
-                )
-            ){
-                Column(modifier = Modifier
-                    .height(200.dp)
-                    .padding(4.dp)
-                    .fillMaxWidth()
-                ) {
-                    PieChartCalories(
-                        carbs.toFloat(), carbsLimit,
-                        fat.toFloat(), fatLimit,
-                        protein.toFloat(), proteinLimit
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
+            CaloriesStatCard(
+                carbs.toFloat(), carbsLimit,
+                fat.toFloat(), fatLimit,
+                protein.toFloat(), proteinLimit)
 
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 4.dp)
-                    ) {
-                        Text("Carbs")
-                        ProgressBarWithPercentage(carbs.toFloat()/carbsLimit)
-                        Text("${carbs}/${carbsLimit} g")
-                    }
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 4.dp)
-                    ) {
-                        Text("Fat")
-                        ProgressBarWithPercentage(fat.toFloat()/fatLimit)
-                        Text("${fat}/${fatLimit} g")
-                    }
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 4.dp)
-                    ) {
-                        Text("Protein")
-                        ProgressBarWithPercentage(protein.toFloat()/proteinLimit)
-                        Text("${protein}/${proteinLimit} g")
-                    }
-                }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BreakfastCard(navController)
+            LunchCard(navController)
+            DinnerCard(navController)
+        }
+    }
+}
+
+@Composable
+fun CaloriesStatCard(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, protein:Float, proteinLimit: Int) {
+    Card (
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
+    ){
+        Column(modifier = Modifier
+            .height(200.dp)
+            .padding(4.dp)
+            .fillMaxWidth()
+        ) {
+            PieChartCalories(
+                carbs, carbsLimit,
+                fat, fatLimit,
+                protein, proteinLimit
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+            ) {
+                Text("Carbs")
+                ProgressBarWithPercentage(carbs.toFloat()/carbsLimit)
+                Text("${carbs}/${carbsLimit} g")
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+            ) {
+                Text("Fat")
+                ProgressBarWithPercentage(fat.toFloat()/fatLimit)
+                Text("${fat}/${fatLimit} g")
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 4.dp)
+            ) {
+                Text("Protein")
+                ProgressBarWithPercentage(protein.toFloat()/proteinLimit)
+                Text("${protein}/${proteinLimit} g")
             }
         }
     }
+}
+
+@Composable
+fun BreakfastCard(navController: NavController) {
+    Card (
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Breakfast")
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("300 kcal", style = MaterialTheme.typography.bodyMedium)
+            }
+            IconButton(onClick = {
+                navController.navigate("foodList")
+            }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+        }
+    }
+}
+
+@Composable
+fun LunchCard(navController: NavController) {
+
+}
+
+@Composable
+fun DinnerCard(navController: NavController) {
+
 }
 
 @Composable

@@ -102,6 +102,9 @@ fun HomeScreen() {
             composable(Routes.Nutrition.value) {
                 PersonalNutrition(navController)
             }
+            composable("foodList") {
+                NutritionTracker(navController)
+            }
             composable(
                 route = "foodDetail/{foodId}",
                 arguments = listOf(navArgument("foodId") { type = NavType.LongType })
