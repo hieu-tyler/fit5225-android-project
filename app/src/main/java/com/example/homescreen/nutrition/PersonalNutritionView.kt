@@ -13,6 +13,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -69,7 +70,11 @@ fun PersonalNutrition(navController: NavController) {
                 .padding(horizontal = 12.dp)
         ) {
 
-            Card{
+            Card (
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 6.dp
+                )
+            ){
                 Column(modifier = Modifier
                     .height(200.dp)
                     .padding(4.dp)
@@ -184,7 +189,7 @@ fun PieChartCalories(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, pro
                 description.isEnabled = false
                 centerText = "Calories\n$calories KJ"
                 setDrawCenterText(true)
-                setEntryLabelTextSize(16f)
+                setEntryLabelTextSize(12f)
                 animateY(4000)
                 legend.isEnabled = false
             }
