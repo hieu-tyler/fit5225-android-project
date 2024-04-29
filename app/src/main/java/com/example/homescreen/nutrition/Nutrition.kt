@@ -2,6 +2,7 @@ package com.example.homescreen.nutrition
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -48,8 +48,10 @@ import coil.compose.rememberImagePainter
 fun NutritionTracker(navController: NavController) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
+    var showBackButton by remember { mutableStateOf(false) }
     var selectedFood by remember { mutableStateOf<Food?>(null) } // Hold the selected food item
 
+    // TODO: Create retrieve function
     val dummyFoods = listOf(
         Food(1, "Apple", "apple", 95, 0.5f, 25f, 0.3f),
         Food(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
@@ -57,27 +59,30 @@ fun NutritionTracker(navController: NavController) {
         Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f),
         Food(6, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
         Food(8, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-
     )
     val foods by remember { mutableStateOf(dummyFoods) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Nutrition Tab") },
-                actions = {
-                    IconButton(onClick = { showCreate = true; showForm = false }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Food")
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navController.navigateUp()
-                    }) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, "")
-                    }
-                },
-            )
+            AnimatedVisibility(visible = !showForm) {
+                TopAppBar(
+                    title = { Text("Nutrition Tab") },
+                    actions = {
+                        IconButton(onClick = { showCreate = true; showForm = false }) {
+                            Icon(Icons.Default.Add, contentDescription = "Add Food")
+                        }
+                    },
+                    navigationIcon = {
+                        if (showBackButton) {
+                            IconButton(onClick = {
+                                navController.navigateUp()
+                            }) {
+                                Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back")
+                            }
+                        }
+                    },
+                )
+            }
         }
     ) {
         Column (
@@ -86,139 +91,99 @@ fun NutritionTracker(navController: NavController) {
                 .padding(top = 64.dp)
         ) {
             if (showForm && selectedFood != null) {
-                NutritionFormView(food = selectedFood!!, onCloseForm = { selectedFood = null; showForm = false })
+                NutritionFormView(navController, food = selectedFood!!, onCloseForm = { selectedFood = null; showForm = false })
+                showBackButton = true
             }
 
             if (showCreate && !showForm) {
                 CreateNutritionForm(onCloseForm = { showCreate = false })
             }
 
-            if (!showForm && selectedFood == null) {
+            if (!showForm && selectedFood == null){
                 FoodList(foods = foods) { clickedFood ->
                     selectedFood = clickedFood
                     showForm = true
+                    navController.navigate("foodDetail/${clickedFood.id}")
                 }
             }
-
-
         }
     }
 }
 
-@SuppressLint("DiscouragedApi")
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("DiscouragedApi", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NutritionFormView(food: Food, onCloseForm: () -> Unit) {
+fun NutritionFormView(navController: NavController, food: Food, onCloseForm: () -> Unit) {
     val description by remember { mutableStateOf("The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.") }
     val context = LocalContext.current
     val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
 
-    Image(
-        painter = painterResource(resourceId),
-        contentDescription = "Food Image",
-        contentScale = ContentScale.Fit,
-        modifier = Modifier
-            .fillMaxWidth()
-            .size(512.dp, 255.dp)
-            .background(Color.Gray))
-
-    Row {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = food.name) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back")
+                    }
+                }
+            )
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
-
         ) {
-
-            Text(
-                text = food.name,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+            Image(
+                painter = painterResource(resourceId),
+                contentDescription = "Food Image",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(512.dp, 255.dp)
+                    .background(Color.Gray)
             )
 
+            // Description text
             if (description != "") {
                 Text(
-                    text = "The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.",
+                    text = description,
                     textAlign = TextAlign.Justify,
                     fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Card {
-                Column(
-                    Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Protein",
-                        )
-                        Text(
-                            text = "${food.protein} g",
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Calories",
-                        )
-                        Text(
-                            text = "${food.calories} kJ",
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Carbs",
-                        )
-                        Text(
-                            text = "${food.carbs} g",
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Fats",
-                        )
-                        Text(
-                            text = "${food.fats} g",
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Close button
-            Button(
-                onClick = { onCloseForm() },
-                modifier = Modifier.align(Alignment.End)
+            // Nutritional information card
+            Card(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Close")
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    NutritionInfoItem(label = "Protein", value = "${food.protein} g")
+                    NutritionInfoItem(label = "Calories", value = "${food.calories} kJ")
+                    NutritionInfoItem(label = "Carbs", value = "${food.carbs} g")
+                    NutritionInfoItem(label = "Fats", value = "${food.fats} g")
+                }
             }
         }
     }
 }
 
+@Composable
+fun NutritionInfoItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label)
+        Text(text = value)
+    }
+}
 
 @Composable
 fun CreateNutritionForm(onCloseForm: () -> Unit) {
@@ -415,16 +380,16 @@ fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
                         Text(text = "Calories: ${food.calories} Kj")
                     }
                     Column(modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Protein: ${food.protein}g")
+                        Text(text = "Protein: ${food.protein} g")
 
                     }
                 }
                 Row(modifier = Modifier.padding(top = 6.dp)) {
                     Column (modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Carbs: ${food.carbs}g")
+                        Text(text = "Carbs: ${food.carbs} g")
                     }
                     Column (modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Fats: ${food.fats}g")
+                        Text(text = "Fats: ${food.fats} g")
                     }
                 }
             }

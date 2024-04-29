@@ -13,14 +13,18 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
 import com.example.homescreen.exercise_report.Exercise
 import com.example.homescreen.health_metrics.UserHealthDashboard
 import com.example.homescreen.health_metrics.UserHealthMetrics
+import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
 import com.example.homescreen.profile.ProfileSettingsScreen
 import com.example.homescreen.profile.UserProfile
@@ -94,6 +98,23 @@ fun HomeScreen() {
             }
             composable(Routes.Nutrition.value) {
                 NutritionTracker(navController)
+            }
+            composable(
+                route = "foodDetail/{foodId}",
+                arguments = listOf(navArgument("foodId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val foodId = backStackEntry.arguments?.getLong("foodId")
+                // TODO: Create function to retrieve list of foods
+                val dummyFoods = listOf(
+                    Food(1, "Apple", "apple", 95, 0.5f, 25f, 0.3f),
+                    Food(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
+                    Food(3, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
+                    Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f)
+                )
+                val selectedFood = dummyFoods.find { it.id == foodId }
+                if (selectedFood != null) {
+                    NutritionFormView(navController = navController, food = selectedFood, onCloseForm = { /* Handle form close */ })
+                }
             }
             composable(Routes.ExerciseReport.value) {
                 ActivityTrackerScreen(navController)
