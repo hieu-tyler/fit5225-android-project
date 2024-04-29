@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,8 +58,8 @@ fun NutritionTracker(navController: NavController) {
         Food(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
         Food(3, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
         Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f),
+        Food(5, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
         Food(6, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-        Food(8, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
     )
     val foods by remember { mutableStateOf(dummyFoods) }
 
@@ -66,10 +67,16 @@ fun NutritionTracker(navController: NavController) {
         topBar = {
             AnimatedVisibility(visible = !showForm) {
                 TopAppBar(
-                    title = { Text("Nutrition Tab") },
+                    title = { Text("Nutrition") },
                     actions = {
-                        IconButton(onClick = { showCreate = true; showForm = false }) {
-                            Icon(Icons.Default.Add, contentDescription = "Add Food")
+                        if (!showCreate) {
+                            IconButton(onClick = { showCreate = true; showForm = false }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add Food")
+                            }
+                        } else {
+                            IconButton(onClick = { showCreate = false; selectedFood = null; showForm = false }) {
+                                Icon(Icons.Default.Close, contentDescription = "Close")
+                            }
                         }
                     },
                     navigationIcon = {
@@ -91,12 +98,13 @@ fun NutritionTracker(navController: NavController) {
                 .padding(top = 64.dp)
         ) {
             if (showForm && selectedFood != null) {
-                NutritionFormView(navController, food = selectedFood!!, onCloseForm = { selectedFood = null; showForm = false })
+                NutritionFormView(navController, food = selectedFood!!)
                 showBackButton = true
             }
 
             if (showCreate && !showForm) {
-                CreateNutritionForm(onCloseForm = { showCreate = false })
+                CreateNutritionForm(onCloseForm = {
+                    showCreate = false; selectedFood = null; showForm = false })
             }
 
             if (!showForm && selectedFood == null){
@@ -113,7 +121,7 @@ fun NutritionTracker(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DiscouragedApi", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NutritionFormView(navController: NavController, food: Food, onCloseForm: () -> Unit) {
+fun NutritionFormView(navController: NavController, food: Food) {
     val description by remember { mutableStateOf("The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.") }
     val context = LocalContext.current
     val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
@@ -335,7 +343,6 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
         }
     }
 }
-
 
 @Composable
 fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {

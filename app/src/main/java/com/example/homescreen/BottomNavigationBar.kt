@@ -96,6 +96,8 @@ fun HomeScreen() {
                 )
                 UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2, actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
             }
+
+            /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
                 NutritionTracker(navController)
             }
@@ -113,7 +115,7 @@ fun HomeScreen() {
                 )
                 val selectedFood = dummyFoods.find { it.id == foodId }
                 if (selectedFood != null) {
-                    NutritionFormView(navController = navController, food = selectedFood, onCloseForm = { /* Handle form close */ })
+                    NutritionFormView(navController = navController, food = selectedFood)
                 }
             }
             composable(Routes.ExerciseReport.value) {
