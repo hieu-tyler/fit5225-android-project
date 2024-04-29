@@ -64,7 +64,7 @@ fun NutritionFormView(navController: NavController, food: Food) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(64.dp)
         ) {
             Image(
                 painter = painterResource(resourceId),

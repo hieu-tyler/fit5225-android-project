@@ -26,6 +26,7 @@ import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
+import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.ProfileSettingsScreen
 import com.example.homescreen.profile.UserProfile
 import java.text.SimpleDateFormat
@@ -99,7 +100,7 @@ fun HomeScreen() {
 
             /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
-                NutritionTracker(navController)
+                PersonalNutrition(navController)
             }
             composable(
                 route = "foodDetail/{foodId}",
