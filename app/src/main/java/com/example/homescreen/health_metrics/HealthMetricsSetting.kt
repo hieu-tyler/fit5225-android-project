@@ -271,23 +271,25 @@ fun IntMetricSlider(label: String, value: Int, onValueChange: (Int) -> Unit, val
 @Preview(showBackground = true)
 @Composable
 fun CreateHealthMetricsRecord() {
-    val sampleUserHealthMetrics = UserHealthMetrics(
-        userId = 1,
-        entryDate = Date(),
-        weight = 60F,
-        height = 170F,
-        bmi = 20F,
-        waist = 100F,
-        exerciseType = "running",
-        exerciseFreq = 3,
-        exerciseTime = 30,
-        exerciseNote = "",
-        systolicBP = 120F,
-        diastolicBP = 80F
-    )
-    HealthMetricsSettingsScreen(
-        userHealthMetrics = sampleUserHealthMetrics,
-        onSaveMetrics = {}, // In preview, actions don't need to do anything
-        onSignOut = {} // In preview, actions don't need to do anything
-    )
+    HomeScreenTheme {
+        val sampleUserHealthMetrics = UserHealthMetrics(
+            userId = 1,
+            entryDate = Date(),
+            weight = 60F,
+            height = 170F,
+            bmi = 20F,
+            waist = 100F,
+            exerciseType = "running",
+            exerciseFreq = 3,
+            exerciseTime = 30,
+            exerciseNote = "",
+            systolicBP = 120F,
+            diastolicBP = 80F
+        )
+        HealthMetricsSettingsScreen(
+            userHealthMetrics = sampleUserHealthMetrics,
+            onSaveMetrics = {}, // In preview, actions don't need to do anything
+            onSignOut = {} // In preview, actions don't need to do anything
+        )
+    }
 }
