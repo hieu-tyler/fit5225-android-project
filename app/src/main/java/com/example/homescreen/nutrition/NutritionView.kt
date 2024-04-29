@@ -240,21 +240,21 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
             Button(
                 onClick = {
                     // Save food log to database or perform desired action
-                    val newFood = Food(
-                        id = System.currentTimeMillis(),
-                        name = foodName,
-                        imageUrl = imageUrl,
-                        calories = calories.toIntOrNull() ?: 0,
-                        protein = protein.toFloatOrNull() ?: 0f,
-                        carbs = carbs.toFloatOrNull() ?: 0f,
-                        fats = fats.toFloatOrNull() ?: 0f
-                    )
-                    foodName = ""
-                    calories = ""
-                    protein = ""
-                    carbs = ""
-                    fats = ""
-                    imageUrl = ""
+//                    val newFood = Food(
+//                        id = System.currentTimeMillis(),
+//                        name = foodName,
+//                        imageUrl = imageUrl,
+//                        calories = calories.toIntOrNull() ?: 0,
+//                        protein = protein.toFloatOrNull() ?: 0f,
+//                        carbs = carbs.toFloatOrNull() ?: 0f,
+//                        fats = fats.toFloatOrNull() ?: 0f
+//                    )
+//                    foodName = ""
+//                    calories = ""
+//                    protein = ""
+//                    carbs = ""
+//                    fats = ""
+//                    imageUrl = ""
                     Toast.makeText(context, "Food Logged: $foodName", Toast.LENGTH_SHORT).show()
 
                     onCloseForm()
