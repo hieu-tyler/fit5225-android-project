@@ -12,6 +12,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -284,6 +287,9 @@ fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {
 fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
     val context = LocalContext.current
     val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
+    // TODO: Create counter
+    var quantity by remember { mutableStateOf(0) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,36 +297,40 @@ fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
             .clickable { onFoodClick(food) }
     ) {
         Row(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painter = rememberImagePainter(resourceId),
                 contentDescription = "Food Image",
                 modifier = Modifier
-                    .size(100.dp)
-                    .padding(8.dp),
+                    .size(72.dp)
+                    .padding(end = 16.dp),
                 contentScale = ContentScale.Crop
             )
 
-            Column {
-                Text(text = food.name, style = MaterialTheme.typography.headlineMedium)
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = food.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(modifier = Modifier.padding(end = 6.dp)) {
-                    Column (modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Calories: ${food.calories} Kj")
-                    }
-                    Column(modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Protein: ${food.protein} g")
+                Text(text = "Carbs: ${food.carbs} g", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Fats: ${food.fats} g", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Protein: ${food.protein} g", style = MaterialTheme.typography.bodyMedium)
+                Text(text = "Calories: ${food.calories} kcal", style = MaterialTheme.typography.bodyMedium)
+            }
 
-                    }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { if (quantity > 0) quantity-- }) {
+                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Remove")
                 }
-                Row(modifier = Modifier.padding(top = 6.dp)) {
-                    Column (modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Carbs: ${food.carbs} g")
-                    }
-                    Column (modifier = Modifier.padding(end = 4.dp)) {
-                        Text(text = "Fats: ${food.fats} g")
-                    }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "$quantity", fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(onClick = {quantity++} ) {
+                    Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Add")
                 }
             }
         }

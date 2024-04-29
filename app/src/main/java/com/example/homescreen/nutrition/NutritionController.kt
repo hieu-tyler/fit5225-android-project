@@ -30,7 +30,7 @@ import androidx.navigation.NavController
 fun NutritionTracker(navController: NavController) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
-    var showBackButton by remember { mutableStateOf(false) }
+    var showBackButton by remember { mutableStateOf(true) }
     var selectedFood by remember { mutableStateOf<Food?>(null) } // Hold the selected food item
 
     // TODO: Create retrieve function
