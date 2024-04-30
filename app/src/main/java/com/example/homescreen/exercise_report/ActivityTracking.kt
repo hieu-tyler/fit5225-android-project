@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -39,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
@@ -46,26 +48,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.homescreen.R
 import com.example.homescreen.ui.theme.Purple80
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerScreen(navHostController: NavHostController) {
+fun ActivityTrackerScreen(activityViewModel: ActivityViewModel) {
 
-    val barChartInputsPercent = (0..10).map { (1..100).random().toFloat() }
+    val activities by activityViewModel.allActivities.observeAsState(emptyList())
 
-    val activitiesList = listOf(
-        Activity(1, "Walking", 12, 185, "", 0.25, 0),
-        Activity(2, "Running", 5, 30, "", 0.6, 0),
-        Activity(3, "Cycling", 0, 0, "", 0.0, 0)
-    )
-
-    val activities by remember { mutableStateOf(activitiesList) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,26 +78,29 @@ fun ActivityTrackerScreen(navHostController: NavHostController) {
         }
 
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.padding(24.dp))
-            Text(text = "Total Activities this week",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 24.dp))
-            ActivityItemsList(activities = activities)
-            ReportGraph(data = mapOf(
-                Pair(0.5f, 10),
-                Pair(0.6f, 12),
-                Pair(0.4f, 8),
-                Pair(0.2f, 4),
-                Pair(0.9f, 18),
-            ), maxValue = 1000)
-            MapScreen()
+        Column(modifier = Modifier.fillMaxSize())
+        {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(modifier = Modifier.padding(24.dp))
+                Text(
+                    text = "Total Activities this week",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                ActivityItemsList(activities = activities)
 
+            }
+            Text(
+                text = "Weekly activities distance graph",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            BarChartScreen()
         }
     }
 
@@ -177,97 +183,6 @@ fun ActivityItems(index: Int, activity: Activity) {
 }
 
 @Composable
-fun ReportGraph(
-    data: Map<Float, Int>,
-    maxValue: Int
-) {
-    val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(50.dp)
-    ) {
-        Text(text = "Graph", style = MaterialTheme.typography.headlineSmall)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Box(modifier = Modifier
-                .fillMaxHeight()
-                .width(50.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-
-                //scale
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    Text(text = maxValue.toString())
-                    Spacer(modifier = Modifier.fillMaxHeight())
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    Text(text = (maxValue/2).toString())
-                    Spacer(modifier = Modifier.fillMaxHeight(0.5f))
-                }
-            }
-
-            //graph
-            Box(modifier = Modifier
-                .fillMaxHeight()
-                .width(2.dp)
-                .background(Color.Black)
-            )
-             data.forEach {
-                 Box(modifier = Modifier
-                     .padding(start = 20.dp)
-                     .clip(RoundedCornerShape(10.dp))
-                     .width(20.dp)
-                     .fillMaxHeight(it.key)
-                     .background(Purple80)
-                     .clickable {
-                         Toast
-                             .makeText(context, it.key.toString(), Toast.LENGTH_SHORT)
-                             .show()
-                     }
-                 )
-             }
-
-        }
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(2.dp)
-            .background(Color.Black)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 72.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            data.values.forEach {
-                Text(
-                    modifier = Modifier.width(20.dp),
-                    text = it.toString(),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-
-
-}
-
-@Composable
 fun MapScreen() {
 
     Text(
@@ -285,4 +200,36 @@ fun MapScreen() {
         contentScale = ContentScale.Crop
     )
 
+}
+
+@Composable
+fun BarChartScreen() {
+    val barEntries = listOf(
+        BarEntry(0f, 1070f),
+        BarEntry(1f, 4050f),
+        BarEntry(2f, 3890f),
+        BarEntry(3f, 5599f),
+        BarEntry(4f, 2300f),
+        BarEntry(5f, 4055f),
+        BarEntry(6f,5100f)
+    )
+    val barDataSet = BarDataSet(barEntries, "Steps")
+    barDataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
+    val barData = BarData(barDataSet)
+    barData.barWidth = 0.5f
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { context ->
+            BarChart(context).apply {
+                data = barData
+                description.isEnabled = false
+                setFitBars(true)
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.valueFormatter =
+                    IndexAxisValueFormatter(listOf("Sun", "Mon", "Tues", "Wed", "Thurs",
+                        "Fri","Sat"))
+                animateY(4000)
+            }
+        }
+    )
 }
