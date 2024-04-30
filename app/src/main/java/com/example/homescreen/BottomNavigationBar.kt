@@ -13,15 +13,20 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
 import com.example.homescreen.exercise_report.Exercise
 import com.example.homescreen.health_metrics.UserHealthDashboard
 import com.example.homescreen.health_metrics.UserHealthMetrics
+import com.example.homescreen.nutrition.FoodViewModel
+import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
+import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.ProfileSettingsScreen
 import com.example.homescreen.profile.UserProfile
 import java.text.SimpleDateFormat
@@ -59,7 +64,7 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(foodViewModel: FoodViewModel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
@@ -92,8 +97,23 @@ fun HomeScreen() {
                 )
                 UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2, actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
             }
+
+            /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
-                NutritionTracker(navController)
+                PersonalNutrition(navController)
+            }
+            composable("foodList") {
+                NutritionTracker(navController, foodViewModel)
+            }
+            composable(
+                route = "foodDetail/{foodName}",
+                arguments = listOf(navArgument("foodName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val foodName = backStackEntry.arguments?.getString("foodName")
+                val selectedFood = foodViewModel.allFoods.value?.find { it.name == foodName }
+                if (selectedFood != null) {
+                    NutritionFormView(navController = navController, food = selectedFood)
+                }
             }
             composable(Routes.ExerciseReport.value) {
                 ActivityTrackerScreen(navController)

@@ -1,7 +1,11 @@
 package com.example.homescreen.nutrition
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "foods")
 data class Food(
-    val id: Long,
+    @PrimaryKey
     val name: String,
     val imageUrl: String,
     val calories: Int,
