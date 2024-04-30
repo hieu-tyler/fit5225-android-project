@@ -23,7 +23,7 @@ import com.example.homescreen.exercise_report.ActivityTrackerScreen
 import com.example.homescreen.exercise_report.Exercise
 import com.example.homescreen.health_metrics.UserHealthDashboard
 import com.example.homescreen.health_metrics.UserHealthMetrics
-import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.FoodViewModel
 import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
 import com.example.homescreen.nutrition.PersonalNutrition
@@ -64,7 +64,7 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(foodViewModel: FoodViewModel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
@@ -103,21 +103,14 @@ fun HomeScreen() {
                 PersonalNutrition(navController)
             }
             composable("foodList") {
-                NutritionTracker(navController)
+                NutritionTracker(navController, foodViewModel)
             }
             composable(
-                route = "foodDetail/{foodId}",
-                arguments = listOf(navArgument("foodId") { type = NavType.LongType })
+                route = "foodDetail/{foodName}",
+                arguments = listOf(navArgument("foodName") { type = NavType.StringType })
             ) { backStackEntry ->
-                val foodId = backStackEntry.arguments?.getLong("foodId")
-                // TODO: Create function to retrieve list of foods
-                val dummyFoods = listOf(
-                    Food(1, "Apple", "apple", 95, 0.5f, 25f, 0.3f),
-                    Food(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
-                    Food(3, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-                    Food(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f)
-                )
-                val selectedFood = dummyFoods.find { it.id == foodId }
+                val foodName = backStackEntry.arguments?.getString("foodName")
+                val selectedFood = foodViewModel.allFoods.value?.find { it.name == foodName }
                 if (selectedFood != null) {
                     NutritionFormView(navController = navController, food = selectedFood)
                 }
