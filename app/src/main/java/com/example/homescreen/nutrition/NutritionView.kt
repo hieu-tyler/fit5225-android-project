@@ -42,6 +42,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -281,6 +284,56 @@ fun FoodList(foods: List<Food>, onFoodClick: (Food) -> Unit) {
         }
     }
 }
+
+fun getFoodFactApi(foodName: String): Response {
+    val client = OkHttpClient()
+
+    val request = Request.Builder()
+        .url("https://dietagram.p.rapidapi.com/apiFood.php?name=${foodName}&lang=en")
+        .get()
+        .addHeader("X-RapidAPI-Key", "ba808d99damsh7294f863f004cafp172317jsnc7af5eb1de3a")
+        .addHeader("X-RapidAPI-Host", "dietagram.p.rapidapi.com")
+        .build()
+
+    return client.newCall(request).execute()
+}
+
+fun getDefaultFoodName(): String {
+    val fruits = listOf(
+        "apples",
+        "bananas",
+        "oranges",
+        "grapes",
+        "strawberries"
+    )
+    val fruitsString = fruits.joinToString(separator = ",")
+    val protein = listOf(
+        "Chicken breast",
+        "Ground beef",
+        "Salmon",
+        "Tofu",
+        "Turkey breast",
+        "Pork chops"
+    )
+    val proteinString = protein.joinToString(separator = ",")
+    val vegetable = listOf(
+        "Spinach",
+        "Broccoli",
+        "Carrots",
+        "Tomatoes",
+        "Capsicum",
+        "Cucumbers",
+        "Onions",
+        "Garlic",
+        "Potatoes",
+        "Sweet potatoes",
+        "Lettuce",
+    )
+    val vegetableString = vegetable.joinToString(separator = ",")
+
+    return listOf(fruitsString, proteinString, vegetableString).joinToString(separator = ",")
+}
+
 
 @SuppressLint("DiscouragedApi")
 @Composable
