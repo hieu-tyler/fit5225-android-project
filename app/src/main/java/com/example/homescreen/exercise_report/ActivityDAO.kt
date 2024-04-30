@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.Flow
 interface ActivityDAO {
     @Query("SELECT * FROM Activity")
     fun getAllActivities(): Flow<List<Activity>>
+
+    @Query("SELECT name FROM ACTIVITY")
+    fun getAllNames(): Flow<List<String>>
+
     @Insert
     suspend fun insertActivity(activity: Activity)
     @Update

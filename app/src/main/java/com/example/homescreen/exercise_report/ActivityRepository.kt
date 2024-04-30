@@ -7,6 +7,7 @@ class ActivityRepository (application: Application) {
     private var activityDAO : ActivityDAO =
         ActivityDatabase.getDatabase(application).activityDAO()
     val allActivities : Flow<List<Activity>> = activityDAO.getAllActivities()
+    val allNames: Flow<List<String>> = activityDAO.getAllNames()
     suspend fun insert(activity: Activity) {
         activityDAO.insertActivity(activity)
     }

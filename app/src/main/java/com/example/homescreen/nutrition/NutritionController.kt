@@ -175,7 +175,7 @@ fun prepareFoodList(): List<Food> {
         getFoodFactApi(foodName)
     }
     val foodEntities = mutableListOf<Food>()
-    val jsonArray = JSONArray(response.body?.string())
+    val jsonArray = JSONArray(response)
     try {
         for (i in 0 until jsonArray.length()) {
             val jsonObject = jsonArray.getJSONObject(i)
@@ -195,8 +195,8 @@ fun prepareFoodList(): List<Food> {
                 carbs = carbs,
                 fats = fats
                 )
-                foodEntities.add(food)
-            }
+            foodEntities.add(food)
+        }
     } catch (e: Exception) {
         // Handle JSON parsing exception
         e.printStackTrace()

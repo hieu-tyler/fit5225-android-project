@@ -13,6 +13,7 @@ class ActivityViewModel(application: Application) : AndroidViewModel(application
         cRepository = ActivityRepository(application)
     }
     val allActivities: LiveData<List<Activity>> = cRepository.allActivities.asLiveData()
+    val allNames: LiveData<List<String>> = cRepository.allNames.asLiveData()
     fun insertActivity(activity: Activity) = viewModelScope.launch(Dispatchers.IO) {
         cRepository.insert(activity)
     }

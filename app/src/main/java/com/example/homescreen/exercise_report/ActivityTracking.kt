@@ -40,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.clip
@@ -64,16 +65,10 @@ import com.github.mikephil.charting.utils.ColorTemplate
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerScreen(navHostController: NavHostController) {
+fun ActivityTrackerScreen(activityViewModel: ActivityViewModel) {
 
-    val activitiesList = listOf(
-        Activity(1, "Walking", 12, 185, "", 0.25, 0),
-        Activity(2, "Running", 5, 30, "", 0.6, 0),
-        Activity(3, "Cycling", 0, 0, "", 0.0, 0),
-        Activity(4, "Rowing", 0, 0, "", 0.0, 0),
-    )
+    val activities by activityViewModel.allActivities.observeAsState(emptyList())
 
-    val activities by remember { mutableStateOf(activitiesList) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -106,7 +101,6 @@ fun ActivityTrackerScreen(navHostController: NavHostController) {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
             BarChartScreen()
-//            MapScreen()
         }
     }
 
@@ -181,97 +175,6 @@ fun ActivityItems(index: Int, activity: Activity) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-            }
-        }
-    }
-
-
-}
-
-@Composable
-fun ReportGraph(
-    data: Map<Float, Int>,
-    maxValue: Int
-) {
-    val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(50.dp)
-    ) {
-        Text(text = "Graph", style = MaterialTheme.typography.headlineSmall)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(),
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Box(modifier = Modifier
-                .fillMaxHeight()
-                .width(50.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-
-                //scale
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    Text(text = maxValue.toString())
-                    Spacer(modifier = Modifier.fillMaxHeight())
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    Text(text = (maxValue/2).toString())
-                    Spacer(modifier = Modifier.fillMaxHeight(0.5f))
-                }
-            }
-
-            //graph
-            Box(modifier = Modifier
-                .fillMaxHeight()
-                .width(2.dp)
-                .background(Color.Black)
-            )
-             data.forEach {
-                 Box(modifier = Modifier
-                     .padding(start = 20.dp)
-                     .clip(RoundedCornerShape(10.dp))
-                     .width(20.dp)
-                     .fillMaxHeight(it.key)
-                     .background(Purple80)
-                     .clickable {
-                         Toast
-                             .makeText(context, it.key.toString(), Toast.LENGTH_SHORT)
-                             .show()
-                     }
-                 )
-             }
-
-        }
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(2.dp)
-            .background(Color.Black)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 72.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            data.values.forEach {
-                Text(
-                    modifier = Modifier.width(20.dp),
-                    text = it.toString(),
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }

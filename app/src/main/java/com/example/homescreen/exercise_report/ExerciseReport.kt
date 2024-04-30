@@ -37,7 +37,7 @@ fun ExerciseReport(activityViewModel: ActivityViewModel) {
         }
         LazyColumn {
             itemsIndexed(activities) { index, activity ->
-                if (index % 5 == 0) {
+                if (index % 10 == 0) {
                     ActivityItemTitle()
                 }
                 ActivityItem(

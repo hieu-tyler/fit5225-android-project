@@ -20,6 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
+import com.example.homescreen.exercise_report.ActivityViewModel
 import com.example.homescreen.exercise_report.Exercise
 import com.example.homescreen.health_metrics.UserHealthDashboard
 import com.example.homescreen.health_metrics.UserHealthMetrics
@@ -64,7 +65,7 @@ fun BottomNavigationBar(navController: NavController) {
 }
 
 @Composable
-fun HomeScreen(foodViewModel: FoodViewModel) {
+fun HomeScreen(viewModel: ActivityViewModel, foodViewModel : FoodViewModel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
@@ -116,10 +117,10 @@ fun HomeScreen(foodViewModel: FoodViewModel) {
                 }
             }
             composable(Routes.ExerciseReport.value) {
-                ActivityTrackerScreen(navController)
+                ActivityTrackerScreen(activityViewModel = viewModel)
             }
             composable(Routes.Exercise.value) {
-                Exercise(navController)
+                Exercise(navController, viewModel)
             }
             composable(Routes.Profile.value) {
                 val sampleUserProfile = UserProfile(
