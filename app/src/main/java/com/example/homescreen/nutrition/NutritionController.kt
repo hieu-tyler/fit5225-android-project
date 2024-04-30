@@ -77,9 +77,9 @@ fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel)
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-                        IconButton(onClick = { foodViewModel.deleteAll() }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete")
-                        }
+//                        IconButton(onClick = { foodViewModel.deleteAll() }) {
+//                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+//                        }
                     },
                     navigationIcon = {
                         if (showBackButton) {
@@ -195,7 +195,7 @@ fun prepareFoodList(): List<Food> {
                 carbs = carbs,
                 fats = fats
                 )
-                foodEntities.add(food)
+            foodEntities.add(food)
             }
     } catch (e: Exception) {
         // Handle JSON parsing exception

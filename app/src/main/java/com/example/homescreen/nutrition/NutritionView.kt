@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -272,23 +273,34 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
 
 @Composable
 fun FoodList(foodEntities: List<Food>, onFoodClick: (Food) -> Unit) {
+    val quantityMap = remember { mutableStateMapOf<Food, Int>() }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
         itemsIndexed(foodEntities) { _, food ->
-            FoodListItem(food = food, onFoodClick = onFoodClick)
+            FoodListItem(
+                food = food,
+                quantity = quantityMap[food] ?: 0,
+                onIncrease = { quantityMap[food] = (quantityMap[food] ?: 0) + 1 },
+                onDecrease = { if ((quantityMap[food] ?: 0) > 0) quantityMap[food] = (quantityMap[food] ?: 0) - 1 },
+                onFoodClick = onFoodClick
+            )
         }
     }
 }
 
-@SuppressLint("DiscouragedApi")
+@SuppressLint("DiscouragedApi", "MutableCollectionMutableState")
 @Composable
-fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
+fun FoodListItem(
+    food: Food,
+    quantity: Int,
+    onIncrease: () -> Unit,
+    onDecrease: () -> Unit,
+    onFoodClick: (Food) -> Unit
+) {
     val context = LocalContext.current
     val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
-    // TODO: Create counter
-    var quantity by remember { mutableStateOf(0) }
 
     Card(
         modifier = Modifier
@@ -323,13 +335,19 @@ fun FoodListItem(food: Food, onFoodClick: (Food) -> Unit) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { if (quantity > 0) quantity-- }) {
+                // Decrease quantity
+                IconButton(onClick = { onDecrease() }) {
                     Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Remove")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
+
+                // Display quantity
                 Text(text = "$quantity", fontWeight = FontWeight.Bold)
+
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = {quantity++} ) {
+
+                // Increase quantity
+                IconButton(onClick = { onIncrease() }) {
                     Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Add")
                 }
             }
