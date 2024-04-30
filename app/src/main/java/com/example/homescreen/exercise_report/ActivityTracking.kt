@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -46,10 +47,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.homescreen.R
 import com.example.homescreen.ui.theme.Purple80
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -57,12 +66,11 @@ import com.example.homescreen.ui.theme.Purple80
 @Composable
 fun ActivityTrackerScreen(navHostController: NavHostController) {
 
-    val barChartInputsPercent = (0..10).map { (1..100).random().toFloat() }
-
     val activitiesList = listOf(
         Activity(1, "Walking", 12, 185, "", 0.25, 0),
         Activity(2, "Running", 5, 30, "", 0.6, 0),
-        Activity(3, "Cycling", 0, 0, "", 0.0, 0)
+        Activity(3, "Cycling", 0, 0, "", 0.0, 0),
+        Activity(4, "Rowing", 0, 0, "", 0.0, 0),
     )
 
     val activities by remember { mutableStateOf(activitiesList) }
@@ -75,26 +83,30 @@ fun ActivityTrackerScreen(navHostController: NavHostController) {
         }
 
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.padding(24.dp))
-            Text(text = "Total Activities this week",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 24.dp))
-            ActivityItemsList(activities = activities)
-            ReportGraph(data = mapOf(
-                Pair(0.5f, 10),
-                Pair(0.6f, 12),
-                Pair(0.4f, 8),
-                Pair(0.2f, 4),
-                Pair(0.9f, 18),
-            ), maxValue = 1000)
-            MapScreen()
+        Column(modifier = Modifier.fillMaxSize())
+        {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(modifier = Modifier.padding(24.dp))
+                Text(
+                    text = "Total Activities this week",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                ActivityItemsList(activities = activities)
 
+            }
+            Text(
+                text = "Weekly activities distance graph",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            BarChartScreen()
+//            MapScreen()
         }
     }
 
@@ -285,4 +297,36 @@ fun MapScreen() {
         contentScale = ContentScale.Crop
     )
 
+}
+
+@Composable
+fun BarChartScreen() {
+    val barEntries = listOf(
+        BarEntry(0f, 1070f),
+        BarEntry(1f, 4050f),
+        BarEntry(2f, 3890f),
+        BarEntry(3f, 5599f),
+        BarEntry(4f, 2300f),
+        BarEntry(5f, 4055f),
+        BarEntry(6f,5100f)
+    )
+    val barDataSet = BarDataSet(barEntries, "Steps")
+    barDataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
+    val barData = BarData(barDataSet)
+    barData.barWidth = 0.5f
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { context ->
+            BarChart(context).apply {
+                data = barData
+                description.isEnabled = false
+                setFitBars(true)
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.valueFormatter =
+                    IndexAxisValueFormatter(listOf("Sun", "Mon", "Tues", "Wed", "Thurs",
+                        "Fri","Sat"))
+                animateY(4000)
+            }
+        }
+    )
 }

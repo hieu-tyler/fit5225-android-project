@@ -39,13 +39,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
 @Composable
-fun NutritionTracker() {
+fun NutritionTracker(navHostController: NavHostController) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
     var selectedFood by remember { mutableStateOf<Food?>(null) } // Hold the selected food item
