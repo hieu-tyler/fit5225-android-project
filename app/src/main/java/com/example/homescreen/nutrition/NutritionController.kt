@@ -1,6 +1,9 @@
 package com.example.homescreen.nutrition
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.database.sqlite.SQLiteConstraintException
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
@@ -43,26 +46,21 @@ fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel)
     var showCreate by remember { mutableStateOf(false) }
     var showBackButton by remember { mutableStateOf(true) }
     var selectedFood by remember { mutableStateOf<Food?>(null) }
-//    var foods by remember { mutableStateOf<List<FoodEntity>>(emptyList()) }
     val foods by foodViewModel.allFoods.observeAsState(emptyList())
+
     // Fetch foods from the ViewModel when the composable is first launched
-        LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
+        if (foodViewModel.allFoods.value?.isEmpty() == true) {
             if (foods.isEmpty()) {
-                val defaultFoods = prepareFoodList()
-                foodViewModel.insertFoods(defaultFoods)
+                try {
+                    val defaultFoods = prepareFoodList()
+                    foodViewModel.insertFoods(defaultFoods)
+                } catch (e: SQLiteConstraintException) {
+                    Log.d(ContentValues.TAG, "Error SQL Unique Constraints")
+                }
             }
         }
-
-    // TODO: Create retrieve function
-//    val dummyFoodEntities = listOf(
-//        FoodEntity(1, "Apple", "apple", 95, 0.5f, 25f, 0.3f),
-//        FoodEntity(2, "Banana", "banana", 105, 1.3f, 27f, 0.4f),
-//        FoodEntity(3, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-//        FoodEntity(4, "Salmon Fillet", "salmon", 220, 25.0f, 0.0f, 14.0f),
-//        FoodEntity(5, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-//        FoodEntity(6, "Chicken Breast", "chicken", 165, 31.0f, 0.0f, 3.6f),
-//    )
-//    val dummyFoods by remember { mutableStateOf(dummyFoodEntities) }
+    }
 
     Scaffold(
         topBar = {
@@ -78,6 +76,9 @@ fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel)
                             IconButton(onClick = { showCreate = false; selectedFood = null; showForm = false }) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
+                        }
+                        IconButton(onClick = { foodViewModel.deleteAll() }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete")
                         }
                     },
                     navigationIcon = {
@@ -144,7 +145,7 @@ fun getDefaultFoodName(): String {
         "Carrots",
         "Tomatoes",
         "Capsicum",
-        "Cucumbers",
+        "Cucumber",
         "Onions",
         "Potatoes",
     )
@@ -180,8 +181,8 @@ fun prepareFoodList(): List<Food> {
             val jsonObject = jsonArray.getJSONObject(i)
             val name = jsonObject.getString("name")
                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            val imageUrl = "" // TODO: Add logic to extract image URL if available
-            val calories = jsonObject.getString("calories").toInt()
+            val imageUrl = jsonObject.getString("name").lowercase().replace(" ", "_")
+            val calories = jsonObject.getString("calories").toFloatOrNull()?.toInt() ?: 0
             val protein = jsonObject.getString("protein_g").toFloatOrNull() ?: 0f
             val carbs = jsonObject.getString("carbohydrates_total_g").toFloatOrNull() ?: 0f
             val fats = jsonObject.getString("fat_total_g").toFloatOrNull() ?: 0f

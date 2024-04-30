@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 
-@Database(entities = [Food::class], version = 1, exportSchema = false)
+@Database(entities = [Food::class], version = 2, exportSchema = false)
 abstract class FoodDatabase : RoomDatabase() {
     abstract fun foodDao(): FoodDAO
 

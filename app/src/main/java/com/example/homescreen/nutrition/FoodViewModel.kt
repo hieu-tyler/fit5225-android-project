@@ -38,4 +38,8 @@ class FoodViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         cRepository.delete(food)
     }
+
+    fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
+        cRepository.deleteAll()
+    }
 }

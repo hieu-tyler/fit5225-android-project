@@ -23,4 +23,8 @@ class FoodRepository (application: Application) {
     suspend fun update(food: Food) {
         foodDao.updateFood(food)
     }
+
+    suspend fun deleteAll() {
+        foodDao.deleteAll()
+    }
 }
