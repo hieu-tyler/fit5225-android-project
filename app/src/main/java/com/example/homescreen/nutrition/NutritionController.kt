@@ -175,7 +175,7 @@ fun prepareFoodList(): List<Food> {
         getFoodFactApi(foodName)
     }
     val foodEntities = mutableListOf<Food>()
-    val jsonArray = JSONArray(response)
+    val jsonArray = JSONArray(response.body?.string())
     try {
         for (i in 0 until jsonArray.length()) {
             val jsonObject = jsonArray.getJSONObject(i)
