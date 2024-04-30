@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HomeScreen"
+rootProject.name = "FitLab"
 include(":app")
