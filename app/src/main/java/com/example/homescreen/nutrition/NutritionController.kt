@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONArray
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -111,7 +113,7 @@ fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel)
                 FoodList(foodEntities = foods) { clickedFood ->
                     selectedFood = clickedFood
                     showForm = true
-                    navController.navigate("foodDetail/${clickedFood.id}")
+                    navController.navigate("foodDetail/${clickedFood.name}")
                 }
             }
         }
@@ -120,8 +122,8 @@ fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel)
 
 fun getDefaultFoodName(): String {
     val fruits = listOf(
-        "apples",
-        "bananas",
+        "apple",
+        "banana",
         "oranges",
         "grapes",
         "strawberries"
@@ -144,10 +146,7 @@ fun getDefaultFoodName(): String {
         "Capsicum",
         "Cucumbers",
         "Onions",
-        "Garlic",
         "Potatoes",
-        "Sweet potatoes",
-        "Lettuce",
     )
     val vegetableString = vegetable.joinToString(separator = " ")
 
@@ -180,6 +179,7 @@ fun prepareFoodList(): List<Food> {
         for (i in 0 until jsonArray.length()) {
             val jsonObject = jsonArray.getJSONObject(i)
             val name = jsonObject.getString("name")
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             val imageUrl = "" // TODO: Add logic to extract image URL if available
             val calories = jsonObject.getString("calories").toInt()
             val protein = jsonObject.getString("protein_g").toFloatOrNull() ?: 0f
