@@ -7,7 +7,7 @@ import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 import kotlinx.coroutines.flow.Flow
 
-class repository (application: Application) {
+class Repository(application: Application) {
 
     private var foodDao: FoodDAO =
         AppDatabase.getDatabase(application).foodDao()
