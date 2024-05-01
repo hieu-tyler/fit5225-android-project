@@ -24,6 +24,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
     val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
     val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
+    val nutritionFacts: LiveData<List<PersonalNutrition>> = repository.nutritionFacts.asLiveData()
 
     fun insertFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertFood(food)
@@ -66,29 +67,34 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteAllPersonalNutrition() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAllPersonalNutrition()
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun savePersonalNutrition(personalNutritionList: List<PersonalNutrition>) = viewModelScope.launch(Dispatchers.IO) {
-        val currentDate = LocalDate.now().toString()
-        val todayNutritionRecords = allPersonalNutrition.value?.filter { it.date == currentDate }
-        for (personalNutrition in personalNutritionList) {
-            var existingRecord = todayNutritionRecords?.firstOrNull {
-                it.userName == personalNutrition.userName &&
-                        it.date == personalNutrition.date &&
-                        it.category == personalNutrition.category &&
-                        it.foodName == personalNutrition.foodName
-            }
 
-            if (existingRecord != null) {
-                // If a record exists, update its quantity
-                existingRecord.quantity += personalNutrition.quantity
-                // Update the record in the database
-                updatePersonalNutrition(existingRecord)
-            } else {
-                // If no record exists, insert a new record
-                insertPersonalNutrition(personalNutrition)
-            }
-        }
-    }
+//    fun getNutritionFacts(username: String, date: String) = viewModelScope.launch(Dispatchers.IO) {
+//        repository.getNutritionFacts(username, date)
+//    }
+
+//    @RequiresApi(Build.VERSION_CODES.O)
+//    fun savePersonalNutrition(personalNutritionList: List<PersonalNutrition>) = viewModelScope.launch(Dispatchers.IO) {
+//        val currentDate = LocalDate.now().toString()
+//        val todayNutritionRecords = allPersonalNutrition.value?.filter { it.date == currentDate }
+//        for (personalNutrition in personalNutritionList) {
+//            var existingRecord = todayNutritionRecords?.firstOrNull {
+//                it.userName == personalNutrition.userName &&
+//                        it.date == personalNutrition.date &&
+//                        it.category == personalNutrition.category &&
+//                        it.foodName == personalNutrition.foodName
+//            }
+//
+//            if (existingRecord != null) {
+//                // If a record exists, update its quantity
+//                existingRecord.quantity += personalNutrition.quantity
+//                // Update the record in the database
+//                updatePersonalNutrition(existingRecord)
+//            } else {
+//                // If no record exists, insert a new record
+//                insertPersonalNutrition(personalNutrition)
+//            }
+//        }
+//    }
 
     // Activity
     val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()

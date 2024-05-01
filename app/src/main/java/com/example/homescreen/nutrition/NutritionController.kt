@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.homescreen.ViewModel
@@ -55,14 +56,16 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
     var showBackButton by remember { mutableStateOf(true) }
     var selectedFood by remember { mutableStateOf<Food?>(null) }
     val foods by viewModel.allFoods.observeAsState(emptyList())
-    val allPersonalNutrition by viewModel.allPersonalNutrition.observeAsState(emptyList())
     val quantityMap = remember { mutableStateMapOf<Food, Int>() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val category = navBackStackEntry?.arguments?.getString("category")
+    val nutritionFacts by viewModel.nutritionFacts.observeAsState(emptyList())
+
 
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
         if (viewModel.allFoods.value?.isEmpty() == true) {
+            // Crawl API endpoint
             if (foods.isEmpty()) {
                 try {
                     val defaultFoods = prepareFoodList()
@@ -157,9 +160,11 @@ fun saveNutrition(viewModel: ViewModel, quantityMap: SnapshotStateMap<Food, Int>
             fats = food.fats * quantity // Calculate fats based on quantity
         )
         personalNutritionList.add(personalNutrition)
+        Log.d(ContentValues.TAG, "Inserted food to user $personalNutritionList")
     }
     for (personalNutrition in personalNutritionList) {
-        viewModel.updatePersonalNutrition(personalNutrition)
+        viewModel.insertPersonalNutrition(personalNutrition)
+        Log.d(ContentValues.TAG, "Inserted in table $personalNutrition")
     }
 }
 

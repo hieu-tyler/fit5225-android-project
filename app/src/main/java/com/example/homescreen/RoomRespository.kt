@@ -23,6 +23,7 @@ class Repository(application: Application) {
 
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
     val allPersonalNutrition: Flow<List<PersonalNutrition>> = personalNutritionDao.getAllPersonalNutrition()
+    val nutritionFacts: Flow<List<PersonalNutrition>> = personalNutritionDao.getNutritionFacts()
 
     // Food
     suspend fun insertFood(food: Food) {

@@ -24,4 +24,17 @@ interface PersonalNutritionDAO {
 
     @Query("DELETE FROM personal_nutrition")
     suspend fun deleteAllPersonalNutrition()
+
+    @Query("SELECT \n" +
+            "    userName,\n" +
+            "    date,\n" +
+            "    foodName,\n" +
+            "    category,\n" +
+            "    SUM(quantity) AS totalQuantity,\n" +
+            "    SUM(carbs) AS totalCarbs,\n" +
+            "    SUM(protein) AS totalProtein,\n" +
+            "    SUM(fats) AS totalFats\n" +
+            "FROM personal_nutrition\n" +
+            "GROUP BY userName, date, foodName, category;")
+    fun getNutritionFacts(): Flow<List<PersonalNutrition>>
 }
