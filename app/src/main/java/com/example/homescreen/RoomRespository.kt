@@ -1,6 +1,7 @@
 package com.example.homescreen
 
 import android.app.Application
+import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 import kotlinx.coroutines.flow.Flow
@@ -8,7 +9,9 @@ import kotlinx.coroutines.flow.Flow
 class FoodRepository (application: Application) {
 
     private var foodDao: FoodDAO =
-        FoodDatabase.getDatabase(application).foodDao()
+        AppDatabase.getDatabase(application).foodDao()
+    private var activityDAO: ActivityDAO =
+        AppDatabase.getDatabase(application).activityDao()
 
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
 
