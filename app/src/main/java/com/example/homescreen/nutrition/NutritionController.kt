@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -41,20 +42,20 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel) {
+fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
     var showBackButton by remember { mutableStateOf(true) }
     var selectedFood by remember { mutableStateOf<Food?>(null) }
-    val foods by foodViewModel.allFoods.observeAsState(emptyList())
+    val foods by viewModel.allFoods.observeAsState(emptyList())
 
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
-        if (foodViewModel.allFoods.value?.isEmpty() == true) {
+        if (viewModel.allFoods.value?.isEmpty() == true) {
             if (foods.isEmpty()) {
                 try {
                     val defaultFoods = prepareFoodList()
-                    foodViewModel.insertFoods(defaultFoods)
+                    viewModel.insertFoods(defaultFoods)
                 } catch (e: SQLiteConstraintException) {
                     Log.d(ContentValues.TAG, "Error SQL Unique Constraints")
                 }
@@ -77,7 +78,7 @@ fun NutritionTracker(navController: NavController, foodViewModel: FoodViewModel)
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-                        IconButton(onClick = { foodViewModel.deleteAll() }) {
+                        IconButton(onClick = { viewModel.deleteAll() }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete")
                         }
                     },

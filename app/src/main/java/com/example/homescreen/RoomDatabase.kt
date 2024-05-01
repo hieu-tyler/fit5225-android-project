@@ -4,18 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import com.example.homescreen.exercise_report.Activity
+import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
-import com.example.homescreen.profile.Converter
-import com.example.homescreen.profile.UserProfile
-import com.example.homescreen.profile.UserProfileDAO
 
-@Database(entities = [Food::class, UserProfile::class], version = 2, exportSchema = false)
-@TypeConverters(Converter::class)
+@Database(entities = [Food::class, Activity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun foodDao(): FoodDAO
-    abstract fun userProfileDAO(): UserProfileDAO
+
+    abstract fun activityDao() : ActivityDAO
 
     companion object {
         @Volatile
