@@ -75,18 +75,18 @@ fun ProfileSettingsScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "First Name: ",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier)
+                Text(
+                    text = "First Name: ",
+                    style = MaterialTheme.typography.titleMedium
+                )
                 if (editingFirstName) {
                     OutlinedTextField(
                         value = firstName,
                         onValueChange = { firstName = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = { editingFirstName = false }) {
@@ -95,31 +95,36 @@ fun ProfileSettingsScreen(
                         }
                     )
                 } else {
-                    Text(
-                        text = firstName,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { editingFirstName = true }
-                            .padding(12.dp)
-                    )
-                    IconButton(onClick = { editingFirstName = true }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = firstName,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { editingFirstName = true }
+                                .padding(12.dp)
+                        )
+                        IconButton(onClick = { editingFirstName = true }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                        }
                     }
                 }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Last Name: ",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier)
+                Text(
+                    text = "Last Name: ",
+                    style = MaterialTheme.typography.titleMedium
+                )
                 if (editingLastName) {
                     OutlinedTextField(
                         value = lastName,
                         onValueChange = { lastName = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = { editingLastName = false }) {
@@ -128,54 +133,65 @@ fun ProfileSettingsScreen(
                         }
                     )
                 } else {
-                    Text(
-                        text = lastName,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { editingLastName = true }
-                            .padding(12.dp)
-                    )
-                    IconButton(onClick = { editingLastName = true }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = lastName,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { editingLastName = true }
+                                .padding(12.dp)
+                        )
+                        IconButton(onClick = { editingLastName = true }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                        }
                     }
                 }
             }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                "Gender:    $selectedGender",
+                "Gender:",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                selectedGender,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)
+                modifier = Modifier.padding(start = 12.dp, top = 11.dp)
             )
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
             modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp)
         ) {
+            Text(
+                "Date of Birth:",
+                style = MaterialTheme.typography.titleMedium
+            )
             val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
             Text(
-                "Date of Birth:    ${formatter.format(birthDate)}",
+                formatter.format(birthDate),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.padding(start = 12.dp, top = 11.dp)
             )
         }
         Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Phone Number: ",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier)
+                Text(
+                    text = "Phone Number: ",
+                    style = MaterialTheme.typography.titleMedium
+                )
                 if (editingPhone) {
                     OutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = { editingPhone = false }) {
@@ -184,16 +200,21 @@ fun ProfileSettingsScreen(
                         }
                     )
                 } else {
-                    Text(
-                        text = phone,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { editingPhone = true }
-                            .padding(12.dp)
-                    )
-                    IconButton(onClick = { editingPhone = true }) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = phone,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { editingPhone = true }
+                                .padding(12.dp)
+                        )
+                        IconButton(onClick = { editingPhone = true }) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                        }
                     }
                 }
             }
