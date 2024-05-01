@@ -1,7 +1,12 @@
 package com.example.homescreen.exercise_report
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
 data class Activity(
-    val id: Long,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val name: String,
     val distance: Long,
     val duration: Long,

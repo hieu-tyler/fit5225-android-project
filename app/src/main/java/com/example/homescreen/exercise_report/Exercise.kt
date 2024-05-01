@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,13 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.homescreen.ViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Exercise(navController: NavHostController) {
-    val exercises = listOf("Walk", "Run", "Cycle")
+fun Exercise(navController: NavHostController, viewModel: ViewModel) {
+    val exercises = viewModel.allNames.observeAsState()
     var isExpanded by remember { mutableStateOf(false) }
-    var selectedExercise by remember { mutableStateOf(exercises[0]) }
+    var isStarted by remember { mutableStateOf(false) }
+    var selectedExercise by remember { mutableStateOf("exercise") }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -50,9 +53,9 @@ fun Exercise(navController: NavHostController) {
                         }
                         .padding(bottom = 8.dp),
                     readOnly = true,
-                    value = selectedExercise,
+                    value = selectedExercise.toString(),
                     onValueChange = {},
-                    label = { Text(text = "Exercise") },
+                    label = { Text(text = "Select Exercise") },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
                     },
@@ -60,7 +63,7 @@ fun Exercise(navController: NavHostController) {
                 ExposedDropdownMenu(
                     expanded = isExpanded,
                     onDismissRequest = { isExpanded = false}) {
-                    exercises.forEach { selectionOption ->
+                    exercises.value?.forEach() { selectionOption ->
                         DropdownMenuItem (
                             text = { Text(selectionOption) },
                             onClick = {
@@ -70,7 +73,6 @@ fun Exercise(navController: NavHostController) {
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                         )
                     }
-
                 }
             }
 
@@ -79,14 +81,27 @@ fun Exercise(navController: NavHostController) {
                     .fillMaxWidth()
                     .padding(16.dp)
                 ,
-                onClick = { /*TODO*/ }
+                onClick = { updateActivityData(viewModel) }
             ) {
-                Text(text = "Start Exercise")
+                if (!isStarted) {
+                    Text(text = "Start Exercise")
+                }else {
+                    Text(text = "Stop Exercise")
+                }
             }
 
             Spacer(modifier = Modifier.size(30.dp))
             Text("Enjoy your $selectedExercise", style =
             MaterialTheme.typography.bodyLarge)
+            ExerciseReport(viewModel = viewModel)
         }
     }
+}
+
+
+fun updateActivityData(viewModel: ViewModel) {
+    var activities = viewModel.allActivities.value?.get(2)
+    activities = activities!!.copy(distance = 25, duration = 154, elevation = 2)
+    println(activities)
+    viewModel.updateActivity(activities)
 }
