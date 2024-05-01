@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 class UserProfileRepository (application: Application) {
     private var userProfileDAO : UserProfileDAO =
-        AppDatabase.getDatabase(application).userProfileDAO()
+        AppDatabase.getDatabase(application).userProfileDao()
     val allUsers : Flow<List<UserProfile>> = userProfileDAO.getAllUsers()
     suspend fun insert(userProfile: UserProfile) {
         userProfileDAO.insertUser(userProfile)
