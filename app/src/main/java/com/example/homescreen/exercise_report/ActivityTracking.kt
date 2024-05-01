@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.rememberImagePainter
 import com.example.homescreen.R
+import com.example.homescreen.ViewModel
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -54,9 +55,9 @@ import com.github.mikephil.charting.utils.ColorTemplate
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerScreen(activityViewModel: ActivityViewModel) {
+fun ActivityTrackerScreen(viewModel: ViewModel) {
 
-    val activities by activityViewModel.allActivities.observeAsState(emptyList())
+    val activities by viewModel.allActivities.observeAsState(emptyList())
 
     Scaffold(
         topBar = {

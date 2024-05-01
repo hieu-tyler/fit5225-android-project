@@ -26,10 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.homescreen.ViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Exercise(navController: NavHostController, viewModel: ActivityViewModel) {
+fun Exercise(navController: NavHostController, viewModel: ViewModel) {
     val exercises = viewModel.allNames.observeAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var isStarted by remember { mutableStateOf(false) }
@@ -92,13 +93,13 @@ fun Exercise(navController: NavHostController, viewModel: ActivityViewModel) {
             Spacer(modifier = Modifier.size(30.dp))
             Text("Enjoy your $selectedExercise", style =
             MaterialTheme.typography.bodyLarge)
-            ExerciseReport(activityViewModel = viewModel)
+            ExerciseReport(viewModel = viewModel)
         }
     }
 }
 
 
-fun updateActivityData(viewModel: ActivityViewModel) {
+fun updateActivityData(viewModel: ViewModel) {
     var activities = viewModel.allActivities.value?.get(2)
     activities = activities!!.copy(distance = 25, duration = 154, elevation = 2)
     println(activities)
