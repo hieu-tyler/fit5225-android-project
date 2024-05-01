@@ -5,6 +5,8 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.PersonalNutrition
+import com.example.homescreen.nutrition.PersonalNutritionDAO
 import kotlinx.coroutines.flow.Flow
 
 class Repository(application: Application) {
@@ -13,11 +15,16 @@ class Repository(application: Application) {
         AppDatabase.getDatabase(application).foodDao()
     private var activityDAO : ActivityDAO =
         AppDatabase.getDatabase(application).activityDao()
+    private var personalNutritionDao : PersonalNutritionDAO =
+        AppDatabase.getDatabase(application).personalNutritionDao()
+
     val allActivities : Flow<List<Activity>> = activityDAO.getAllActivities()
     val allNames: Flow<List<String>> = activityDAO.getAllNames()
 
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
+    val allPersonalNutrition: Flow<List<PersonalNutrition>> = personalNutritionDao.getAllPersonalNutrition()
 
+    // Food
     suspend fun insertFood(food: Food) {
         foodDao.insertFood(food)
     }
@@ -31,10 +38,27 @@ class Repository(application: Application) {
     }
 
     suspend fun deleteAllFood() {
-        foodDao.deleteAll()
+        foodDao.deleteAllFoods()
     }
 
+    // PersonalNutrition
+    suspend fun insertPersonalNutrition(personalNutrition: PersonalNutrition) {
+        personalNutritionDao.insertPersonalNutrition(personalNutrition)
+    }
 
+    suspend fun deletePersonalNutrition(personalNutrition: PersonalNutrition) {
+        personalNutritionDao.deletePersonalNutrition(personalNutrition)
+    }
+
+    suspend fun updatePersonalNutrition(personalNutrition: PersonalNutrition) {
+        personalNutritionDao.updatePersonalNutrition(personalNutrition)
+    }
+
+    suspend fun deleteAllPersonalNutrition() {
+        personalNutritionDao.deleteAllPersonalNutrition()
+    }
+
+    // Activity
     suspend fun insertActivity(activity: Activity) {
         activityDAO.insertActivity(activity)
     }

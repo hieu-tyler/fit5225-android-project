@@ -1,5 +1,7 @@
 package com.example.homescreen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -62,6 +64,7 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(viewModel: ViewModel) {
     val navController = rememberNavController()
@@ -99,9 +102,10 @@ fun HomeScreen(viewModel: ViewModel) {
 
             /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
-                PersonalNutrition(navController)
+                PersonalNutrition(navController, viewModel)
             }
-            composable("foodList") {
+            composable(
+                route = "foodList/{category}") {
                 NutritionTracker(navController, viewModel)
             }
             composable(

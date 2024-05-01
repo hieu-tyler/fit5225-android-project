@@ -23,17 +23,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.example.homescreen.ViewModel
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -43,7 +43,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun PersonalNutrition(navController: NavController) {
+fun PersonalNutrition(navController: NavController, viewModel: ViewModel) {
     // TODO: Create retrieve function
     var carbs by remember { mutableIntStateOf(25) }
     var carbsLimit by remember { mutableIntStateOf(206) }
@@ -54,16 +54,12 @@ fun PersonalNutrition(navController: NavController) {
     var breakfastCalories by remember { mutableFloatStateOf(500.0f) }
     var lunchCalories by remember { mutableFloatStateOf(300.0f) }
     var dinnerCalories by remember { mutableFloatStateOf(200.0f) }
+    val allPersonalNutrition by viewModel.allPersonalNutrition.observeAsState(emptyList())
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Nutrition Record") },
-//                navigationIcon = {
-//                    IconButton(onClick = { navController.popBackStack() }) {
-//                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Back")
-//                    }
-//                }
             )
         }
     ) {
@@ -147,7 +143,7 @@ fun CaloriesStatCard(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, pro
 
 @Composable
 fun BreakfastCard(navController: NavController, breakfastCalories: Float) {
-
+    val category = "breakfast"
     Card (
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -167,7 +163,7 @@ fun BreakfastCard(navController: NavController, breakfastCalories: Float) {
                 Text("$breakfastCalories KJ", style = MaterialTheme.typography.bodyMedium)
             }
             IconButton(onClick = {
-                navController.navigate("foodList")
+                navController.navigate("foodList/$category")
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
@@ -263,8 +259,6 @@ fun PercentageText(progress: Float) {
     )
 }
 
-
-
 @Composable
 fun PieChartCalories(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, protein:Float, proteinLimit: Int) {
     val calories = calculateCalories(protein, fat, carbs)
@@ -292,7 +286,7 @@ fun PieChartCalories(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, pro
     pieDataSet.yValuePosition =
         PieDataSet.ValuePosition.INSIDE_SLICE;
     pieDataSet.valueFormatter = PercentValueFormatter()
-    pieDataSet.valueTextSize = 30f
+    pieDataSet.valueTextSize = 20f
 
     AndroidView(
         modifier = Modifier
@@ -325,11 +319,3 @@ fun calculateCalories(proteinGrams: Float, fatGrams: Float, carbGrams: Float): F
     return proteinCalories + fatCalories + carbCalories
 }
 
-
-
-@Preview(showBackground = true)
-@Composable
-fun PersonalNutritionPreview() {
-    var navController = rememberNavController()
-    PersonalNutrition(navController)
-}

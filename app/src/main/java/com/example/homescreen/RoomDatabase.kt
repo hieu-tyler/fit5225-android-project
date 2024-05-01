@@ -8,12 +8,18 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.PersonalNutrition
+import com.example.homescreen.nutrition.PersonalNutritionDAO
 
-@Database(entities = [Food::class, Activity::class], version = 2, exportSchema = false)
+@Database(entities = [Food::class, Activity::class, PersonalNutrition::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun foodDao(): FoodDAO
 
+    abstract fun personalNutritionDao() : PersonalNutritionDAO
+
+
     abstract fun activityDao() : ActivityDAO
+
 
     companion object {
         @Volatile
