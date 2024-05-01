@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
 import com.example.homescreen.exercise_report.Exercise
+import com.example.homescreen.health_metrics.HealthMetricsSettingsScreen
 import com.example.homescreen.health_metrics.UserHealthDashboard
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.NutritionFormView
@@ -64,7 +65,7 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(64)
 @Composable
 fun HomeScreen(viewModel: ViewModel) {
     val navController = rememberNavController()
@@ -97,7 +98,29 @@ fun HomeScreen(viewModel: ViewModel) {
                     systolicBP = 160f,
                     diastolicBP = 95f
                 )
-                UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2, actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
+                UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
+                    actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics, navController)
+            }
+            composable("HealthMetricsSettingsScreen") {
+                val sampleUserHealthMetrics = UserHealthMetrics(
+                    userId = 1,
+                    entryDate = Date(),
+                    weight = 60F,
+                    height = 170F,
+                    bmi = 20F,
+                    waist = 100F,
+                    exerciseType = "running",
+                    exerciseFreq = 3,
+                    exerciseTime = 30,
+                    exerciseNote = "",
+                    systolicBP = 120F,
+                    diastolicBP = 80F
+                )
+                HealthMetricsSettingsScreen(
+                    userHealthMetrics = sampleUserHealthMetrics,
+                    onSaveMetrics = {},
+                    navController
+                )
             }
 
             /* Nutrition navigation tab */

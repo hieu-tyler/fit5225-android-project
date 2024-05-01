@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
+import androidx.navigation.NavController
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,7 +36,8 @@ import kotlin.math.abs
 
 @Composable
 fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
-    actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics
+    actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics,
+    navController: NavController
 ) {
     // Create a temporary list of data for "userHealthMetricsLast"
     var userIdLast = 1
@@ -140,7 +142,7 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
             }
         }
         Button(
-            onClick = { },
+            onClick = { navController.navigate("HealthMetricsSettingsScreen") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Create New Health Record")
@@ -223,23 +225,23 @@ fun MetricComparison(metricName: String, lastValue: Float, newValue: Float, unit
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HealthMetricsDashboard() {
-    val sampleMetrics = UserHealthMetrics(
-        userId = 1,
-        entryDate = Date(),
-        weight = 70f,
-        height = 175f,
-        bmi = 22.9f,
-        waist = 87f,
-        exerciseType = "running",
-        exerciseFreq = 3,
-        exerciseTime = 30,
-        exerciseNote = "",
-        systolicBP = 160f,
-        diastolicBP = 95f
-    )
-    UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
-        actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HealthMetricsDashboard() {
+//    val sampleMetrics = UserHealthMetrics(
+//        userId = 1,
+//        entryDate = Date(),
+//        weight = 70f,
+//        height = 175f,
+//        bmi = 22.9f,
+//        waist = 87f,
+//        exerciseType = "running",
+//        exerciseFreq = 3,
+//        exerciseTime = 30,
+//        exerciseNote = "",
+//        systolicBP = 160f,
+//        diastolicBP = 95f
+//    )
+//    UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
+//        actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
+//}

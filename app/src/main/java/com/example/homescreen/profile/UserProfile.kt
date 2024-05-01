@@ -1,8 +1,12 @@
 package com.example.homescreen.profile
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.Date
 
+@Entity(tableName = "userProfile")
 data class UserProfile(
+    @PrimaryKey(autoGenerate = true)
     val userId: Int,
     val firstName: String,
     val lastName: String,

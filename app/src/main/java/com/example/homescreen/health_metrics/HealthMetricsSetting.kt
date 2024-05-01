@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -49,8 +50,8 @@ import com.example.homescreen.ui.theme.HomeScreenTheme
 @Composable
 fun HealthMetricsSettingsScreen(
     userHealthMetrics: UserHealthMetrics,
-    onSaveMetrics: (UserHealthMetrics) -> Unit, // Callback when Save button is clicked
-    onSignOut: () -> Unit // Callback when Sign Out button is clicked
+    onSaveMetrics: (UserHealthMetrics) -> Unit,
+    navController: NavController
 ) {
     // Local state for form fields
     var userId by rememberSaveable { mutableStateOf(userHealthMetrics.userId) }
@@ -83,7 +84,9 @@ fun HealthMetricsSettingsScreen(
         Text(
             text = "Create New Health Record",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(top = 12.dp).padding(bottom = 12.dp)
+            modifier = Modifier
+                .padding(top = 12.dp)
+                .padding(bottom = 12.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -226,7 +229,7 @@ fun HealthMetricsSettingsScreen(
         }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedButton(
-            onClick = onSignOut,
+            onClick = { navController.popBackStack() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cancel")
@@ -268,29 +271,28 @@ fun IntMetricSlider(label: String, value: Int, onValueChange: (Int) -> Unit, val
     }
 }
 
-@RequiresApi(64)
-@Preview(showBackground = true)
-@Composable
-fun CreateHealthMetricsRecord() {
-    HomeScreenTheme {
-        val sampleUserHealthMetrics = UserHealthMetrics(
-            userId = 1,
-            entryDate = Date(),
-            weight = 60F,
-            height = 170F,
-            bmi = 20F,
-            waist = 100F,
-            exerciseType = "running",
-            exerciseFreq = 3,
-            exerciseTime = 30,
-            exerciseNote = "",
-            systolicBP = 120F,
-            diastolicBP = 80F
-        )
-        HealthMetricsSettingsScreen(
-            userHealthMetrics = sampleUserHealthMetrics,
-            onSaveMetrics = {}, // In preview, actions don't need to do anything
-            onSignOut = {} // In preview, actions don't need to do anything
-        )
-    }
-}
+//@RequiresApi(64)
+//@Preview(showBackground = true)
+//@Composable
+//fun CreateHealthMetricsRecord() {
+//    HomeScreenTheme {
+//        val sampleUserHealthMetrics = UserHealthMetrics(
+//            userId = 1,
+//            entryDate = Date(),
+//            weight = 60F,
+//            height = 170F,
+//            bmi = 20F,
+//            waist = 100F,
+//            exerciseType = "running",
+//            exerciseFreq = 3,
+//            exerciseTime = 30,
+//            exerciseNote = "",
+//            systolicBP = 120F,
+//            diastolicBP = 80F
+//        )
+//        HealthMetricsSettingsScreen(
+//            userHealthMetrics = sampleUserHealthMetrics,
+//            onSaveMetrics = {}
+//        )
+//    }
+//}
