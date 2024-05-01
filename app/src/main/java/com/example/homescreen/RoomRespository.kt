@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class FoodRepository (application: Application) {
 
     private var foodDao: FoodDAO =
-        FoodDatabase.getDatabase(application).foodDao()
+        AppDatabase.getDatabase(application).foodDao()
 
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
 
