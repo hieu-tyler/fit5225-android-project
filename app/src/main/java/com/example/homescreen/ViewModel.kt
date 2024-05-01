@@ -13,10 +13,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: repository
+    private val repository: Repository
 
     init {
-        repository = repository(application)
+        repository = Repository(application)
     }
     val allFoods: LiveData<List<Food>> =  repository.allFoods.asLiveData()
 
