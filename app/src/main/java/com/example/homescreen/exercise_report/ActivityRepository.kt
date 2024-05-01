@@ -1,11 +1,12 @@
 package com.example.homescreen.exercise_report
 
 import android.app.Application
+import com.example.homescreen.AppDatabase
 import kotlinx.coroutines.flow.Flow
 
 class ActivityRepository (application: Application) {
     private var activityDAO : ActivityDAO =
-        ActivityDatabase.getDatabase(application).activityDAO()
+        AppDatabase.getDatabase(application).activityDao()
     val allActivities : Flow<List<Activity>> = activityDAO.getAllActivities()
     val allNames: Flow<List<String>> = activityDAO.getAllNames()
     suspend fun insert(activity: Activity) {
