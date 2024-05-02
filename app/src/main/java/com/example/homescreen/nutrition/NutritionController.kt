@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.homescreen.ViewModel
@@ -56,16 +55,14 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
     var showBackButton by remember { mutableStateOf(true) }
     var selectedFood by remember { mutableStateOf<Food?>(null) }
     val foods by viewModel.allFoods.observeAsState(emptyList())
+    val allPersonalNutrition by viewModel.allPersonalNutrition.observeAsState(emptyList())
     val quantityMap = remember { mutableStateMapOf<Food, Int>() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val category = navBackStackEntry?.arguments?.getString("category")
-    val nutritionFacts by viewModel.nutritionFacts.observeAsState(emptyList())
-
 
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
         if (viewModel.allFoods.value?.isEmpty() == true) {
-            // Crawl API endpoint
             if (foods.isEmpty()) {
                 try {
                     val defaultFoods = prepareFoodList()
@@ -92,11 +89,8 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-                        IconButton(onClick = { category?.let {
-                            saveNutrition(viewModel, quantityMap, it)
-                        } }) {
+                        IconButton(onClick = { saveNutrition(viewModel, quantityMap, category ?: "breakfast") }) {
                             Text("Save")
-//                            Icon(Icons.Default.Add, contentDescription = "Save")
                         }
                     },
                     navigationIcon = {
@@ -151,20 +145,18 @@ fun saveNutrition(viewModel: ViewModel, quantityMap: SnapshotStateMap<Food, Int>
         val personalNutrition = PersonalNutrition(
             userName = "user", // TODO: Replace with actual username
             date = currentDate,
-            category = category, // Replace with actual category
+            category = category,
             foodName = food.name,
             quantity = quantity,
-            calories = food.calories * quantity, // Calculate calories based on quantity
-            protein = food.protein * quantity, // Calculate protein based on quantity
-            carbs = food.carbs * quantity, // Calculate carbs based on quantity
-            fats = food.fats * quantity // Calculate fats based on quantity
+            calories = food.calories * quantity,
+            protein = food.protein * quantity,
+            carbs = food.carbs * quantity,
+            fats = food.fats * quantity
         )
         personalNutritionList.add(personalNutrition)
-        Log.d(ContentValues.TAG, "Inserted food to user $personalNutritionList")
     }
     for (personalNutrition in personalNutritionList) {
         viewModel.insertPersonalNutrition(personalNutrition)
-        Log.d(ContentValues.TAG, "Inserted in table $personalNutrition")
     }
 }
 

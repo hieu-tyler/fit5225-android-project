@@ -1,6 +1,5 @@
 package com.example.homescreen
 
-import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
@@ -28,7 +27,7 @@ import com.example.homescreen.health_metrics.UserHealthDashboard
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
-import com.example.homescreen.nutrition.PersonalNutrition
+import com.example.homescreen.nutrition.PersonalNutritionView
 import com.example.homescreen.profile.ProfileSettingsScreen
 import com.example.homescreen.profile.UserProfile
 import java.text.SimpleDateFormat
@@ -125,7 +124,7 @@ fun HomeScreen(viewModel: ViewModel) {
 
             /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
-                PersonalNutrition(navController, viewModel)
+                PersonalNutritionView(navController, viewModel)
             }
             composable(
                 route = "foodList/{category}") {
