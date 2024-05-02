@@ -20,10 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
+import com.example.homescreen.ViewModel
 
 @Composable
-fun ExerciseReport(activityViewModel: ActivityViewModel) {
-    val activities by activityViewModel.allActivities.observeAsState(emptyList())
+fun ExerciseReport(viewModel: ViewModel) {
+    val activities by viewModel.allActivities.observeAsState(emptyList())
     val selectedActivity = remember { mutableStateOf<Activity?>(null) }
     val insertDialog = remember { mutableStateOf(false) }
 
@@ -43,7 +44,7 @@ fun ExerciseReport(activityViewModel: ActivityViewModel) {
                 ActivityItem(
                     activity = activity,
                     onEdit = { selectedActivity.value = activity },
-                    onDelete = { activityViewModel.deleteActivity(activity) }
+                    onDelete = { viewModel.deleteActivity(activity) }
                 )
                 Divider(color = Color.Blue, thickness = 5.dp)
             }
@@ -54,7 +55,7 @@ fun ExerciseReport(activityViewModel: ActivityViewModel) {
         InsertActivityDialog(
             onDismiss = { insertDialog.value = false },
             onSave = { activityName ->
-                activityViewModel.insertActivity(Activity(name = activityName, distance = 0, duration = 0, avg_pace = 0.0, elevation = 0, route = ""))
+                viewModel.insertActivity(Activity(name = activityName, distance = 0, duration = 0, avg_pace = 0.0, elevation = 0, route = ""))
             }
         )
     }
@@ -63,7 +64,7 @@ fun ExerciseReport(activityViewModel: ActivityViewModel) {
             activity = activity,
             onDismiss = { selectedActivity.value = null },
             onSave = { updatedActivity ->
-                activityViewModel.updateActivity(updatedActivity)
+                viewModel.updateActivity(updatedActivity)
                 selectedActivity.value = null
             }
         )
