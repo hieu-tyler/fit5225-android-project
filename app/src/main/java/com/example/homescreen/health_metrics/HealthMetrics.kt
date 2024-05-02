@@ -46,12 +46,13 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
     var heightLast = 171F
     val bmiLast = 23.3F
     var waistLast = 87F
+    var systolicBPLast = 140F
+    var diastolicBPLast = 85F
     var exerciseTypeLast = "running"
     var exerciseFreqLast = 3
     var exerciseTimeLast = 30
     var exerciseNoteLast = ""
-    var systolicBPLast = 140F
-    var diastolicBPLast = 85F
+    var stepsGoalLast = 10000
 
     // Local state for form fields
     var userId by rememberSaveable { mutableStateOf(userHealthMetricsNewest.userId) }
@@ -60,12 +61,13 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
     var height by rememberSaveable { mutableStateOf(userHealthMetricsNewest.height) }
     val bmi by rememberSaveable { mutableStateOf(userHealthMetricsNewest.bmi) }
     var waist by rememberSaveable { mutableStateOf(userHealthMetricsNewest.waist) }
+    var systolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.systolicBP) }
+    var diastolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.diastolicBP) }
     var exerciseType by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseType) }
     var exerciseFreq by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseFreq) }
     var exerciseTime by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseTime) }
     var exerciseNote by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseNote) }
-    var systolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.systolicBP) }
-    var diastolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.diastolicBP) }
+    var stepsGoal by rememberSaveable { mutableStateOf(userHealthMetricsNewest.stepsGoal) }
 
     Column(modifier = Modifier
         .padding(16.dp)
@@ -98,9 +100,9 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                     )
                     Column(modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Goal: $exerciseFreq times/week, $exerciseTime min/time")
+                        Text(text = "Goal: $exerciseType for $exerciseTime min, \n$exerciseFreq times/week")
                         Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = {}) {
+                        OutlinedButton(onClick = { navController.navigate("ExerciseGoalSettingsScreen") }) {
                             Text(
                                 text = "Change your exercise goal",
                                 style = MaterialTheme.typography.titleSmall
@@ -129,9 +131,9 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                     )
                     Column(modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Goal: 10000 steps/day")
+                    Text(text = "Goal: $stepsGoal steps/day")
                     Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = {}) {
+                        OutlinedButton(onClick = { navController.navigate("StepsGoalSettingsScreen") }) {
                             Text(
                                 text = "Change your steps goal",
                                 style = MaterialTheme.typography.titleSmall
@@ -224,24 +226,3 @@ fun MetricComparison(metricName: String, lastValue: Float, newValue: Float, unit
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun HealthMetricsDashboard() {
-//    val sampleMetrics = UserHealthMetrics(
-//        userId = 1,
-//        entryDate = Date(),
-//        weight = 70f,
-//        height = 175f,
-//        bmi = 22.9f,
-//        waist = 87f,
-//        exerciseType = "running",
-//        exerciseFreq = 3,
-//        exerciseTime = 30,
-//        exerciseNote = "",
-//        systolicBP = 160f,
-//        diastolicBP = 95f
-//    )
-//    UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
-//        actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics)
-//}
