@@ -15,42 +15,43 @@ fun HealthScreen() {
     val subNavController = rememberNavController()
 
     Column {
+        val sampleUserHealthMetrics = UserHealthMetrics(
+            userId = 1,
+            entryDate = Date(),
+            weight = 60F,
+            height = 170F,
+            bmi = 20F,
+            waist = 105F,
+            systolicBP = 120F,
+            diastolicBP = 80F,
+            exerciseType = "running",
+            exerciseFreq = 3,
+            exerciseTime = 30,
+            exerciseNote = "",
+            stepsGoal = 10000
+        )
         // Nested NavHost
         NavHost(navController = subNavController, startDestination = Routes.HealthMetrics.value) {
             composable(Routes.HealthMetrics.value) {
-                val sampleMetrics = UserHealthMetrics(
-                    userId = 1,
-                    entryDate = Date(),
-                    weight = 70f,
-                    height = 175f,
-                    bmi = 22.9f,
-                    waist = 87f,
-                    exerciseType = "running",
-                    exerciseFreq = 3,
-                    exerciseTime = 30,
-                    exerciseNote = "",
-                    systolicBP = 160f,
-                    diastolicBP = 95f
-                )
                 UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
-                    actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics, subNavController)
+                    actualExerciseTime = 30, userHealthMetricsNewest = sampleUserHealthMetrics, subNavController)
             }
             composable("HealthMetricsSettingsScreen") {
-                val sampleUserHealthMetrics = UserHealthMetrics(
-                    userId = 1,
-                    entryDate = Date(),
-                    weight = 60F,
-                    height = 170F,
-                    bmi = 20F,
-                    waist = 100F,
-                    exerciseType = "running",
-                    exerciseFreq = 3,
-                    exerciseTime = 30,
-                    exerciseNote = "",
-                    systolicBP = 120F,
-                    diastolicBP = 80F
-                )
                 HealthMetricsSettingsScreen(
+                    userHealthMetrics = sampleUserHealthMetrics,
+                    onSaveMetrics = {},
+                    subNavController
+                )
+            }
+            composable("ExerciseGoalSettingsScreen") {
+                ExerciseGoalSettingsScreen(
+                    userHealthMetrics = sampleUserHealthMetrics,
+                    onSaveMetrics = {},
+                    subNavController
+                )
+            }
+            composable("StepsGoalSettingsScreen") {
+                StepsGoalSettingsScreen(
                     userHealthMetrics = sampleUserHealthMetrics,
                     onSaveMetrics = {},
                     subNavController
