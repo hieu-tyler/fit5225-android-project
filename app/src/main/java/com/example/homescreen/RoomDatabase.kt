@@ -17,7 +17,7 @@ import com.example.homescreen.profile.Converter
 import com.example.homescreen.profile.UserProfile
 import com.example.homescreen.profile.UserProfileDAO
 
-@Database(entities = [Food::class, Activity::class, UserProfile::class, UserHealthMetrics::class , PersonalNutrition::class], version = 2, exportSchema = false)
+@Database(entities = [Food::class, Activity::class, UserProfile::class, UserHealthMetrics::class , PersonalNutrition::class], version = 3, exportSchema = false)
 @TypeConverters(Converter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun foodDao(): FoodDAO
