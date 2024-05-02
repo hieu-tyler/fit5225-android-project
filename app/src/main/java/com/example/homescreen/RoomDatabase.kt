@@ -11,15 +11,19 @@ import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.health_metrics.UserHealthMetricsDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.PersonalNutrition
+import com.example.homescreen.nutrition.PersonalNutritionDAO
 import com.example.homescreen.profile.Converter
 import com.example.homescreen.profile.UserProfile
 import com.example.homescreen.profile.UserProfileDAO
 
-
-@Database(entities = [Food::class, Activity::class, UserProfile::class, UserHealthMetrics::class], version = 2, exportSchema = false)
+@Database(entities = [Food::class, Activity::class, UserProfile::class, UserHealthMetrics::class , PersonalNutrition::class], version = 3, exportSchema = false)
 @TypeConverters(Converter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun foodDao(): FoodDAO
+
+    abstract fun personalNutritionDao() : PersonalNutritionDAO
+
 
     abstract fun activityDao() : ActivityDAO
 

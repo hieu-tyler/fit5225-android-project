@@ -272,8 +272,7 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
 }
 
 @Composable
-fun FoodList(foodEntities: List<Food>, onFoodClick: (Food) -> Unit) {
-    val quantityMap = remember { mutableStateMapOf<Food, Int>() }
+fun FoodList(foodEntities: List<Food>, quantityMap: MutableMap<Food, Int>, onFoodClick: (Food) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
