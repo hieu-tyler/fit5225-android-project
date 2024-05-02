@@ -99,7 +99,7 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
         fat = totalFats.roundToInt()
         totalCalories = breakfastCalories + lunchCalories + dinnerCalories
         Log.d(ContentValues.TAG, "carbs: $carbs, protein $protein, fat $fat, totalCalories $totalCalories")
-        dataReady = totalCalories > 0
+        dataReady = true
     }
 
     Scaffold(
