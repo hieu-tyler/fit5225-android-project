@@ -5,6 +5,8 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
+import com.example.homescreen.health_metrics.UserHealthMetrics
+import com.example.homescreen.health_metrics.UserHealthMetricsDAO
 import kotlinx.coroutines.flow.Flow
 
 class Repository(application: Application) {
@@ -13,6 +15,8 @@ class Repository(application: Application) {
         AppDatabase.getDatabase(application).foodDao()
     private var activityDAO : ActivityDAO =
         AppDatabase.getDatabase(application).activityDao()
+    private var userHealthMetricsDAO: UserHealthMetricsDAO =
+        AppDatabase.getDatabase(application).healthMetricsDao()
     val allActivities : Flow<List<Activity>> = activityDAO.getAllActivities()
     val allNames: Flow<List<String>> = activityDAO.getAllNames()
 
@@ -43,5 +47,16 @@ class Repository(application: Application) {
     }
     suspend fun updateActivity(activity: Activity) {
         activityDAO.updateActivity(activity)
+    }
+    suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics) {
+        userHealthMetricsDAO.insertUserHealthMetrics(metrics)
+    }
+
+    suspend fun updateUserHealthMetrics(metrics: UserHealthMetrics) {
+        userHealthMetricsDAO.updateUserHealthMetrics(metrics)
+    }
+
+    suspend fun deleteUserHealthMetrics(metrics: UserHealthMetrics) {
+        userHealthMetricsDAO.deleteUserHealthMetrics(metrics)
     }
 }
