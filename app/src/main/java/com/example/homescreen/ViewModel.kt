@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.homescreen.exercise_report.Activity
+import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,5 +54,16 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun deleteActivity(activity: Activity) = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteActivity(activity)
+    }
+    fun insertUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
+        repository.insertUserHealthMetrics(metrics)
+    }
+
+    fun updateUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
+        repository.updateUserHealthMetrics(metrics)
+    }
+
+    fun deleteUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
+        repository.deleteUserHealthMetrics(metrics)
     }
 }
