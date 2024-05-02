@@ -9,10 +9,11 @@ data class UserHealthMetrics(
     val height: Float,
     val bmi: Float,
     val waist: Float,
+    val systolicBP: Float,
+    val diastolicBP: Float,
     val exerciseType: String,
     val exerciseFreq: Int,
     val exerciseTime: Int,
     val exerciseNote: String,
-    val systolicBP: Float,
-    val diastolicBP: Float
+    val stepsGoal: Int
 )
