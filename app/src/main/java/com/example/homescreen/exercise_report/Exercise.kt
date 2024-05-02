@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.homescreen.Routes
 import com.example.homescreen.ViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +37,7 @@ fun Exercise(navController: NavHostController, viewModel: ViewModel) {
     var isExpanded by remember { mutableStateOf(false) }
     var isStarted by remember { mutableStateOf(false) }
     var selectedExercise by remember { mutableStateOf("exercise") }
+    val subNavController = rememberNavController()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -81,7 +84,7 @@ fun Exercise(navController: NavHostController, viewModel: ViewModel) {
                     .fillMaxWidth()
                     .padding(16.dp)
                 ,
-                onClick = { updateActivityData(viewModel) }
+                onClick = { navController.navigate(Routes.Map.value) }
             ) {
                 if (!isStarted) {
                     Text(text = "Start Exercise")
@@ -100,8 +103,8 @@ fun Exercise(navController: NavHostController, viewModel: ViewModel) {
 
 
 fun updateActivityData(viewModel: ViewModel) {
-    var activities = viewModel.allActivities.value?.get(2)
-    activities = activities!!.copy(distance = 25, duration = 154, elevation = 2)
+    var activities = viewModel.allActivities.value?.get(1)
+    activities = activities!!.copy(distance = activities.distance + 20, duration = activities.duration + 1, elevation = 2)
     println(activities)
     viewModel.updateActivity(activities)
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FitLab</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoiZGF2YWFiYWEiLCJhIjoiY2x2b3dxeTkyMDdvcjJrcHI0Z29jNHExbyJ9.hTMyB0ckrQ5yg3p6khEjKw</string>
 </resources>

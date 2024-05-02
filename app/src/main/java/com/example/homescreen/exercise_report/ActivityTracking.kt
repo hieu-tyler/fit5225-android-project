@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.homescreen.R
 import com.example.homescreen.ViewModel
@@ -55,7 +56,7 @@ import com.github.mikephil.charting.utils.ColorTemplate
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerScreen(viewModel: ViewModel) {
+fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewModel) {
 
     val activities by viewModel.allActivities.observeAsState(emptyList())
 
@@ -169,26 +170,6 @@ fun ActivityItems(index: Int, activity: Activity) {
         }
     }
 
-
-}
-
-@Composable
-fun MapScreen() {
-
-    Text(
-        text = "Map",
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.padding(16.dp)
-    )
-
-    Image(
-        painter = rememberImagePainter(R.drawable.walkingroute), // Placeholder image
-        contentDescription = "Map",
-        modifier = Modifier
-            .size(400.dp)
-            .padding(8.dp),
-        contentScale = ContentScale.Crop
-    )
 
 }
 

@@ -33,7 +33,7 @@ data class NavBarItem (
             NavBarItem(
                 label = "Start",
                 icon = Icons.Filled.Add,
-                route = Routes.Exercise.value
+                route = Routes.ExerciseNav.value
             ),
             NavBarItem(
                 label = "Nutrition",
