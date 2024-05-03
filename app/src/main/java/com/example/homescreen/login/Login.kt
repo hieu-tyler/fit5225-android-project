@@ -1,5 +1,6 @@
 package com.example.homescreen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,10 +34,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.homescreen.ui.theme.HomeScreenTheme
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
+fun LoginScreen(navController: NavController, loginWithEmailPassword: (String, String) -> Unit) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -78,7 +81,8 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onLoginClicked(email, password) },
+            onClick = { Log.d("LoginScreen", "Login button clicked")
+                loginWithEmailPassword(email, password, navController) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
@@ -90,7 +94,7 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
             Text("Forgot Password?")
         }
         Row {
-            TextButton(onClick = { /* Navigate to registration screen */ },
+            TextButton(onClick = { navController.navigate(Routes.Registration.value) },
             ) {
                 Text("Don't have an account? Sign Up!")
             }
@@ -115,10 +119,22 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Login() {
-    HomeScreenTheme {
-        LoginScreen({ _, _ -> })
+fun loginWithEmailPassword(email: String, password: String,
+                           navController: NavController) {
+    val auth = FirebaseAuth.getInstance()
+    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            Log.d("Login Success", "User email: $email")
+            Log.d("NavController", "Current back stack entry: ${navController.currentBackStackEntry}")
+            if (navController.currentBackStackEntry != null) {
+                navController.navigate(Routes.HealthMetrics.value) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
+        } else {
+            Log.e("Login Error", task.exception?.message ?: "Unknown Error")
+        }
     }
 }

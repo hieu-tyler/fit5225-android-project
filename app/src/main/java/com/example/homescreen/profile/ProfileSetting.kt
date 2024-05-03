@@ -43,7 +43,6 @@ fun ProfileSettingsScreen(
     navController: NavHostController,
     userProfile: UserProfile, // Assuming UserProfile is a data class containing user info
     onSaveProfile: (UserProfile) -> Unit, // Callback when Save button is clicked
-    onSignOut: () -> Unit // Callback when Sign Out button is clicked
 ) {
     // Local state for form fields, initialized with userProfile data
     var userId by rememberSaveable { mutableStateOf(userProfile.userId) }
@@ -254,13 +253,6 @@ fun ProfileSettingsScreen(
         ) {
             Text("Save Changes")
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedButton(
-            onClick = onSignOut,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Cancel")
-        }
     }
 }
 
@@ -281,5 +273,5 @@ fun PofileSetting() {
         allowActivityShare = true,
         allowHealthDataShare = false
     )
-    ProfileSettingsScreen(navController, sampleUserProfile, {}, {})
+    ProfileSettingsScreen(navController, sampleUserProfile, {})
 }

@@ -1,5 +1,6 @@
 package com.example.homescreen
 
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -49,9 +53,9 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
-    onRegisterClicked: (String, String, String, String, String, String, Date) -> Unit,
-    onNavigateToLogin: () -> Unit // Navigate back to login screen
-) {
+    createUserWithEmailPassword: (String, String, String, String, String, String, Date) -> Unit,
+    navController: NavController)
+{ // Navigate back to login screen
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -189,7 +193,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(22.dp))
         Button(
-            onClick = { onRegisterClicked(firstName, lastName, email, password, selectedGender, phone, Date(birthDate)) },
+            onClick = { createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate)) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
@@ -199,15 +203,40 @@ fun RegistrationScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Already have an account? ")
-            TextButton(onClick = onNavigateToLogin) { Text("Login here!") }
+            TextButton(onClick = { navController.navigate(Routes.Login.value) }) { Text("Login here!") }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Registration() {
-    HomeScreenTheme {
-        RegistrationScreen({ _, _, _, _, _, _, _ -> }, {})
+fun createUserWithEmailPassword(firstName: String, lastName: String, email: String, password: String,
+                                selectedGender: String, phone: String, birthDate: Date, navController: NavController) {
+    val auth = FirebaseAuth.getInstance()
+    auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+//            val user = auth.currentUser
+//            val userId = user?.uid // Get the user ID from the Firebase Auth User
+//            val userMap = hashMapOf(
+//                "firstName" to firstName,
+//                "lastName" to lastName,
+//                "gender" to selectedGender,
+//                "phone" to phone,
+//                "birthDate" to birthDate
+//            )
+//            // Store additional details in Firestore
+//            user?.let {
+//                FirebaseFirestore.getInstance().collection("users").document(userId!!)
+//                    .set(userMap)
+//                    .addOnSuccessListener {
+//                        Log.d("Register", "User profile created for $userId")
+//                        // Navigate to the next screen or home screen
+//                        navController.navigate(Routes.HealthMetrics.value)
+//                    }
+//                    .addOnFailureListener { e ->
+//                        Log.w("Register", "Error writing document", e)
+//                    }
+//            }
+        } else {
+//            Log.e("Register", "Failed to create user: ${task.exception?.message}")
+        }
     }
 }
