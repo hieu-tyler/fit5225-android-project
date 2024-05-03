@@ -3,7 +3,9 @@ package com.example.homescreen.nutrition
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.database.sqlite.SQLiteConstraintException
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,12 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -37,8 +42,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONArray
+import java.time.LocalDate
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -48,6 +55,10 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
     var showBackButton by remember { mutableStateOf(true) }
     var selectedFood by remember { mutableStateOf<Food?>(null) }
     val foods by viewModel.allFoods.observeAsState(emptyList())
+    val allPersonalNutrition by viewModel.allPersonalNutrition.observeAsState(emptyList())
+    val quantityMap = remember { mutableStateMapOf<Food, Int>() }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val category = navBackStackEntry?.arguments?.getString("category")
 
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
@@ -78,9 +89,9 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-//                        IconButton(onClick = { viewModel.deleteAll() }) {
-//                            Icon(Icons.Default.Delete, contentDescription = "Delete")
-//                        }
+                        IconButton(onClick = { saveNutrition(viewModel, quantityMap, category ?: "breakfast") }) {
+                            Text("Save")
+                        }
                     },
                     navigationIcon = {
                         if (showBackButton) {
@@ -93,7 +104,7 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
                     },
                 )
             }
-        }
+        },
     ) {
         Column (
             modifier = Modifier
@@ -112,13 +123,40 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
             }
 
             else if (!showForm && selectedFood == null){
-                FoodList(foodEntities = foods) { clickedFood ->
-                    selectedFood = clickedFood
-                    showForm = true
-                    navController.navigate("foodDetail/${clickedFood.name}")
+                FoodList(
+                    foodEntities = foods,
+                    quantityMap = quantityMap
+                        ) { clickedFood ->
+                        selectedFood = clickedFood
+                        showForm = true
+                        navController.navigate("foodDetail/${clickedFood.name}")
                 }
             }
         }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun saveNutrition(viewModel: ViewModel, quantityMap: SnapshotStateMap<Food, Int>, category: String) {
+    val currentDate = LocalDate.now().toString()
+    val personalNutritionList = mutableListOf<PersonalNutrition>()
+
+    quantityMap.forEach { (food, quantity) ->
+        val personalNutrition = PersonalNutrition(
+            userName = "user", // TODO: Replace with actual username
+            date = currentDate,
+            category = category,
+            foodName = food.name,
+            quantity = quantity,
+            calories = food.calories * quantity,
+            protein = food.protein * quantity,
+            carbs = food.carbs * quantity,
+            fats = food.fats * quantity
+        )
+        personalNutritionList.add(personalNutrition)
+    }
+    for (personalNutrition in personalNutritionList) {
+        viewModel.insertPersonalNutrition(personalNutrition)
     }
 }
 
@@ -168,7 +206,6 @@ suspend fun getFoodFactApi(foodName: String): Response {
         client.newCall(request).execute()
     }
 }
-
 
 fun prepareFoodList(): List<Food> {
     val foodName = getDefaultFoodName()
