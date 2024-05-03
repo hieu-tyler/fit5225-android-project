@@ -69,62 +69,42 @@ fun BottomNavigationBar(navController: NavController) {
 @Composable
 fun HomeScreen(viewModel: ViewModel) {
     val navController = rememberNavController()
+    val currentRoute = getCurrentRoute(navController)
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController)
+            if (currentRoute != Routes.Login.value && currentRoute != Routes.Registration.value) {
+                BottomNavigationBar(navController = navController)
+            }
         }
     ) { paddingValues ->
         NavHost(
             navController,
 //            startDestination = Routes.Home.value,
-            startDestination = Routes.HealthMetrics.value,
+//            startDestination = Routes.HealthMetrics.value,
+            startDestination = Routes.Login.value,
             Modifier.padding(paddingValues)
         ) {
 //            composable(Routes.Home.value) {
-//                HomeScreen()
+//                HomeScreen(viewModel)
 //            }
+            composable(Routes.Login.value) {
+                LoginScreen(
+                    loginWithEmailPassword = { email, password ->
+                        loginWithEmailPassword(email, password, navController) },
+                    navController = navController
+                )
+            }
+
+            composable(Routes.Registration.value) {
+                RegistrationScreen(
+                    { firstName, lastName, email, password, gender, phone, birthDate -> },
+                    navController
+                )
+            }
+
             composable(Routes.HealthMetrics.value) {
                 HealthScreen()
             }
-//            composable(Routes.HealthMetrics.value) {
-//                val sampleMetrics = UserHealthMetrics(
-//                    userId = 1,
-//                    entryDate = Date(),
-//                    weight = 70f,
-//                    height = 175f,
-//                    bmi = 22.9f,
-//                    waist = 87f,
-//                    exerciseType = "running",
-//                    exerciseFreq = 3,
-//                    exerciseTime = 30,
-//                    exerciseNote = "",
-//                    systolicBP = 160f,
-//                    diastolicBP = 95f
-//                )
-//                UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
-//                    actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics, navController)
-//            }
-//            composable("HealthMetricsSettingsScreen") {
-//                val sampleUserHealthMetrics = UserHealthMetrics(
-//                    userId = 1,
-//                    entryDate = Date(),
-//                    weight = 60F,
-//                    height = 170F,
-//                    bmi = 20F,
-//                    waist = 100F,
-//                    exerciseType = "running",
-//                    exerciseFreq = 3,
-//                    exerciseTime = 30,
-//                    exerciseNote = "",
-//                    systolicBP = 120F,
-//                    diastolicBP = 80F
-//                )
-//                HealthMetricsSettingsScreen(
-//                    userHealthMetrics = sampleUserHealthMetrics,
-//                    onSaveMetrics = {},
-//                    navController
-//                )
-//            }
 
             /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
@@ -163,10 +143,14 @@ fun HomeScreen(viewModel: ViewModel) {
                     allowActivityShare = true,
                     allowHealthDataShare = false
                 )
-                ProfileSettingsScreen(navController, sampleUserProfile, {}, {})
+                ProfileSettingsScreen(navController, sampleUserProfile, {})
             }
         }
-
     }
+}
 
+@Composable
+fun getCurrentRoute(navController: NavController): String? {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return navBackStackEntry?.destination?.route
 }
