@@ -17,9 +17,9 @@ data class PersonalNutrition(
     val category: String,
     val foodName: String,
     var quantity: Int,
-    val calories: Int,
-    val protein: Float,
-    val carbs: Float,
-    val fats: Float
+    var calories: Int,
+    var protein: Float,
+    var carbs: Float,
+    var fats: Float
 )
 

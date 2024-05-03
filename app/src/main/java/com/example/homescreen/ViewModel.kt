@@ -50,14 +50,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun insertPersonalNutrition(personalNutrition: PersonalNutrition) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertPersonalNutrition(personalNutrition)
     }
-    fun insertPersonalNutritions(personalNutritionList: List<PersonalNutrition>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            for (personalNutrition in personalNutritionList) {
-                repository.insertPersonalNutrition(personalNutrition)
-                Log.d(ContentValues.TAG, "Inserted personalNutrition food: ${personalNutrition.foodName}")
-            }
-        }
-    }
+
     fun updatePersonalNutrition(personalNutrition: PersonalNutrition) = viewModelScope.launch(Dispatchers.IO) {
         repository.updatePersonalNutrition(personalNutrition)
     }
@@ -66,29 +59,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun deleteAllPersonalNutrition() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAllPersonalNutrition()
-    }
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun savePersonalNutrition(personalNutritionList: List<PersonalNutrition>) = viewModelScope.launch(Dispatchers.IO) {
-        val currentDate = LocalDate.now().toString()
-        val todayNutritionRecords = allPersonalNutrition.value?.filter { it.date == currentDate }
-        for (personalNutrition in personalNutritionList) {
-            var existingRecord = todayNutritionRecords?.firstOrNull {
-                it.userName == personalNutrition.userName &&
-                        it.date == personalNutrition.date &&
-                        it.category == personalNutrition.category &&
-                        it.foodName == personalNutrition.foodName
-            }
-
-            if (existingRecord != null) {
-                // If a record exists, update its quantity
-                existingRecord.quantity += personalNutrition.quantity
-                // Update the record in the database
-                updatePersonalNutrition(existingRecord)
-            } else {
-                // If no record exists, insert a new record
-                insertPersonalNutrition(personalNutrition)
-            }
-        }
     }
 
     // Activity

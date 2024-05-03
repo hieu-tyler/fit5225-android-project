@@ -73,26 +73,14 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
         var totalFats = 0.0f
         for (nutrition in allPersonalNutrition) {
             when (nutrition.category) {
-                "breakfast" -> breakfastCalories += calculateCalories(
-                    nutrition.protein,
-                    nutrition.fats,
-                    nutrition.carbs)
-
-                "lunch" -> lunchCalories += calculateCalories(
-                    nutrition.protein,
-                    nutrition.fats,
-                    nutrition.carbs
-                )
-
-                "dinner" -> dinnerCalories += calculateCalories(
-                    nutrition.protein,
-                    nutrition.fats,
-                    nutrition.carbs
-                )
+                "breakfast" -> breakfastCalories += nutrition.calories
+                "lunch" -> lunchCalories += nutrition.calories
+                "dinner" -> dinnerCalories += nutrition.calories
             }
             totalCarbs += nutrition.carbs
             totalProtein += nutrition.protein
             totalFats += nutrition.fats
+
         }
         carbs = totalCarbs.roundToInt()
         protein = totalProtein.roundToInt()
@@ -121,24 +109,25 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
                     fat.toFloat(), fatLimit,
                     protein.toFloat(), proteinLimit,
                     totalCalories)
-                Spacer(modifier = Modifier.height(12.dp))
-
-                BreakfastCard(navController, breakfastCalories)
-                Spacer(modifier = Modifier.height(8.dp))
-                LunchCard(navController, lunchCalories)
-                Spacer(modifier = Modifier.height(8.dp))
-                DinnerCard(navController, dinnerCalories)
-                Spacer(modifier = Modifier.height(8.dp))
             } else {
                 // Show loading indicator or placeholder
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .wrapContentSize(Alignment.Center)
+                Column(modifier = Modifier
+                    .height(200.dp)
+                    .padding(4.dp)
+                    .fillMaxWidth()
                 ) {
                     CircularProgressIndicator()
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BreakfastCard(navController, breakfastCalories)
+            Spacer(modifier = Modifier.height(8.dp))
+            LunchCard(navController, lunchCalories)
+            Spacer(modifier = Modifier.height(8.dp))
+            DinnerCard(navController, dinnerCalories)
+            Spacer(modifier = Modifier.height(8.dp))
 
         }
     }
@@ -333,20 +322,20 @@ fun PieChartCalories(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, pro
     val carbPercentage = (carbs / maxLimit) / totalPercentage
     val fatPercentage = (fat / maxLimit) / totalPercentage
     val proteinPercentage = (protein / maxLimit) / totalPercentage
-    val remainPercentage = 1f - (carbPercentage + fatPercentage + proteinPercentage)
+//    val remainPercentage = 1f - (carbPercentage + fatPercentage + proteinPercentage)
 
     val pieEntries = listOf(
         PieEntry(carbPercentage * 100, "Carbs"),
         PieEntry(fatPercentage * 100, "Fat"),
         PieEntry(proteinPercentage * 100, "Protein"),
-        PieEntry(remainPercentage * 100, "")
+//        PieEntry(remainPercentage * 100, "")
     )
     val pieDataSet = PieDataSet(pieEntries, "")
     val colors = mutableListOf<Int>()
-    colors.add(Color.Red.toArgb())
+    colors.add(Color.LightGray.toArgb())
     colors.add(Color.Green.toArgb())
     colors.add(Color.Blue.toArgb())
-    colors.add(Color.White.toArgb())
+//    colors.add(Color.White.toArgb())
     pieDataSet.colors = colors
     val pieData = PieData(pieDataSet)
     pieDataSet.xValuePosition =
@@ -380,12 +369,3 @@ class PercentValueFormatter : ValueFormatter() {
         return "${value.toInt()}%"
     }
 }
-
-fun calculateCalories(proteinGrams: Float, fatGrams: Float, carbGrams: Float): Int {
-    val proteinCalories = proteinGrams * 4
-    val fatCalories = fatGrams * 9
-    val carbCalories = carbGrams * 4
-    val totalCalories = proteinCalories + fatCalories + carbCalories
-    return totalCalories.roundToInt()
-}
-

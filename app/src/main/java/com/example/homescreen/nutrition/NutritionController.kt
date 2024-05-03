@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,7 +48,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
+fun NutritionListView(navController: NavController, viewModel: ViewModel, category: String) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
     var showBackButton by remember { mutableStateOf(true) }
@@ -57,11 +56,10 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
     val foods by viewModel.allFoods.observeAsState(emptyList())
     val allPersonalNutrition by viewModel.allPersonalNutrition.observeAsState(emptyList())
     val quantityMap = remember { mutableStateMapOf<Food, Int>() }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val category = navBackStackEntry?.arguments?.getString("category")
 
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
+        // Handle Food
         if (viewModel.allFoods.value?.isEmpty() == true) {
             if (foods.isEmpty()) {
                 try {
@@ -70,6 +68,20 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
                 } catch (e: SQLiteConstraintException) {
                     Log.d(ContentValues.TAG, "Error SQL Unique Constraints")
                 }
+            }
+        }
+        if (quantityMap.isEmpty()) {
+            quantityMap.apply {
+                foods.forEach { food -> put(food, 0) }
+            }
+        }
+    }
+    LaunchedEffect(allPersonalNutrition) {
+        for (nutrition in allPersonalNutrition) {
+            val currentFood = foods.find {it.name == nutrition.foodName}
+            if (currentFood != null && category == nutrition.category) {
+                quantityMap[currentFood] = quantityMap[currentFood]!! + 1
+                Log.d(ContentValues.TAG, "Quantity map updated - ${quantityMap[currentFood]}")
             }
         }
     }
@@ -89,7 +101,10 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-                        IconButton(onClick = { saveNutrition(viewModel, quantityMap, category ?: "breakfast") }) {
+                        IconButton(onClick = {
+                            saveNutrition(viewModel, quantityMap, category ?: "breakfast")
+                            navController.popBackStack()
+                        }) {
                             Text("Save")
                         }
                     },
@@ -125,7 +140,7 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
             else if (!showForm && selectedFood == null){
                 FoodList(
                     foodEntities = foods,
-                    quantityMap = quantityMap
+                    quantityMap = quantityMap,
                         ) { clickedFood ->
                         selectedFood = clickedFood
                         showForm = true
@@ -142,18 +157,38 @@ fun saveNutrition(viewModel: ViewModel, quantityMap: SnapshotStateMap<Food, Int>
     val personalNutritionList = mutableListOf<PersonalNutrition>()
 
     quantityMap.forEach { (food, quantity) ->
-        val personalNutrition = PersonalNutrition(
-            userName = "user", // TODO: Replace with actual username
-            date = currentDate,
-            category = category,
-            foodName = food.name,
-            quantity = quantity,
-            calories = food.calories * quantity,
-            protein = food.protein * quantity,
-            carbs = food.carbs * quantity,
-            fats = food.fats * quantity
-        )
-        personalNutritionList.add(personalNutrition)
+        var existingPersonalNutrition: PersonalNutrition? = viewModel.allPersonalNutrition.value?.find {
+            it.foodName == food.name && it.category == category
+        }
+
+        // If quantity is 0 and there is existing personal nutrition, delete it
+        if (quantity == 0 && existingPersonalNutrition != null) {
+            viewModel.deletePersonalNutrition(existingPersonalNutrition)
+        }
+        // If quantity is not 0 and there is existing personal nutrition, update it
+        else if (quantity != 0 && existingPersonalNutrition != null) {
+            existingPersonalNutrition.quantity = quantity
+            existingPersonalNutrition.calories = food.calories * quantity
+            existingPersonalNutrition.protein = food.protein * quantity
+            existingPersonalNutrition.carbs = food.carbs * quantity
+            existingPersonalNutrition.fats = food.fats * quantity
+            viewModel.updatePersonalNutrition(existingPersonalNutrition)
+        }
+        // If quantity is not 0 and there is no existing personal nutrition, insert new
+        else if (quantity != 0 && existingPersonalNutrition == null) {
+            val personalNutrition = PersonalNutrition(
+                userName = "user", // TODO: Replace with actual username
+                date = currentDate,
+                category = category,
+                foodName = food.name,
+                quantity = quantity,
+                calories = food.calories * quantity,
+                protein = food.protein * quantity,
+                carbs = food.carbs * quantity,
+                fats = food.fats * quantity
+            )
+            personalNutritionList.add(personalNutrition)
+        }
     }
     for (personalNutrition in personalNutritionList) {
         viewModel.insertPersonalNutrition(personalNutrition)
