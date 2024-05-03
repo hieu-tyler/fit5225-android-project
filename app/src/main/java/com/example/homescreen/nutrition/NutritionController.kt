@@ -32,7 +32,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -102,7 +101,7 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
                             }
                         }
                         IconButton(onClick = {
-                            saveNutrition(viewModel, quantityMap, category ?: "breakfast")
+                            saveNutrition(viewModel, quantityMap, category)
                             navController.popBackStack()
                         }) {
                             Text("Save")
@@ -156,42 +155,44 @@ fun saveNutrition(viewModel: ViewModel, quantityMap: SnapshotStateMap<Food, Int>
     val currentDate = LocalDate.now().toString()
     val personalNutritionList = mutableListOf<PersonalNutrition>()
 
-    quantityMap.forEach { (food, quantity) ->
-        var existingPersonalNutrition: PersonalNutrition? = viewModel.allPersonalNutrition.value?.find {
+    for ((food, quantity) in quantityMap) {
+        val existingPersonalNutrition = viewModel.allPersonalNutrition.value?.find {
             it.foodName == food.name && it.category == category
-        }
+        } // TODO: Add condition for more user and date
 
-        // If quantity is 0 and there is existing personal nutrition, delete it
-        if (quantity == 0 && existingPersonalNutrition != null) {
-            viewModel.deletePersonalNutrition(existingPersonalNutrition)
-        }
-        // If quantity is not 0 and there is existing personal nutrition, update it
-        else if (quantity != 0 && existingPersonalNutrition != null) {
-            existingPersonalNutrition.quantity = quantity
-            existingPersonalNutrition.calories = food.calories * quantity
-            existingPersonalNutrition.protein = food.protein * quantity
-            existingPersonalNutrition.carbs = food.carbs * quantity
-            existingPersonalNutrition.fats = food.fats * quantity
-            viewModel.updatePersonalNutrition(existingPersonalNutrition)
-        }
-        // If quantity is not 0 and there is no existing personal nutrition, insert new
-        else if (quantity != 0 && existingPersonalNutrition == null) {
-            val personalNutrition = PersonalNutrition(
-                userName = "user", // TODO: Replace with actual username
-                date = currentDate,
-                category = category,
-                foodName = food.name,
-                quantity = quantity,
-                calories = food.calories * quantity,
-                protein = food.protein * quantity,
-                carbs = food.carbs * quantity,
-                fats = food.fats * quantity
-            )
-            personalNutritionList.add(personalNutrition)
+        when {
+            quantity == 0 && existingPersonalNutrition != null -> {
+                viewModel.deletePersonalNutrition(existingPersonalNutrition)
+            }
+            quantity != 0 && existingPersonalNutrition != null -> {
+                existingPersonalNutrition.apply {
+                    this.quantity = quantity
+                    this.calories = food.calories * quantity
+                    this.protein = food.protein * quantity
+                    this.carbs = food.carbs * quantity
+                    this.fats = food.fats * quantity
+                }
+                viewModel.updatePersonalNutrition(existingPersonalNutrition)
+            }
+            quantity != 0 && existingPersonalNutrition == null -> {
+                val personalNutrition = PersonalNutrition(
+                    userName = "user", // TODO: Replace with actual username
+                    date = currentDate,
+                    category = category,
+                    foodName = food.name,
+                    quantity = quantity,
+                    calories = food.calories * quantity,
+                    protein = food.protein * quantity,
+                    carbs = food.carbs * quantity,
+                    fats = food.fats * quantity
+                )
+                personalNutritionList.add(personalNutrition)
+            }
         }
     }
-    for (personalNutrition in personalNutritionList) {
-        viewModel.insertPersonalNutrition(personalNutrition)
+
+    personalNutritionList.forEach {
+        viewModel.insertPersonalNutrition(it)
     }
 }
 
