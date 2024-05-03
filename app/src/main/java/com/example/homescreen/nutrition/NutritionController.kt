@@ -141,10 +141,10 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
                 FoodList(
                     foodEntities = foods,
                     quantityMap = quantityMap,
-                        ) { clickedFood ->
-                        selectedFood = clickedFood
-                        showForm = true
-                        navController.navigate("foodDetail/${clickedFood.name}")
+                ) { clickedFood ->
+                    selectedFood = clickedFood
+                    showForm = true
+                    navController.navigate("foodDetail/${clickedFood.name}")
                 }
             }
         }
@@ -267,9 +267,9 @@ fun prepareFoodList(): List<Food> {
                 protein = protein,
                 carbs = carbs,
                 fats = fats
-                )
+            )
             foodEntities.add(food)
-            }
+        }
     } catch (e: Exception) {
         // Handle JSON parsing exception
         e.printStackTrace()
