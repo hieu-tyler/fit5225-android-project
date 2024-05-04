@@ -7,12 +7,14 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.PersonalNutrition
+import com.example.homescreen.profile.UserProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -25,6 +27,11 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
     val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
     val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
+
+    // LiveData to observe a specific user profile
+    private val _userProfile = MutableLiveData<UserProfile>()
+    val userProfile: MutableLiveData<UserProfile> = _userProfile
+    val allUsers: LiveData<List<UserProfile>> = repository.allUsers.asLiveData()
 
     fun insertFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertFood(food)
@@ -113,5 +120,22 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteUserHealthMetrics(metrics)
+    }
+
+    // User Profile
+    fun loadUserProfile(userId: String) {
+        viewModelScope.launch {
+            val profile = repository.getUserProfile(userId)
+            _userProfile.value = profile!!
+        }
+    }
+    fun insertUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
+        repository.insertUser(userProfile)
+    }
+    fun updateUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
+        repository.updateUser(userProfile)
+    }
+    fun deleteUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
+        repository.deleteUser(userProfile)
     }
 }

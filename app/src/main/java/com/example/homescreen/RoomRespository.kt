@@ -9,7 +9,11 @@ import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.nutrition.PersonalNutritionDAO
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.health_metrics.UserHealthMetricsDAO
+import com.example.homescreen.profile.UserProfile
+import com.example.homescreen.profile.UserProfileDAO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class Repository(application: Application) {
 
@@ -19,14 +23,17 @@ class Repository(application: Application) {
         AppDatabase.getDatabase(application).activityDao()
     private var personalNutritionDao : PersonalNutritionDAO =
         AppDatabase.getDatabase(application).personalNutritionDao()
-
     private var userHealthMetricsDAO: UserHealthMetricsDAO =
         AppDatabase.getDatabase(application).healthMetricsDao()
+    private var userProfileDAO : UserProfileDAO =
+        AppDatabase.getDatabase(application).userProfileDao()
+
     val allActivities : Flow<List<Activity>> = activityDAO.getAllActivities()
     val allNames: Flow<List<String>> = activityDAO.getAllNames()
 
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
     val allPersonalNutrition: Flow<List<PersonalNutrition>> = personalNutritionDao.getAllPersonalNutrition()
+    val allUsers: Flow<List<UserProfile>> = userProfileDAO.getAllUsers()
 
     // Food
     suspend fun insertFood(food: Food) {
@@ -72,6 +79,8 @@ class Repository(application: Application) {
     suspend fun updateActivity(activity: Activity) {
         activityDAO.updateActivity(activity)
     }
+
+    // Health Metrics
     suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics) {
         userHealthMetricsDAO.insertUserHealthMetrics(metrics)
     }
@@ -82,5 +91,21 @@ class Repository(application: Application) {
 
     suspend fun deleteUserHealthMetrics(metrics: UserHealthMetrics) {
         userHealthMetricsDAO.deleteUserHealthMetrics(metrics)
+    }
+
+    // User profile
+    suspend fun getUserProfile(userId: String): UserProfile? {
+        return withContext(Dispatchers.IO) {
+            userProfileDAO.getUserById(userId)
+        }
+    }
+    suspend fun insertUser(userProfile: UserProfile) {
+        userProfileDAO.insertUser(userProfile)
+    }
+    suspend fun deleteUser(userProfile: UserProfile) {
+        userProfileDAO.deleteUser(userProfile)
+    }
+    suspend fun updateUser(userProfile: UserProfile) {
+        userProfileDAO.updateUser(userProfile)
     }
 }
