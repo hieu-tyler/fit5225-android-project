@@ -21,7 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
-import com.example.homescreen.exercise_report.Exercise
+import com.example.homescreen.exercise_report.ExerciseNavigation
 import com.example.homescreen.health_metrics.HealthScreen
 import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
@@ -120,10 +120,10 @@ fun HomeScreen(viewModel: ViewModel) {
                 }
             }
             composable(Routes.ExerciseReport.value) {
-                ActivityTrackerScreen(viewModel = viewModel)
+                ActivityTrackerScreen(navController, viewModel)
             }
-            composable(Routes.Exercise.value) {
-                Exercise(navController, viewModel)
+            composable(Routes.ExerciseNav.value) {
+                ExerciseNavigation(navController, viewModel)
             }
             composable(Routes.Profile.value) {
                 val userId = getCurrentUserId()

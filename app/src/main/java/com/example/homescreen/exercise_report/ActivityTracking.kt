@@ -1,47 +1,43 @@
 package com.example.homescreen.exercise_report
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.compose.rememberImagePainter
-import com.example.homescreen.R
+import androidx.navigation.NavHostController
 import com.example.homescreen.ViewModel
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
@@ -55,9 +51,9 @@ import com.github.mikephil.charting.utils.ColorTemplate
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerScreen(viewModel: ViewModel) {
+fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewModel) {
 
-    val activities by viewModel.allActivities.observeAsState(emptyList())
+    val activities by viewModel.allUserActivities.observeAsState(emptyList())
 
     Scaffold(
         topBar = {
@@ -90,6 +86,7 @@ fun ActivityTrackerScreen(viewModel: ViewModel) {
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
+
             BarChartScreen()
         }
     }
@@ -98,20 +95,20 @@ fun ActivityTrackerScreen(viewModel: ViewModel) {
 
 @OptIn(ExperimentalComposeUiApi :: class)
 @Composable
-fun ActivityItemsList(activities: List<Activity>) {
+fun ActivityItemsList(activities: List<UserActivity>) {
     
     LazyRow {
         itemsIndexed(activities) {index, activity ->
             ActivityItems(index, activity = activity)
 
-            Divider(color = Color.Blue, thickness = 5.dp)
+            HorizontalDivider(thickness = 5.dp, color = Color.Blue)
         }
     }
 }
 
 
 @Composable
-fun ActivityItems(index: Int, activity: Activity) {
+fun ActivityItems(index: Int, activity: UserActivity) {
 
     var lastItemPadding = 8.dp
 
@@ -128,8 +125,8 @@ fun ActivityItems(index: Int, activity: Activity) {
             modifier = Modifier
                 .clip(RoundedCornerShape(25.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .width(200.dp)
-                .height(150.dp)
+                .width(180.dp)
+                .height(200.dp)
                 .clickable { }
                 .padding(vertical = 12.dp, horizontal = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -138,7 +135,7 @@ fun ActivityItems(index: Int, activity: Activity) {
             Row {
 
                 Text(
-                    text = activity.name,
+                    text = activity.startTime.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp, end = 24.dp)
                 )
@@ -157,7 +154,7 @@ fun ActivityItems(index: Int, activity: Activity) {
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = " Average Pace: ${activity.avg_pace}",
+                        text = " Average Pace: ${activity.avgPace}",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
@@ -169,26 +166,6 @@ fun ActivityItems(index: Int, activity: Activity) {
         }
     }
 
-
-}
-
-@Composable
-fun MapScreen() {
-
-    Text(
-        text = "Map",
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.padding(16.dp)
-    )
-
-    Image(
-        painter = rememberImagePainter(R.drawable.walkingroute), // Placeholder image
-        contentDescription = "Map",
-        modifier = Modifier
-            .size(400.dp)
-            .padding(8.dp),
-        contentScale = ContentScale.Crop
-    )
 
 }
 

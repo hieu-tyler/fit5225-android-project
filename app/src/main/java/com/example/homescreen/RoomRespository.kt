@@ -1,8 +1,13 @@
 package com.example.homescreen
 
 import android.app.Application
+import androidx.room.Delete
+import androidx.room.Query
+import androidx.room.Update
 import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
+import com.example.homescreen.exercise_report.UserActivity
+import com.example.homescreen.exercise_report.UserActivityDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.PersonalNutrition
@@ -21,6 +26,8 @@ class Repository(application: Application) {
         AppDatabase.getDatabase(application).foodDao()
     private var activityDAO : ActivityDAO =
         AppDatabase.getDatabase(application).activityDao()
+    private var userActivityDao : UserActivityDAO =
+        AppDatabase.getDatabase(application).userActivityDao()
     private var personalNutritionDao : PersonalNutritionDAO =
         AppDatabase.getDatabase(application).personalNutritionDao()
     private var userHealthMetricsDAO: UserHealthMetricsDAO =
@@ -30,6 +37,10 @@ class Repository(application: Application) {
 
     val allActivities : Flow<List<Activity>> = activityDAO.getAllActivities()
     val allNames: Flow<List<String>> = activityDAO.getAllNames()
+
+    val allUserActivities : Flow<List<UserActivity>> = userActivityDao.getAllUserActivities()
+    val allDistances: Flow<List<Float>> = userActivityDao.getAllDistance()
+
 
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
     val allPersonalNutrition: Flow<List<PersonalNutrition>> = personalNutritionDao.getAllPersonalNutrition()
@@ -70,6 +81,9 @@ class Repository(application: Application) {
     }
 
     // Activity
+    suspend fun getActivityId(activityName : String) : Int {
+        return activityDAO.getActivityId(activityName)
+    }
     suspend fun insertActivity(activity: Activity) {
         activityDAO.insertActivity(activity)
     }
@@ -80,7 +94,33 @@ class Repository(application: Application) {
         activityDAO.updateActivity(activity)
     }
 
-    // Health Metrics
+    suspend fun deleteAllActivity() {
+        activityDAO.deleteAllActivity()
+    }
+
+    //UserActivity
+
+    suspend fun getUserActivities(userId : Int): Flow<List<UserActivity>> {
+        return userActivityDao.getUserActivities(userId = userId)
+    }
+    suspend fun insertUserActivity(userActivity: UserActivity) {
+        userActivityDao.insertUserActivity(userActivity)
+    }
+
+
+    suspend fun updateUserActivity(userActivity: UserActivity) {
+        userActivityDao.updateUserActivity(userActivity)
+    }
+
+    suspend fun deleteUserActivity(userActivity: UserActivity) {
+        userActivityDao.deleteUserActivity(userActivity)
+    }
+
+
+    suspend fun deleteAllUserActivity() {
+        userActivityDao.deleteAllUserActivity()
+    }
+
     suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics) {
         userHealthMetricsDAO.insertUserHealthMetrics(metrics)
     }
