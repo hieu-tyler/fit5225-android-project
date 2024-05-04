@@ -15,10 +15,16 @@ interface ActivityDAO {
     @Query("SELECT name FROM ACTIVITY")
     fun getAllNames(): Flow<List<String>>
 
+    @Query("SELECT id FROM ACTIVITY WHERE name = :activityName")
+    fun getActivityId(activityName : String) : Int
+
     @Insert
     suspend fun insertActivity(activity: Activity)
     @Update
     suspend fun updateActivity(activity: Activity)
     @Delete
     suspend fun deleteActivity(activity: Activity)
+
+    @Query("DELETE FROM ACTIVITY")
+    fun deleteAllActivity()
 }

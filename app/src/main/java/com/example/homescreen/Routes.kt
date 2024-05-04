@@ -5,11 +5,11 @@ enum class Routes (val value: String) {
     Login("LoginScreen"),
     Registration("RegistrationScreen"),
     HealthMetrics("HealthMetrics"),
-    Exercise("Exercise"),
+    ExerciseScreen("ExerciseScreen"),
     ExerciseNav("ExerciseNavigation"),
     Profile("Profile"),
     ExerciseReport("ActivityTracking"),
     Nutrition("Nutrition"),
-    Map("MapScreen")
+    MapScreen("MapScreen")
 
 }

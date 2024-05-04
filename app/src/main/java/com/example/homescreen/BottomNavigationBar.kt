@@ -21,12 +21,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
-import com.example.homescreen.exercise_report.Exercise
 import com.example.homescreen.exercise_report.ExerciseNavigation
-import com.example.homescreen.health_metrics.HealthMetricsSettingsScreen
 import com.example.homescreen.health_metrics.HealthScreen
-import com.example.homescreen.health_metrics.UserHealthDashboard
-import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
 import com.example.homescreen.nutrition.PersonalNutritionView
@@ -82,7 +78,8 @@ fun HomeScreen(viewModel: ViewModel) {
             navController,
 //            startDestination = Routes.Home.value,
 //            startDestination = Routes.HealthMetrics.value,
-            startDestination = Routes.Login.value,
+//            startDestination = Routes.Login.value,
+            startDestination = Routes.ExerciseNav.value,
             Modifier.padding(paddingValues)
         ) {
 //            composable(Routes.Home.value) {
