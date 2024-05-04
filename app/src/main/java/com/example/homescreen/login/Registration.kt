@@ -37,12 +37,10 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.example.homescreen.profile.UserProfile
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -54,8 +52,7 @@ import java.util.Locale
 @Composable
 fun RegistrationScreen(
     createUserWithEmailPassword: (String, String, String, String, String, String, Date) -> Unit,
-    navController: NavController)
-{ // Navigate back to login screen
+    navController: NavController, viewModel: ViewModel) {
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -71,6 +68,7 @@ fun RegistrationScreen(
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var birthDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -193,7 +191,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(22.dp))
         Button(
-            onClick = { createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate)) },
+            onClick = { createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate), navController, viewModel) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
@@ -209,10 +207,43 @@ fun RegistrationScreen(
 }
 
 fun createUserWithEmailPassword(firstName: String, lastName: String, email: String, password: String,
-                                selectedGender: String, phone: String, birthDate: Date, navController: NavController) {
+                                selectedGender: String, phone: String, birthDate: Date, navController: NavController,
+                                viewModel: ViewModel) {
     val auth = FirebaseAuth.getInstance()
     auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
         if (task.isSuccessful) {
+            Log.d("Register Success", "User email: $email")
+            val userId = auth.currentUser?.uid ?: ""  // Retrieve the unique user ID from Firebase
+            if (userId.isNotEmpty()) {
+                val userProfile = UserProfile(
+                    userId = userId,
+                    firstName = firstName,
+                    lastName = lastName,
+                    email = email,
+                    password = password,
+                    selectedGender = selectedGender,
+                    phone = phone,
+                    birthDate = birthDate,
+                    allowLocation = false,
+                    allowActivityShare = false,
+                    allowHealthDataShare = false
+                )
+                viewModel.insertUser(userProfile)
+                navController.navigate(Routes.Login.value)  // Navigate to login screen after successful registration
+            } else {
+                Log.e("Registration", "Failed to retrieve Firebase user ID.")
+            }
+        } else {
+            Log.e("Registration", "Registration failed: ${task.exception?.message}")
+        }
+    }
+}
+
+//fun createUserWithEmailPassword(firstName: String, lastName: String, email: String, password: String,
+//                                selectedGender: String, phone: String, birthDate: Date, navController: NavController) {
+//    val auth = FirebaseAuth.getInstance()
+//    auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+//        if (task.isSuccessful) {
 //            val user = auth.currentUser
 //            val userId = user?.uid // Get the user ID from the Firebase Auth User
 //            val userMap = hashMapOf(
@@ -235,8 +266,8 @@ fun createUserWithEmailPassword(firstName: String, lastName: String, email: Stri
 //                        Log.w("Register", "Error writing document", e)
 //                    }
 //            }
-        } else {
+//        } else {
 //            Log.e("Register", "Failed to create user: ${task.exception?.message}")
-        }
-    }
-}
+//        }
+//    }
+//}

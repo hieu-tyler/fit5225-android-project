@@ -81,8 +81,7 @@ fun LoginScreen(navController: NavController, loginWithEmailPassword: (String, S
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { Log.d("LoginScreen", "Login button clicked")
-                loginWithEmailPassword(email, password, navController) },
+            onClick = { loginWithEmailPassword(email, password, navController) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
@@ -96,7 +95,7 @@ fun LoginScreen(navController: NavController, loginWithEmailPassword: (String, S
         Row {
             TextButton(onClick = { navController.navigate(Routes.Registration.value) },
             ) {
-                Text("Don't have an account? Sign Up!")
+                Text("Don't have an account? Register here!")
             }
         }
         // Google Sign-In Button

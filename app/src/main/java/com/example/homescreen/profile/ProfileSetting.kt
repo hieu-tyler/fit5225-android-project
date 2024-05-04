@@ -1,5 +1,6 @@
 package com.example.homescreen.profile
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,42 +24,52 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
+import com.example.homescreen.Routes
+import com.example.homescreen.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @Composable
 fun ProfileSettingsScreen(
-    navController: NavHostController,
-    userProfile: UserProfile, // Assuming UserProfile is a data class containing user info
-    onSaveProfile: (UserProfile) -> Unit, // Callback when Save button is clicked
+    navController: NavController,
+    viewModel: ViewModel,
+    userId: String
 ) {
-    // Local state for form fields, initialized with userProfile data
-    var userId by rememberSaveable { mutableStateOf(userProfile.userId) }
-    var firstName by rememberSaveable { mutableStateOf(userProfile.firstName) }
+    // Load the user profile when the composable enters the composition
+    LaunchedEffect(userId) {
+        viewModel.loadUserProfile(userId)
+    }
+
+    // Observe UserProfile LiveData with a default empty UserProfile if null
+    val userProfile by viewModel.userProfile.observeAsState(UserProfile.empty())
+    if (userProfile.userId == "") {
+        return
+    }
+
+    var firstName by remember { mutableStateOf(userProfile.firstName) }
     var editingFirstName by remember { mutableStateOf(false) }
-    var lastName by rememberSaveable { mutableStateOf(userProfile.lastName) }
+    var lastName by remember { mutableStateOf(userProfile.lastName) }
     var editingLastName by remember { mutableStateOf(false) }
-    var email by rememberSaveable { mutableStateOf(userProfile.email) }
-    var password by rememberSaveable { mutableStateOf(userProfile.password) }
-    var selectedGender by rememberSaveable { mutableStateOf(userProfile.selectedGender) }
-    var phone by rememberSaveable { mutableStateOf(userProfile.phone) }
+    var selectedGender by remember { mutableStateOf(userProfile.selectedGender) }
+    var phone by remember { mutableStateOf(userProfile.phone) }
     var editingPhone by remember { mutableStateOf(false) }
-    var birthDate by rememberSaveable { mutableStateOf(userProfile.birthDate) }
-    var allowLocation by rememberSaveable { mutableStateOf(userProfile.allowLocation) }
-    var allowActivityShare by rememberSaveable { mutableStateOf(userProfile.allowActivityShare) }
-    var allowHealthDataShare by rememberSaveable { mutableStateOf(userProfile.allowHealthDataShare) }
+    var birthDate by remember { mutableStateOf(userProfile.birthDate) }
+    var allowLocation by remember { mutableStateOf(userProfile.allowLocation) }
+    var allowActivityShare by remember { mutableStateOf(userProfile.allowActivityShare) }
+    var allowHealthDataShare by remember { mutableStateOf(userProfile.allowHealthDataShare) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -248,30 +259,37 @@ fun ProfileSettingsScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { onSaveProfile(UserProfile(userId, firstName, lastName, email, password, selectedGender, phone, birthDate, allowLocation, allowActivityShare, allowHealthDataShare)) },
+            onClick = { val updatedProfile = userProfile.copy(
+                firstName = firstName,
+                lastName = lastName,
+                phone = phone,
+                allowLocation = allowLocation,
+                allowActivityShare = allowActivityShare,
+                allowHealthDataShare = allowHealthDataShare
+            )
+                Log.d("updatedProfile", "phone = $phone")
+                viewModel.updateUser(updatedProfile) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Save Changes")
         }
+        Spacer(modifier = Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = { signOut(navController) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Log Out")
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PofileSetting() {
-    val navController = rememberNavController()
-    val sampleUserProfile = UserProfile(
-        userId = 1,
-        firstName = "John",
-        lastName = "Doe",
-        email = "johndoe@example.com",
-        password = "password123",
-        selectedGender = "Male",
-        phone = "0412345678",
-        birthDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/01/1990") ?: Date(),
-        allowLocation = true,
-        allowActivityShare = true,
-        allowHealthDataShare = false
-    )
-    ProfileSettingsScreen(navController, sampleUserProfile, {})
+fun signOut(navController: NavController) {
+    val auth = FirebaseAuth.getInstance()
+    auth.signOut()
+    // Navigate to login screen
+    navController.navigate(Routes.Login.value) {
+        popUpTo(navController.graph.startDestinationId) {
+            inclusive = true
+        }
+    }
 }

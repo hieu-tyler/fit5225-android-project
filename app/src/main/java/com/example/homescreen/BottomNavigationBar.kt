@@ -27,10 +27,7 @@ import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionTracker
 import com.example.homescreen.nutrition.PersonalNutritionView
 import com.example.homescreen.profile.ProfileSettingsScreen
-import com.example.homescreen.profile.UserProfile
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
@@ -94,8 +91,9 @@ fun HomeScreen(viewModel: ViewModel) {
 
             composable(Routes.Registration.value) {
                 RegistrationScreen(
-                    { firstName, lastName, email, password, gender, phone, birthDate -> },
-                    navController
+                    createUserWithEmailPassword = { firstName, lastName, email, password, gender, phone, birthDate -> },
+                    navController = navController,
+                    viewModel = viewModel
                 )
             }
 
@@ -128,20 +126,10 @@ fun HomeScreen(viewModel: ViewModel) {
                 ExerciseNavigation(navController, viewModel)
             }
             composable(Routes.Profile.value) {
-                val sampleUserProfile = UserProfile(
-                    userId = 1,
-                    firstName = "John",
-                    lastName = "Doe",
-                    email = "johndoe@example.com",
-                    password = "password123",
-                    selectedGender = "Male",
-                    phone = "0412345678",
-                    birthDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/01/1990") ?: Date(),
-                    allowLocation = true,
-                    allowActivityShare = true,
-                    allowHealthDataShare = false
-                )
-                ProfileSettingsScreen(navController, sampleUserProfile, {})
+                val userId = getCurrentUserId()
+                if (userId != null) {
+                    ProfileSettingsScreen(navController, viewModel, userId)
+                }
             }
         }
     }
@@ -151,4 +139,9 @@ fun HomeScreen(viewModel: ViewModel) {
 fun getCurrentRoute(navController: NavController): String? {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     return navBackStackEntry?.destination?.route
+}
+
+fun getCurrentUserId(): String? {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    return currentUser?.uid  // return the user's ID or null if no user is logged in
 }
