@@ -33,10 +33,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.homescreen.ui.theme.HomeScreenTheme
 
 @Composable
-fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
+fun LoginScreen(navController: NavController, onLoginClicked: (String, String) -> Unit) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -90,7 +91,7 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
             Text("Forgot Password?")
         }
         Row {
-            TextButton(onClick = { /* Navigate to registration screen */ },
+            TextButton(onClick = { navController.navigate("register")},
             ) {
                 Text("Don't have an account? Sign Up!")
             }
@@ -115,10 +116,10 @@ fun LoginScreen(onLoginClicked: (String, String) -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Login() {
-    HomeScreenTheme {
-        LoginScreen({ _, _ -> })
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun Login() {
+//    HomeScreenTheme {
+//        LoginScreen({ _, _ -> })
+//    }
+//}

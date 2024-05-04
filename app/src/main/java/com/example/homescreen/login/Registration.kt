@@ -1,5 +1,5 @@
 package com.example.homescreen
-
+import com.google.firebase.auth.FirebaseAuth
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,7 +38,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.homescreen.login.UserProfile
 import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -49,7 +52,8 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationScreen(
-    onRegisterClicked: (String, String, String, String, String, String, Date) -> Unit,
+    navController: NavController,
+    // onRegisterClicked: (String, String, String, String, String, String, Date) -> Unit,
     onNavigateToLogin: () -> Unit // Navigate back to login screen
 ) {
     var firstName by rememberSaveable { mutableStateOf("") }
@@ -189,7 +193,7 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(22.dp))
         Button(
-            onClick = { onRegisterClicked(firstName, lastName, email, password, selectedGender, phone, Date(birthDate)) },
+            onClick = { register(firstName, lastName, email, password, selectedGender, phone, Date(birthDate) , {}, {}) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
@@ -204,10 +208,59 @@ fun RegistrationScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun Registration() {
-    HomeScreenTheme {
-        RegistrationScreen({ _, _, _, _, _, _, _ -> }, {})
-    }
+
+fun register(
+    firstName: String,
+    lastName: String,
+    email: String,
+    password: String,
+    selectedGender: String,
+    phone: String,
+    birthDate: Date,
+    onSuccess: () -> Unit,
+    onError: (String) -> Unit
+) {
+    // Initialize Firebase Auth and create a new user
+    val auth = FirebaseAuth.getInstance()
+    auth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val firebaseUser = task.result?.user
+                firebaseUser?.let { user ->
+                    // Prepare user profile data without the password
+                    val userProfile = UserProfile(
+                        userId = user.uid,
+                        firstName = firstName,
+                        lastName = lastName,
+                        email = email,
+                        selectedGender = selectedGender,
+                        phone = phone,
+                        birthDate = birthDate
+                    )
+                    // Save the user profile data to Firestore
+                    saveUserProfile(user.uid, userProfile, onSuccess, onError)
+                } ?: onError("Failed to retrieve registered user.")
+            } else {
+                onError(task.exception?.message ?: "Registration failed")
+            }
+        }
 }
+
+fun saveUserProfile(userId: String, userProfile: UserProfile, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("users").document(userId)
+        .set(userProfile)
+        .addOnSuccessListener {
+            onSuccess()
+        }
+        .addOnFailureListener { e ->
+            onError(e.message ?: "Failed to save user profile")
+        }
+}
+//@Preview(showBackground = true)
+//@Composable
+//fun Registration() {
+//    HomeScreenTheme {
+//        RegistrationScreen({})
+//    }
+//}

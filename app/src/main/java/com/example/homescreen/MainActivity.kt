@@ -4,25 +4,73 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.homescreen.ViewModel
 import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel : ViewModel by viewModels()
+    private val viewModel: ViewModel by viewModels()
+    @RequiresApi(64)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             HomeScreenTheme {
+//
+//                HomeScreen(viewModel)
+                val navController = rememberNavController()
 
-                HomeScreen(viewModel)
-
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        // Check if the user is already logged in
+                        if (FirebaseAuth.getInstance().currentUser == null) {
+                            LoginScreen(navController, onLoginClicked = { email, password ->
+                                performLogin(email, password, navController)
+                            })
+                        } else {
+                            navigateToHome(navController)
+                        }
+                    }
+                    composable("register") {
+                        RegistrationScreen(navController,
+                            onNavigateToLogin = { navController.navigate("login") {
+                                popUpTo("login") { inclusive = true }
+                            } }
+                        )
+                    }
+                    composable("home") {
+                        HomeScreen(viewModel)
+                    }
+                }
             }
         }
     }
+
+    private fun performLogin(email: String, password: String, navController: NavController) {
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    navigateToHome(navController)
+                } else {
+                    // Handle login failure (show error message)
+                }
+            }
+    }
+
+    private fun navigateToHome(navController: NavController) {
+        navController.navigate("home") {
+            popUpTo("login") { inclusive = true }  // Clear the back stack
+        }
+    }
 }
+
 
 // TODO: Clean up this HomeScreen function
 //@SuppressLint("UnrememberedMutableState")
