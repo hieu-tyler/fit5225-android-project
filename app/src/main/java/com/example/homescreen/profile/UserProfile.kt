@@ -4,10 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "userProfile")
+@Entity(tableName = "user_profile")
 data class UserProfile(
-    @PrimaryKey(autoGenerate = true)
-    val userId: Int,
+    @PrimaryKey
+    val userId: String,
     val firstName: String,
     val lastName: String,
     val email: String,
@@ -18,4 +18,21 @@ data class UserProfile(
     val allowLocation: Boolean,
     val allowActivityShare: Boolean,
     val allowHealthDataShare: Boolean
-)
+){
+    companion object {
+        // Provides a default, empty instance of UserProfile
+        fun empty(): UserProfile = UserProfile(
+            userId = "",
+            firstName = "",
+            lastName = "",
+            email = "",
+            password = "",
+            selectedGender = "",
+            phone = "",
+            birthDate = Date(),
+            allowLocation = false,
+            allowActivityShare = false,
+            allowHealthDataShare = false
+        )
+    }
+}

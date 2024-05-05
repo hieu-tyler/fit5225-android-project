@@ -23,10 +23,11 @@ fun ActivityItem(activity: Activity, onEdit: () -> Unit, onDelete: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = activity.name, modifier = Modifier.weight(1f))
-        Text(text = activity.distance.toString(), modifier = Modifier.weight(1f))
-        Text(text = activity.duration.toString(), modifier = Modifier.weight(1f))
-        Text(text = activity.avg_pace.toString(), modifier = Modifier.weight(1f))
-        Text(text = activity.elevation.toString(), modifier = Modifier.weight(1f))
-
+        IconButton(onClick = onEdit) {
+            Icon(Icons.Default.Edit, contentDescription = "Edit")
+        }
+        IconButton(onClick = onDelete) {
+            Icon(Icons.Default.Delete, contentDescription = "Delete")
+        }
     }
 }

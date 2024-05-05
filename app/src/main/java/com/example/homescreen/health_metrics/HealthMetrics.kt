@@ -1,5 +1,6 @@
 package com.example.homescreen.health_metrics
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,59 +16,75 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
+import com.example.homescreen.ViewModel
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.pow
 
 @Composable
-fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
-    actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics,
-    navController: NavController
+fun UserHealthDashboard(
+    userId: String, stepsTaken: Int, actualExerciseFreq: Int,
+    actualExerciseTime: Int, userHealthMetrics: List<UserHealthMetrics>?,
+    navController: NavController, viewModel: ViewModel
 ) {
-    // Create a temporary list of data for "userHealthMetricsLast"
-    var userIdLast = 1
-    var entryDateLast = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/02/2024") ?: Date()
-    var weightLast = 68F
-    var heightLast = 171F
-    val bmiLast = 23.3F
-    var waistLast = 87F
-    var systolicBPLast = 140F
-    var diastolicBPLast = 85F
-    var exerciseTypeLast = "running"
-    var exerciseFreqLast = 3
-    var exerciseTimeLast = 30
-    var exerciseNoteLast = ""
-    var stepsGoalLast = 10000
+    // Default values for initialization
+    val defaultMetrics = UserHealthMetrics(0L, "", Date(), 0f, 0f, 0f, 0f, 0f, 0f, "running", 0, 0, "", 5000)
 
-    // Local state for form fields
-    var userId by rememberSaveable { mutableStateOf(userHealthMetricsNewest.userId) }
-    var entryDate by rememberSaveable { mutableStateOf(userHealthMetricsNewest.entryDate) }
-    var weight by rememberSaveable { mutableStateOf(userHealthMetricsNewest.weight) }
-    var height by rememberSaveable { mutableStateOf(userHealthMetricsNewest.height) }
-    val bmi by rememberSaveable { mutableStateOf(userHealthMetricsNewest.bmi) }
-    var waist by rememberSaveable { mutableStateOf(userHealthMetricsNewest.waist) }
-    var systolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.systolicBP) }
-    var diastolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.diastolicBP) }
-    var exerciseType by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseType) }
-    var exerciseFreq by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseFreq) }
-    var exerciseTime by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseTime) }
-    var exerciseNote by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseNote) }
-    var stepsGoal by rememberSaveable { mutableStateOf(userHealthMetricsNewest.stepsGoal) }
+    // Using the first item from the list if available, otherwise default
+    val metrics = userHealthMetrics?.firstOrNull() ?: defaultMetrics
+
+    var userId by rememberSaveable { mutableStateOf(metrics.userId) }
+    var entryDate by rememberSaveable { mutableStateOf(metrics.entryDate) }
+    var weight by remember { mutableStateOf(metrics.weight) }
+    var height by remember { mutableStateOf(metrics.height) }
+    val bmi = weight / (height / 100).pow(2) // BMI calculation
+    var waist by remember { mutableStateOf(metrics.waist) }
+    var systolicBP by remember { mutableStateOf(metrics.systolicBP) }
+    var diastolicBP by remember { mutableStateOf(metrics.diastolicBP) }
+    val exerciseTypeList = listOf("running", "walking", "cycling")
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    var exerciseType by remember { mutableStateOf(metrics.exerciseType) }
+    var exerciseFreq by remember { mutableStateOf(metrics.exerciseFreq) }
+    var exerciseTime by remember { mutableStateOf(metrics.exerciseTime) }
+    var exerciseNote by remember { mutableStateOf(metrics.exerciseNote) }
+    var stepsGoal by remember { mutableStateOf(metrics.stepsGoal) }
+
+    // Use the second item from the list if available, otherwise default
+    val lastMetrics = userHealthMetrics?.getOrNull(1) ?: defaultMetrics
+
+    var lastEntryDate by rememberSaveable { mutableStateOf(lastMetrics.entryDate) }
+    var lastWeight by remember { mutableStateOf(lastMetrics.weight) }
+    var lastHeight by remember { mutableStateOf(lastMetrics.height) }
+    val lastBmi = lastWeight / (lastHeight / 100).pow(2) // BMI calculation
+    var lastWaist by remember { mutableStateOf(lastMetrics.waist) }
+    var lastSystolicBP by remember { mutableStateOf(lastMetrics.systolicBP) }
+    var lastDiastolicBP by remember { mutableStateOf(lastMetrics.diastolicBP) }
+    var lastExerciseType by remember { mutableStateOf(lastMetrics.exerciseType) }
+    var lastExerciseFreq by remember { mutableStateOf(lastMetrics.exerciseFreq) }
+    var lastExerciseTime by remember { mutableStateOf(lastMetrics.exerciseTime) }
+    var lastExerciseNote by remember { mutableStateOf(lastMetrics.exerciseNote) }
+    var lastStepsGoal by remember { mutableStateOf(lastMetrics.stepsGoal) }
 
     Column(modifier = Modifier
         .padding(16.dp)
@@ -157,18 +174,18 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                 verticalAlignment = Alignment.Top) {
                 Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                     // Display comparison for Weight
-                    MetricComparison("Weight", weightLast, userHealthMetricsNewest.weight, "kg")
+                    MetricComparison("Weight", lastWeight, weight, "kg")
                     // Display comparison for BMI
-                    MetricComparison("BMI", bmiLast, userHealthMetricsNewest.bmi, "kg/m2")
+                    MetricComparison("BMI", lastBmi, bmi, "kg/m2")
                     // Display comparison for Waist
-                    MetricComparison("Waist", waistLast, userHealthMetricsNewest.waist, "cm")
+                    MetricComparison("Waist", lastWaist, waist, "cm")
                 }
             // Right Card - Blood Pressure
                 Column(modifier = Modifier.weight(1f)) {
                     // Display comparison for Blood Pressure (Systolic)
-                    MetricComparison("Systolic BP", systolicBPLast, userHealthMetricsNewest.systolicBP, "mmHg")
+                    MetricComparison("Systolic BP", lastSystolicBP, systolicBP, "mmHg")
                     // Display comparison for Blood Pressure (Diastolic)
-                    MetricComparison("Diastolic BP", diastolicBPLast, userHealthMetricsNewest.diastolicBP, "mmHg")
+                    MetricComparison("Diastolic BP", lastDiastolicBP, diastolicBP, "mmHg")
                 }
             }
         }

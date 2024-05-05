@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.homescreen.ViewModel
 import com.example.homescreen.ui.theme.HomeScreenTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,9 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             HomeScreenTheme {
-
                 HomeScreen(viewModel)
-
             }
         }
     }

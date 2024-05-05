@@ -21,16 +21,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.homescreen.exercise_report.ActivityTrackerScreen
-import com.example.homescreen.exercise_report.Exercise
+import com.example.homescreen.exercise_report.ExerciseNavigation
 import com.example.homescreen.health_metrics.HealthScreen
 import com.example.homescreen.nutrition.NutritionFormView
 import com.example.homescreen.nutrition.NutritionListView
 import com.example.homescreen.nutrition.PersonalNutritionView
 import com.example.homescreen.profile.ProfileSettingsScreen
-import com.example.homescreen.profile.UserProfile
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
@@ -66,62 +63,48 @@ fun BottomNavigationBar(navController: NavController) {
 @Composable
 fun HomeScreen(viewModel: ViewModel) {
     val navController = rememberNavController()
+    val currentRoute = getCurrentRoute(navController)
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController)
+            if (currentRoute != Routes.Login.value && currentRoute != Routes.Registration.value) {
+                BottomNavigationBar(navController = navController)
+            }
         }
     ) { paddingValues ->
         NavHost(
             navController,
 //            startDestination = Routes.Home.value,
-            startDestination = Routes.HealthMetrics.value,
+//            startDestination = Routes.HealthMetrics.value,
+            startDestination = Routes.Login.value,
             Modifier.padding(paddingValues)
         ) {
 //            composable(Routes.Home.value) {
-//                HomeScreen()
+//                HomeScreen(viewModel)
 //            }
-            composable(Routes.HealthMetrics.value) {
-                HealthScreen()
+            composable(Routes.Login.value) {
+                LoginScreen(
+                    loginWithEmailPassword = { email, password, onLoginError ->
+                        loginWithEmailPassword(email, password, navController, onLoginError)
+                    },
+                    navController = navController,
+                    viewModel = viewModel
+                )
             }
-//            composable(Routes.HealthMetrics.value) {
-//                val sampleMetrics = UserHealthMetrics(
-//                    userId = 1,
-//                    entryDate = Date(),
-//                    weight = 70f,
-//                    height = 175f,
-//                    bmi = 22.9f,
-//                    waist = 87f,
-//                    exerciseType = "running",
-//                    exerciseFreq = 3,
-//                    exerciseTime = 30,
-//                    exerciseNote = "",
-//                    systolicBP = 160f,
-//                    diastolicBP = 95f
-//                )
-//                UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
-//                    actualExerciseTime = 30, userHealthMetricsNewest = sampleMetrics, navController)
-//            }
-//            composable("HealthMetricsSettingsScreen") {
-//                val sampleUserHealthMetrics = UserHealthMetrics(
-//                    userId = 1,
-//                    entryDate = Date(),
-//                    weight = 60F,
-//                    height = 170F,
-//                    bmi = 20F,
-//                    waist = 100F,
-//                    exerciseType = "running",
-//                    exerciseFreq = 3,
-//                    exerciseTime = 30,
-//                    exerciseNote = "",
-//                    systolicBP = 120F,
-//                    diastolicBP = 80F
-//                )
-//                HealthMetricsSettingsScreen(
-//                    userHealthMetrics = sampleUserHealthMetrics,
-//                    onSaveMetrics = {},
-//                    navController
-//                )
-//            }
+
+            composable(Routes.Registration.value) {
+                RegistrationScreen(
+                    createUserWithEmailPassword = { firstName, lastName, email, password, gender, phone, birthDate -> },
+                    navController = navController,
+                    viewModel = viewModel
+                )
+            }
+
+            composable(Routes.HealthMetrics.value) {
+                val userId = getCurrentUserId()
+                if (userId != null) {
+                    HealthScreen(userId, viewModel)
+                }
+            }
 
             /* Nutrition navigation tab */
             composable(Routes.Nutrition.value) {
@@ -145,29 +128,28 @@ fun HomeScreen(viewModel: ViewModel) {
                 }
             }
             composable(Routes.ExerciseReport.value) {
-                ActivityTrackerScreen(viewModel = viewModel)
+                ActivityTrackerScreen(navController, viewModel)
             }
-            composable(Routes.Exercise.value) {
-                Exercise(navController, viewModel)
+            composable(Routes.ExerciseNav.value) {
+                ExerciseNavigation(navController, viewModel)
             }
             composable(Routes.Profile.value) {
-                val sampleUserProfile = UserProfile(
-                    userId = 1,
-                    firstName = "John",
-                    lastName = "Doe",
-                    email = "johndoe@example.com",
-                    password = "password123",
-                    selectedGender = "Male",
-                    phone = "0412345678",
-                    birthDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/01/1990") ?: Date(),
-                    allowLocation = true,
-                    allowActivityShare = true,
-                    allowHealthDataShare = false
-                )
-                ProfileSettingsScreen(navController, sampleUserProfile, {}, {})
+                val userId = getCurrentUserId()
+                if (userId != null) {
+                    ProfileSettingsScreen(navController, viewModel, userId)
+                }
             }
         }
-
     }
+}
 
+@Composable
+fun getCurrentRoute(navController: NavController): String? {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return navBackStackEntry?.destination?.route
+}
+
+fun getCurrentUserId(): String? {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    return currentUser?.uid  // return the user's ID or null if no user is logged in
 }
