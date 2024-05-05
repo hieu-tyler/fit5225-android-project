@@ -121,6 +121,11 @@ class Repository(application: Application) {
         userActivityDao.deleteAllUserActivity()
     }
 
+    // Health Metrics
+    fun getUserHealthMetrics(userId: String): Flow<List<UserHealthMetrics>> {
+        return userHealthMetricsDAO.getUserHealthMetrics(userId)
+    }
+
     suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics) {
         userHealthMetricsDAO.insertUserHealthMetrics(metrics)
     }

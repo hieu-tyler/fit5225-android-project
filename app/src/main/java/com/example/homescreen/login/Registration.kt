@@ -68,6 +68,7 @@ fun RegistrationScreen(
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var birthDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
+    val isFormValid = isFormValid(firstName, lastName, email, password, phone)
 
     Column(
         modifier = Modifier
@@ -191,19 +192,27 @@ fun RegistrationScreen(
         }
         Spacer(modifier = Modifier.height(22.dp))
         Button(
-            onClick = { createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate), navController, viewModel) },
-            modifier = Modifier
-                .height(46.dp)
-                .width(190.dp)
+            onClick = {
+                if (isFormValid) {
+                    createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate), navController, viewModel)
+                }
+            },
+            enabled = isFormValid,  // Button is disabled if form is not valid
+            modifier = Modifier.height(46.dp).width(190.dp)
         ) { Text("Register") }
         Row(
             modifier = Modifier.padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Already have an account? ")
-            TextButton(onClick = { navController.navigate(Routes.Login.value) }) { Text("Login here!") }
+            TextButton(onClick = { navController.navigate(Routes.Login.value) }
+            ) { Text("Login here!") }
         }
     }
+}
+
+fun isFormValid(firstName: String, lastName: String, email: String, password: String, phone: String): Boolean {
+    return firstName.isNotEmpty() && lastName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && phone.isNotEmpty()
 }
 
 fun createUserWithEmailPassword(firstName: String, lastName: String, email: String, password: String,

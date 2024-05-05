@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "userProfile")
+@Entity(tableName = "user_profile")
 data class UserProfile(
     @PrimaryKey
     val userId: String,

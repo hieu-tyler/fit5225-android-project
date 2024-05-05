@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 interface UserHealthMetricsDAO {
 
     @Query("SELECT * FROM user_health_metrics WHERE userId = :userId")
-    fun getUserHealthMetrics(userId: Int): Flow<List<UserHealthMetrics>>
+    fun getUserHealthMetrics(userId: String): Flow<List<UserHealthMetrics>>
 
     @Insert
-    suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics)
+    suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics): Long
 
     @Update
     suspend fun updateUserHealthMetrics(metrics: UserHealthMetrics)

@@ -83,9 +83,11 @@ fun HomeScreen(viewModel: ViewModel) {
 //            }
             composable(Routes.Login.value) {
                 LoginScreen(
-                    loginWithEmailPassword = { email, password ->
-                        loginWithEmailPassword(email, password, navController) },
-                    navController = navController
+                    loginWithEmailPassword = { email, password, onLoginError ->
+                        loginWithEmailPassword(email, password, navController, onLoginError)
+                    },
+                    navController = navController,
+                    viewModel = viewModel
                 )
             }
 
@@ -98,7 +100,10 @@ fun HomeScreen(viewModel: ViewModel) {
             }
 
             composable(Routes.HealthMetrics.value) {
-                HealthScreen()
+                val userId = getCurrentUserId()
+                if (userId != null) {
+                    HealthScreen(userId, viewModel)
+                }
             }
 
             /* Nutrition navigation tab */

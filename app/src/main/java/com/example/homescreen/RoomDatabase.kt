@@ -28,7 +28,7 @@ import com.example.homescreen.profile.UserProfileDAO
         PersonalNutrition::class,
         UserActivity::class
                ],
-    version = 5,
+    version = 8,
     exportSchema = false)
 @TypeConverters(Converter::class)
 abstract class AppDatabase : RoomDatabase() {
