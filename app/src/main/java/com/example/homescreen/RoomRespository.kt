@@ -47,7 +47,7 @@ class Repository(application: Application) {
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
     val allPersonalNutrition: Flow<List<PersonalNutrition>> = personalNutritionDao.getAllPersonalNutrition()
     private val searchService = FoodRetrofit.retrofitService
-    private val API_KEY = "Here enter your API key"
+    private val API_KEY = "PUBQhZ5p5CufNYJrC80wsw==NufwNlb4B2Gid3eO"
 
     suspend fun getResponse(keyword: String): FoodSearchResponse {
         return searchService.getFoodFact(

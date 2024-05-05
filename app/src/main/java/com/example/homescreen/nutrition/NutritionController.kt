@@ -31,18 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.json.JSONArray
 import java.time.LocalDate
-import java.util.Locale
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -61,6 +57,8 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
         // Handle Food
+        Log.d(ContentValues.TAG, "Food crawling")
+
         if (viewModel.allFoods.value?.isEmpty() == true) {
             if (foods.isEmpty()) {
                 try {
@@ -270,7 +268,6 @@ suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
             carbs = carbs,
             fats = fats
         )
-        Log.d(ContentValues.TAG, name)
         foodEntities.add(food)
     }
     return foodEntities
