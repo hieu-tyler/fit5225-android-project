@@ -103,15 +103,4 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteActivity(activity: Activity) = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteActivity(activity)
     }
-    fun insertUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insertUserHealthMetrics(metrics)
-    }
-
-    fun updateUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        repository.updateUserHealthMetrics(metrics)
-    }
-
-    fun deleteUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        repository.deleteUserHealthMetrics(metrics)
-    }
 }

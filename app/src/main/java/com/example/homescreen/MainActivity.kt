@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
 //
 //                HomeScreen(viewModel)
                 val navController = rememberNavController()
-
+                // for user to login when open the app
+                // FirebaseAuth.getInstance().signOut()
                 NavHost(navController = navController, startDestination = "login") {
                     composable("login") {
                         // Check if the user is already logged in

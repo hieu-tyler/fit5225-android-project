@@ -16,8 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,16 +32,61 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+
+
 
 @Composable
 fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
     actualExerciseTime: Int, userHealthMetricsNewest: UserHealthMetrics,
     navController: NavController
 ) {
+    val scope = rememberCoroutineScope()
+    var bmi by remember { mutableStateOf<String?>(null) }
+
+    // Helper function to calculate BMI
+    fun calculateBMI(weight: Double, height: Double): Double {
+        if (height == 0.0) return 0.0
+        val heightInMeters = height / 100  // Convert height from cm to meters
+        return weight / (heightInMeters * heightInMeters)
+    }
+
+    // Suspend function to fetch latest weight and height
+    suspend fun fetchLatestWeightAndHeight(): Pair<Double, Double>? {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return null
+
+        val weightSnapshot = db.collection("users").document(userId).collection("HealthRecords")
+            .whereEqualTo("recordType", "Weight")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .await()
+        val latestWeight = weightSnapshot.documents.firstOrNull()?.getDouble("value") ?: return null
+
+        val heightSnapshot = db.collection("users").document(userId).collection("HealthRecords")
+            .whereEqualTo("recordType", "Height")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(1)
+            .get()
+            .await()
+        val latestHeight = heightSnapshot.documents.firstOrNull()?.getDouble("value") ?: return null
+
+        return Pair(latestWeight, latestHeight)
+    }
+
+    // Fetch and calculate BMI when Composable enters the composition
+    LaunchedEffect(true) {
+        val (weight, height) = fetchLatestWeightAndHeight() ?: return@LaunchedEffect
+        bmi = calculateBMI(weight, height).toString()
+    }
     // Create a temporary list of data for "userHealthMetricsLast"
     var userIdLast = 1
     var entryDateLast = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse("01/02/2024") ?: Date()
@@ -55,20 +103,13 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
     var stepsGoalLast = 10000
 
     // Local state for form fields
-    var userId by rememberSaveable { mutableStateOf(userHealthMetricsNewest.userId) }
     var entryDate by rememberSaveable { mutableStateOf(userHealthMetricsNewest.entryDate) }
     var weight by rememberSaveable { mutableStateOf(userHealthMetricsNewest.weight) }
     var height by rememberSaveable { mutableStateOf(userHealthMetricsNewest.height) }
-    val bmi by rememberSaveable { mutableStateOf(userHealthMetricsNewest.bmi) }
+    // val bmi by rememberSaveable { mutableStateOf(userHealthMetricsNewest.bmi) }
     var waist by rememberSaveable { mutableStateOf(userHealthMetricsNewest.waist) }
     var systolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.systolicBP) }
     var diastolicBP by rememberSaveable { mutableStateOf(userHealthMetricsNewest.diastolicBP) }
-    var exerciseType by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseType) }
-    var exerciseFreq by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseFreq) }
-    var exerciseTime by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseTime) }
-    var exerciseNote by rememberSaveable { mutableStateOf(userHealthMetricsNewest.exerciseNote) }
-    var stepsGoal by rememberSaveable { mutableStateOf(userHealthMetricsNewest.stepsGoal) }
-
     Column(modifier = Modifier
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
@@ -80,69 +121,69 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        // Top Card 1 - Exercise goal
-        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
-            Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                val exerciseProgress = (actualExerciseFreq * actualExerciseTime).toFloat() / (exerciseFreq * exerciseTime)
-                val exerciseProgressPercent = String.format("%.1f", exerciseProgress * 100)
-                Text(text = "You've completed $exerciseProgressPercent% exercise!",
-                    style = MaterialTheme.typography.titleLarge)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    CircularProgressIndicator(
-                        progress = exerciseProgress,
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 8.dp,
-                        modifier = Modifier.padding(16.dp).size(80.dp)
-                    )
-                    Column(modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Goal: $exerciseType for $exerciseTime min, \n$exerciseFreq times/week")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = { navController.navigate("ExerciseGoalSettingsScreen") }) {
-                            Text(
-                                text = "Change your exercise goal",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        // Top Card 2 - Steps
-        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
-            Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                val stepProgress = stepsTaken.toFloat() / 10000
-                Text(text = "You've walked $stepsTaken steps today!",
-                    style = MaterialTheme.typography.titleLarge)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    CircularProgressIndicator(
-                        progress = stepProgress,
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 8.dp,
-                        modifier = Modifier.padding(16.dp).size(80.dp)
-                    )
-                    Column(modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Goal: $stepsGoal steps/day")
-                    Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(onClick = { navController.navigate("StepsGoalSettingsScreen") }) {
-                            Text(
-                                text = "Change your steps goal",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        // Top Card 1 - Exercise goal
+//        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+//            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+//            Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+//                val exerciseProgress = (actualExerciseFreq * actualExerciseTime).toFloat() / (exerciseFreq * exerciseTime)
+//                val exerciseProgressPercent = String.format("%.1f", exerciseProgress * 100)
+//                Text(text = "You've completed $exerciseProgressPercent% exercise!",
+//                    style = MaterialTheme.typography.titleLarge)
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.SpaceBetween) {
+//                    CircularProgressIndicator(
+//                        progress = exerciseProgress,
+//                        color = MaterialTheme.colorScheme.primary,
+//                        strokeWidth = 8.dp,
+//                        modifier = Modifier.padding(16.dp).size(80.dp)
+//                    )
+//                    Column(modifier = Modifier.fillMaxWidth(),
+//                        horizontalAlignment = Alignment.CenterHorizontally) {
+//                        Text(text = "Goal: $exerciseType for $exerciseTime min, \n$exerciseFreq times/week")
+//                        Spacer(modifier = Modifier.height(8.dp))
+//                        OutlinedButton(onClick = { navController.navigate("ExerciseGoalSettingsScreen") }) {
+//                            Text(
+//                                text = "Change your exercise goal",
+//                                style = MaterialTheme.typography.titleSmall
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        // Top Card 2 - Steps
+//        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+//            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+//            Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+//                val stepProgress = stepsTaken.toFloat() / 10000
+//                Text(text = "You've walked $stepsTaken steps today!",
+//                    style = MaterialTheme.typography.titleLarge)
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.SpaceBetween) {
+//                    CircularProgressIndicator(
+//                        progress = stepProgress,
+//                        color = MaterialTheme.colorScheme.primary,
+//                        strokeWidth = 8.dp,
+//                        modifier = Modifier.padding(16.dp).size(80.dp)
+//                    )
+//                    Column(modifier = Modifier.fillMaxWidth(),
+//                        horizontalAlignment = Alignment.CenterHorizontally) {
+//                    Text(text = "Goal: $stepsGoal steps/day")
+//                    Spacer(modifier = Modifier.height(8.dp))
+//                        OutlinedButton(onClick = { navController.navigate("StepsGoalSettingsScreen") }) {
+//                            Text(
+//                                text = "Change your steps goal",
+//                                style = MaterialTheme.typography.titleSmall
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
         Button(
             onClick = { navController.navigate("HealthMetricsSettingsScreen") },
             modifier = Modifier.fillMaxWidth()
@@ -159,7 +200,8 @@ fun UserHealthDashboard(stepsTaken: Int, actualExerciseFreq: Int,
                     // Display comparison for Weight
                     MetricComparison("Weight", weightLast, userHealthMetricsNewest.weight, "kg")
                     // Display comparison for BMI
-                    MetricComparison("BMI", bmiLast, userHealthMetricsNewest.bmi, "kg/m2")
+                    Text(text = bmi ?: "Calculating BMI...")
+//                    MetricComparison("BMI", bmiLast, userHealthMetricsNewest.bmi, "kg/m2")
                     // Display comparison for Waist
                     MetricComparison("Waist", waistLast, userHealthMetricsNewest.waist, "cm")
                 }
