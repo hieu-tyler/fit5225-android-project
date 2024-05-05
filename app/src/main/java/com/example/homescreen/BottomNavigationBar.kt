@@ -24,7 +24,7 @@ import com.example.homescreen.exercise_report.ActivityTrackerScreen
 import com.example.homescreen.exercise_report.ExerciseNavigation
 import com.example.homescreen.health_metrics.HealthScreen
 import com.example.homescreen.nutrition.NutritionFormView
-import com.example.homescreen.nutrition.NutritionTracker
+import com.example.homescreen.nutrition.NutritionListView
 import com.example.homescreen.nutrition.PersonalNutritionView
 import com.example.homescreen.profile.ProfileSettingsScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -111,8 +111,11 @@ fun HomeScreen(viewModel: ViewModel) {
                 PersonalNutritionView(navController, viewModel)
             }
             composable(
-                route = "foodList/{category}") {
-                NutritionTracker(navController, viewModel)
+                route = "foodList/{category}",
+                arguments = listOf(navArgument("category") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val category = backStackEntry.arguments?.getString("category")
+                NutritionListView(navController, viewModel, category ?: "breakfast")
             }
             composable(
                 route = "foodDetail/{foodName}",

@@ -5,6 +5,8 @@ import android.content.ContentValues
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,6 +16,7 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.UserActivity
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.FoodSearchResponse
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.UserProfile
 import com.google.firebase.auth.FirebaseAuth
@@ -34,6 +37,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
     val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
+    val retrofitResponse: MutableState<FoodSearchResponse> = mutableStateOf((FoodSearchResponse()))
 
     // Activity
     val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()
@@ -84,14 +88,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun insertPersonalNutrition(personalNutrition: PersonalNutrition) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertPersonalNutrition(personalNutrition)
     }
-    fun insertPersonalNutritions(personalNutritionList: List<PersonalNutrition>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            for (personalNutrition in personalNutritionList) {
-                repository.insertPersonalNutrition(personalNutrition)
-                Log.d(ContentValues.TAG, "Inserted personalNutrition food: ${personalNutrition.foodName}")
-            }
-        }
-    }
+
     fun updatePersonalNutrition(personalNutrition: PersonalNutrition) = viewModelScope.launch(Dispatchers.IO) {
         repository.updatePersonalNutrition(personalNutrition)
     }
@@ -101,26 +98,15 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteAllPersonalNutrition() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAllPersonalNutrition()
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun savePersonalNutrition(personalNutritionList: List<PersonalNutrition>) = viewModelScope.launch(Dispatchers.IO) {
-        val currentDate = LocalDate.now().toString()
-        val todayNutritionRecords = allPersonalNutrition.value?.filter { it.date == currentDate }
-        for (personalNutrition in personalNutritionList) {
-            var existingRecord = todayNutritionRecords?.firstOrNull {
-                it.userName == personalNutrition.userName &&
-                        it.date == personalNutrition.date &&
-                        it.category == personalNutrition.category &&
-                        it.foodName == personalNutrition.foodName
-            }
 
-            if (existingRecord != null) {
-                // If a record exists, update its quantity
-                existingRecord.quantity += personalNutrition.quantity
-                // Update the record in the database
-                updatePersonalNutrition(existingRecord)
-            } else {
-                // If no record exists, insert a new record
-                insertPersonalNutrition(personalNutrition)
+    fun getResponse(keyword:String) {
+        viewModelScope.launch  {
+            try {
+                val responseReturned = repository.getResponse(keyword)
+                retrofitResponse.value = responseReturned
+
+            } catch (e: Exception) {
+                Log.i("Error ", "Response failed")
             }
         }
     }

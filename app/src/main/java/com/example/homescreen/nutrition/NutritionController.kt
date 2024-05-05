@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,8 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -45,11 +44,12 @@ import org.json.JSONArray
 import java.time.LocalDate
 import java.util.Locale
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
+fun NutritionListView(navController: NavController, viewModel: ViewModel, category: String) {
     var showForm by remember { mutableStateOf(false) }
     var showCreate by remember { mutableStateOf(false) }
     var showBackButton by remember { mutableStateOf(true) }
@@ -57,19 +57,32 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
     val foods by viewModel.allFoods.observeAsState(emptyList())
     val allPersonalNutrition by viewModel.allPersonalNutrition.observeAsState(emptyList())
     val quantityMap = remember { mutableStateMapOf<Food, Int>() }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val category = navBackStackEntry?.arguments?.getString("category")
 
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
+        // Handle Food
         if (viewModel.allFoods.value?.isEmpty() == true) {
             if (foods.isEmpty()) {
                 try {
-                    val defaultFoods = prepareFoodList()
+                    val defaultFoods = prepareFoodList(viewModel)
                     viewModel.insertFoods(defaultFoods)
                 } catch (e: SQLiteConstraintException) {
                     Log.d(ContentValues.TAG, "Error SQL Unique Constraints")
                 }
+            }
+        }
+        if (quantityMap.isEmpty()) {
+            quantityMap.apply {
+                foods.forEach { food -> put(food, 0) }
+            }
+        }
+    }
+    LaunchedEffect(allPersonalNutrition) {
+        for (nutrition in allPersonalNutrition) {
+            val currentFood = foods.find {it.name == nutrition.foodName}
+            if (currentFood != null && category == nutrition.category) {
+                quantityMap[currentFood] = quantityMap[currentFood]!! + 1
+                Log.d(ContentValues.TAG, "Quantity $currentFood updated - ${quantityMap[currentFood]}")
             }
         }
     }
@@ -89,7 +102,10 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-                        IconButton(onClick = { saveNutrition(viewModel, quantityMap, category ?: "breakfast") }) {
+                        IconButton(onClick = {
+                            saveNutrition(viewModel, quantityMap, category)
+                            navController.popBackStack()
+                        }) {
                             Text("Save")
                         }
                     },
@@ -125,11 +141,11 @@ fun NutritionTracker(navController: NavController, viewModel: ViewModel) {
             else if (!showForm && selectedFood == null){
                 FoodList(
                     foodEntities = foods,
-                    quantityMap = quantityMap
-                        ) { clickedFood ->
-                        selectedFood = clickedFood
-                        showForm = true
-                        navController.navigate("foodDetail/${clickedFood.name}")
+                    quantityMap = quantityMap,
+                ) { clickedFood ->
+                    selectedFood = clickedFood
+                    showForm = true
+                    navController.navigate("foodDetail/${clickedFood.name}")
                 }
             }
         }
@@ -141,22 +157,44 @@ fun saveNutrition(viewModel: ViewModel, quantityMap: SnapshotStateMap<Food, Int>
     val currentDate = LocalDate.now().toString()
     val personalNutritionList = mutableListOf<PersonalNutrition>()
 
-    quantityMap.forEach { (food, quantity) ->
-        val personalNutrition = PersonalNutrition(
-            userName = "user", // TODO: Replace with actual username
-            date = currentDate,
-            category = category,
-            foodName = food.name,
-            quantity = quantity,
-            calories = food.calories * quantity,
-            protein = food.protein * quantity,
-            carbs = food.carbs * quantity,
-            fats = food.fats * quantity
-        )
-        personalNutritionList.add(personalNutrition)
+    for ((food, quantity) in quantityMap) {
+        val existingPersonalNutrition = viewModel.allPersonalNutrition.value?.find {
+            it.foodName == food.name && it.category == category
+        } // TODO: Add condition for more user and date
+
+        when {
+            quantity == 0 && existingPersonalNutrition != null -> {
+                viewModel.deletePersonalNutrition(existingPersonalNutrition)
+            }
+            quantity != 0 && existingPersonalNutrition != null -> {
+                existingPersonalNutrition.apply {
+                    this.quantity = quantity
+                    this.calories = food.calories * quantity
+                    this.protein = food.protein * quantity
+                    this.carbs = food.carbs * quantity
+                    this.fats = food.fats * quantity
+                }
+                viewModel.updatePersonalNutrition(existingPersonalNutrition)
+            }
+            quantity != 0 && existingPersonalNutrition == null -> {
+                val personalNutrition = PersonalNutrition(
+                    userName = "user", // TODO: Replace with actual username
+                    date = currentDate,
+                    category = category,
+                    foodName = food.name,
+                    quantity = quantity,
+                    calories = food.calories * quantity,
+                    protein = food.protein * quantity,
+                    carbs = food.carbs * quantity,
+                    fats = food.fats * quantity
+                )
+                personalNutritionList.add(personalNutrition)
+            }
+        }
     }
-    for (personalNutrition in personalNutritionList) {
-        viewModel.insertPersonalNutrition(personalNutrition)
+
+    personalNutritionList.forEach {
+        viewModel.insertPersonalNutrition(it)
     }
 }
 
@@ -193,6 +231,7 @@ fun getDefaultFoodName(): String {
     return listOf(fruitsString, proteinString, vegetableString).joinToString(separator = " ")
 }
 
+// TODO: Clean getFoodFactApi function
 suspend fun getFoodFactApi(foodName: String): Response {
     return withContext(Dispatchers.IO) {
         val client = OkHttpClient()
@@ -207,38 +246,36 @@ suspend fun getFoodFactApi(foodName: String): Response {
     }
 }
 
-fun prepareFoodList(): List<Food> {
+suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
     val foodName = getDefaultFoodName()
-    val response = runBlocking {
-        getFoodFactApi(foodName)
-    }
-    val foodEntities = mutableListOf<Food>()
-    val jsonArray = JSONArray(response.body?.string())
-    try {
-        for (i in 0 until jsonArray.length()) {
-            val jsonObject = jsonArray.getJSONObject(i)
-            val name = jsonObject.getString("name")
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            val imageUrl = jsonObject.getString("name").lowercase().replace(" ", "_")
-            val calories = jsonObject.getString("calories").toFloatOrNull()?.toInt() ?: 0
-            val protein = jsonObject.getString("protein_g").toFloatOrNull() ?: 0f
-            val carbs = jsonObject.getString("carbohydrates_total_g").toFloatOrNull() ?: 0f
-            val fats = jsonObject.getString("fat_total_g").toFloatOrNull() ?: 0f
+    viewModel.getResponse(foodName)
+    val response = viewModel.retrofitResponse
 
-            val food = Food(
-                name = name,
-                imageUrl = imageUrl,
-                calories = calories,
-                protein = protein,
-                carbs = carbs,
-                fats = fats
-                )
-            foodEntities.add(food)
-            }
-    } catch (e: Exception) {
-        // Handle JSON parsing exception
-        e.printStackTrace()
+    val foodEntities = mutableListOf<Food>()
+    for (foodAPI in response.value.items) {
+        val name = foodAPI.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        val imageUrl = name.lowercase().replace(" ", "_")
+        val calories = foodAPI.calories
+        val protein = foodAPI.protein_g.toFloat()
+        val carbs = foodAPI.carbohydrates_total_g.toFloat()
+        val fats = foodAPI.fat_total_g.toFloat()
+
+        Log.d(ContentValues.TAG, name)
+
+        val food = Food(
+            name = name,
+            imageUrl = imageUrl,
+            calories = calories,
+            protein = protein,
+            carbs = carbs,
+            fats = fats
+        )
+        Log.d(ContentValues.TAG, name)
+        foodEntities.add(food)
     }
     return foodEntities
 }
+
+
+
 
