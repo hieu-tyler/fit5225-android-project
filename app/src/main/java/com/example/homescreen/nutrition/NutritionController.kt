@@ -132,8 +132,12 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
             }
 
             else if (showCreate && !showForm) {
-                CreateNutritionForm(onCloseForm = {
-                    showCreate = false; selectedFood = null; showForm = false })
+                CreateNutritionForm(
+                    viewModel,
+                    onCloseForm = {
+                        showCreate = false
+                        selectedFood = null
+                        showForm = false })
             }
 
             else if (!showForm && selectedFood == null){

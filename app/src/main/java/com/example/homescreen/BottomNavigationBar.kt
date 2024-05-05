@@ -66,9 +66,9 @@ fun HomeScreen(viewModel: ViewModel) {
     val currentRoute = getCurrentRoute(navController)
     Scaffold(
         bottomBar = {
-            if (currentRoute != Routes.Login.value && currentRoute != Routes.Registration.value) {
+//            if (currentRoute != Routes.Login.value && currentRoute != Routes.Registration.value) {
                 BottomNavigationBar(navController = navController)
-            }
+//            }
         }
     ) { paddingValues ->
         NavHost(

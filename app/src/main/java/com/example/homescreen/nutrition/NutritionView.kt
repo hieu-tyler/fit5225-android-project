@@ -1,7 +1,10 @@
 package com.example.homescreen.nutrition
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.homescreen.ViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,15 +125,31 @@ fun NutritionInfoItem(label: String, value: String) {
     }
 }
 
+fun uploadImage(imageUri: Uri) {
+    // Implement logic to upload image to server or cloud storage service
+    // Once the upload is successful, update the imageUrl variable with the URL received from the server
+    // For example:
+    // imageUrl = "https://example.com/image.jpg"
+}
+
 @Composable
-fun CreateNutritionForm(onCloseForm: () -> Unit) {
+fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
     var foodName by remember { mutableStateOf("") }
     var calories by remember { mutableStateOf("") }
     var protein by remember { mutableStateOf("") }
     var carbs by remember { mutableStateOf("") }
     var fats by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
 
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { imageUri ->
+            // Call uploadImage with the selected image URI
+            uploadImage(imageUri)
+        }
+    }
     val context = LocalContext.current
 
     Column(
@@ -156,17 +177,25 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
 
             // Input fields for food attributes
             Column {
-                OutlinedTextField(
-                    value = foodName,
-                    onValueChange = { foodName = it },
-                    label = { Text("Food Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    OutlinedTextField(
+                        value = foodName,
+                        onValueChange = { foodName = it },
+                        label = { Text("Food Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                Button(
+                    onClick = {
+                        // Open image picker
+                        imagePickerLauncher.launch("image/*")
+                    },
+                ) {
+                    Text(text = "Select Image")
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
             }
-
         }
+
         Column {
             OutlinedTextField(
                 value = calories,
@@ -178,7 +207,7 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
                 ),
                 keyboardActions = KeyboardActions(
                     onNext = {
-                        // Focus on the next field
+                        focusRequester.requestFocus()
                     }
                 ),
                 modifier = Modifier.fillMaxWidth()
@@ -244,21 +273,17 @@ fun CreateNutritionForm(onCloseForm: () -> Unit) {
             Button(
                 onClick = {
                     // Save food log to database or perform desired action
-//                    val newFood = Food(
-//                        id = System.currentTimeMillis(),
-//                        name = foodName,
-//                        imageUrl = imageUrl,
-//                        calories = calories.toIntOrNull() ?: 0,
-//                        protein = protein.toFloatOrNull() ?: 0f,
-//                        carbs = carbs.toFloatOrNull() ?: 0f,
-//                        fats = fats.toFloatOrNull() ?: 0f
-//                    )
-//                    foodName = ""
-//                    calories = ""
-//                    protein = ""
-//                    carbs = ""
-//                    fats = ""
-//                    imageUrl = ""
+                    if (foodName.isNotBlank()) {
+                        val newFood = Food(
+                            name = foodName,
+                            imageUrl = imageUrl,
+                            calories = calories.toIntOrNull() ?: 0,
+                            protein = protein.toFloatOrNull() ?: 0f,
+                            carbs = carbs.toFloatOrNull() ?: 0f,
+                            fats = fats.toFloatOrNull() ?: 0f
+                        )
+                        viewModel.insertFood(newFood)
+                    }
                     Toast.makeText(context, "Food Logged: $foodName", Toast.LENGTH_SHORT).show()
 
                     onCloseForm()
