@@ -6,7 +6,9 @@ import java.util.Date
 
 @Entity(tableName = "user_health_metrics")
 data class UserHealthMetrics(
-    @PrimaryKey val userId: Int,
+    @PrimaryKey(autoGenerate = true)
+    val recordId: Long = 0,
+    val userId: String,
     val entryDate: Date,
     val weight: Float,
     val height: Float,

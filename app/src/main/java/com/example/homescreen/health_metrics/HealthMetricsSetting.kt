@@ -1,5 +1,6 @@
 package com.example.homescreen.health_metrics
 
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,51 +36,59 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.homescreen.Routes
+import com.example.homescreen.ViewModel
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.pow
-import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.google.firebase.auth.FirebaseAuth
 
 @RequiresApi(0)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HealthMetricsSettingsScreen(
-    userHealthMetrics: UserHealthMetrics,
+    userId: String, userHealthMetrics: List<UserHealthMetrics>?,
     onSaveMetrics: (UserHealthMetrics) -> Unit,
-    navController: NavController
+    navController: NavController, viewModel: ViewModel
 ) {
-    // Local state for form fields
-    var userId by rememberSaveable { mutableStateOf(userHealthMetrics.userId) }
+    // Default values for initialization
+    val defaultMetrics = UserHealthMetrics(0L, "", Date(), 0f, 0f, 0f, 0f, 0f, 0f, "running", 0, 0, "", 5000)
+
+    // Using the first item from the list if available, otherwise default
+    val metrics = userHealthMetrics?.firstOrNull() ?: defaultMetrics
+
+    // Remember all stateful variables
+    Log.d("HealthMetricsSettingsScreen", "userId: $userId")
     val calendar = Calendar.getInstance()
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = Instant.now().toEpochMilli()
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var entryDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
-    var weight by rememberSaveable { mutableStateOf(userHealthMetrics.weight) }
-    var height by rememberSaveable { mutableStateOf(userHealthMetrics.height) }
+    var weight by remember { mutableStateOf(metrics.weight) }
+    var height by remember { mutableStateOf(metrics.height) }
     val bmi = weight / (height / 100).pow(2) // BMI calculation
-    var waist by rememberSaveable { mutableStateOf(userHealthMetrics.waist) }
-    var systolicBP by rememberSaveable { mutableStateOf(userHealthMetrics.systolicBP) }
-    var diastolicBP by rememberSaveable { mutableStateOf(userHealthMetrics.diastolicBP) }
+    var waist by remember { mutableStateOf(metrics.waist) }
+    var systolicBP by remember { mutableStateOf(metrics.systolicBP) }
+    var diastolicBP by remember { mutableStateOf(metrics.diastolicBP) }
     val exerciseTypeList = listOf("running", "walking", "cycling")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var exerciseType by rememberSaveable { mutableStateOf(exerciseTypeList[0]) }
-    var exerciseFreq by rememberSaveable { mutableStateOf(userHealthMetrics.exerciseFreq) }
-    var exerciseTime by rememberSaveable { mutableStateOf(userHealthMetrics.exerciseTime) }
-    var exerciseNote by rememberSaveable { mutableStateOf(userHealthMetrics.exerciseNote) }
-    var stepsGoal by rememberSaveable { mutableStateOf(userHealthMetrics.stepsGoal) }
+    var exerciseType by remember { mutableStateOf(metrics.exerciseType) }
+    var exerciseFreq by remember { mutableStateOf(metrics.exerciseFreq) }
+    var exerciseTime by remember { mutableStateOf(metrics.exerciseTime) }
+    var exerciseNote by remember { mutableStateOf(metrics.exerciseNote) }
+    var stepsGoal by remember { mutableStateOf(metrics.stepsGoal) }
 
     Scaffold(
         topBar = {
@@ -235,7 +244,7 @@ fun HealthMetricsSettingsScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
             Button(
-                onClick = { onSaveMetrics(UserHealthMetrics(userId, Date(entryDate), weight, height, waist, bmi, systolicBP, diastolicBP, exerciseType, exerciseFreq, exerciseTime, exerciseNote, stepsGoal)) },
+                onClick = { createHealthMetricsRecord(userId, Date(entryDate), weight, height, waist, bmi, systolicBP, diastolicBP, exerciseType, exerciseFreq, exerciseTime, exerciseNote, stepsGoal, navController, viewModel) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Records")
@@ -275,5 +284,32 @@ fun IntMetricSlider(label: String, value: Int, onValueChange: (Int) -> Unit, val
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+fun createHealthMetricsRecord(userId: String, entryDate: Date, weight: Float, height: Float,
+                              waist: Float, bmi: Float, systolicBP: Float, diastolicBP: Float, exerciseType: String,
+                              exerciseFreq: Int, exerciseTime: Int, exerciseNote: String, stepsGoal: Int,
+                              navController: NavController, viewModel: ViewModel) {
+    if (userId.isNotEmpty()) {
+        val userHealthMetrics = UserHealthMetrics(
+            userId = userId,
+            entryDate = entryDate,
+            weight = weight,
+            height = height,
+            waist = waist,
+            bmi = bmi,
+            systolicBP = systolicBP,
+            diastolicBP = diastolicBP,
+            exerciseType = exerciseType,
+            exerciseFreq = exerciseFreq,
+            exerciseTime = exerciseTime,
+            exerciseNote = exerciseNote,
+            stepsGoal = stepsGoal
+        )
+        viewModel.insertUserHealthMetrics(userHealthMetrics)
+        navController.navigate(Routes.HealthMetrics.value)  // Navigate to login screen after successful registration
+    } else {
+        Log.e("Create HealthMetrics", "Failed to create HealthMetrics record.")
     }
 }

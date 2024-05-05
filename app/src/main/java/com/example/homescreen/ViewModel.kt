@@ -16,6 +16,7 @@ import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.UserProfile
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -26,21 +27,38 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     init {
         repository = Repository(application)
     }
+
+    // Reset password
+    private val _statusMessage = MutableLiveData<String>()
+    val statusMessage: LiveData<String> = _statusMessage
+
     val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
     val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
 
-    //Activity
+    // Activity
     val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()
     val allNames: LiveData<List<String>> = repository.allNames.asLiveData()
 
-    //User_Activity
-    // LiveData to observe a specific user profile
+    // User_Activity
     private val _userProfile = MutableLiveData<UserProfile>()
     val userProfile: MutableLiveData<UserProfile> = _userProfile
     val allUsers: LiveData<List<UserProfile>> = repository.allUsers.asLiveData()
 
     val allUserActivities: LiveData<List<UserActivity>> = repository.allUserActivities.asLiveData()
     val allDistances: LiveData<List<Float>> = repository.allDistances.asLiveData()
+
+    // Reset password
+    fun sendPasswordResetEmail(email: String) {
+        val auth = FirebaseAuth.getInstance()
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _statusMessage.postValue("Reset link sent to your email")
+                } else {
+                    _statusMessage.postValue("Failed to send reset link: ${task.exception?.localizedMessage}")
+                }
+            }
+    }
 
     fun insertFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertFood(food)
@@ -144,8 +162,14 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         repository.deleteAllUserActivity()
     }
 
+    // Health Metrics
+    fun getUserHealthMetrics(userId: String): LiveData<List<UserHealthMetrics>> {
+        return repository.getUserHealthMetrics(userId).asLiveData()
+    }
+
     fun insertUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insertUserHealthMetrics(metrics)
+        val newId = repository.insertUserHealthMetrics(metrics)
+        Log.d("ViewModel", "New record ID: $newId")
     }
 
     fun updateUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
