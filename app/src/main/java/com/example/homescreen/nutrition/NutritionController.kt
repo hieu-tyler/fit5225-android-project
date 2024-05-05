@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ import okhttp3.Response
 import org.json.JSONArray
 import java.time.LocalDate
 import java.util.Locale
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +64,7 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
         if (viewModel.allFoods.value?.isEmpty() == true) {
             if (foods.isEmpty()) {
                 try {
-                    val defaultFoods = prepareFoodList()
+                    val defaultFoods = prepareFoodList(viewModel)
                     viewModel.insertFoods(defaultFoods)
                 } catch (e: SQLiteConstraintException) {
                     Log.d(ContentValues.TAG, "Error SQL Unique Constraints")
@@ -80,7 +82,7 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
             val currentFood = foods.find {it.name == nutrition.foodName}
             if (currentFood != null && category == nutrition.category) {
                 quantityMap[currentFood] = quantityMap[currentFood]!! + 1
-                Log.d(ContentValues.TAG, "Quantity map updated - ${quantityMap[currentFood]}")
+                Log.d(ContentValues.TAG, "Quantity $currentFood updated - ${quantityMap[currentFood]}")
             }
         }
     }
@@ -229,6 +231,7 @@ fun getDefaultFoodName(): String {
     return listOf(fruitsString, proteinString, vegetableString).joinToString(separator = " ")
 }
 
+// TODO: Clean getFoodFactApi function
 suspend fun getFoodFactApi(foodName: String): Response {
     return withContext(Dispatchers.IO) {
         val client = OkHttpClient()
@@ -243,38 +246,36 @@ suspend fun getFoodFactApi(foodName: String): Response {
     }
 }
 
-fun prepareFoodList(): List<Food> {
+suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
     val foodName = getDefaultFoodName()
-    val response = runBlocking {
-        getFoodFactApi(foodName)
-    }
-    val foodEntities = mutableListOf<Food>()
-    val jsonArray = JSONArray(response.body?.string())
-    try {
-        for (i in 0 until jsonArray.length()) {
-            val jsonObject = jsonArray.getJSONObject(i)
-            val name = jsonObject.getString("name")
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            val imageUrl = jsonObject.getString("name").lowercase().replace(" ", "_")
-            val calories = jsonObject.getString("calories").toFloatOrNull()?.toInt() ?: 0
-            val protein = jsonObject.getString("protein_g").toFloatOrNull() ?: 0f
-            val carbs = jsonObject.getString("carbohydrates_total_g").toFloatOrNull() ?: 0f
-            val fats = jsonObject.getString("fat_total_g").toFloatOrNull() ?: 0f
+    viewModel.getResponse(foodName)
+    val response = viewModel.retrofitResponse
 
-            val food = Food(
-                name = name,
-                imageUrl = imageUrl,
-                calories = calories,
-                protein = protein,
-                carbs = carbs,
-                fats = fats
-            )
-            foodEntities.add(food)
-        }
-    } catch (e: Exception) {
-        // Handle JSON parsing exception
-        e.printStackTrace()
+    val foodEntities = mutableListOf<Food>()
+    for (foodAPI in response.value.items) {
+        val name = foodAPI.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        val imageUrl = name.lowercase().replace(" ", "_")
+        val calories = foodAPI.calories
+        val protein = foodAPI.protein_g.toFloat()
+        val carbs = foodAPI.carbohydrates_total_g.toFloat()
+        val fats = foodAPI.fat_total_g.toFloat()
+
+        Log.d(ContentValues.TAG, name)
+
+        val food = Food(
+            name = name,
+            imageUrl = imageUrl,
+            calories = calories,
+            protein = protein,
+            carbs = carbs,
+            fats = fats
+        )
+        Log.d(ContentValues.TAG, name)
+        foodEntities.add(food)
     }
     return foodEntities
 }
+
+
+
 

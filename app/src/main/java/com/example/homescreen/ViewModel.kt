@@ -5,6 +5,8 @@ import android.content.ContentValues
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,6 +16,7 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.UserActivity
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
+import com.example.homescreen.nutrition.FoodSearchResponse
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.UserProfile
 import com.google.firebase.auth.FirebaseAuth
@@ -34,6 +37,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
     val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
+    val retrofitResponse: MutableState<FoodSearchResponse> = mutableStateOf((FoodSearchResponse()))
 
     // Activity
     val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()
@@ -93,6 +97,18 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun deleteAllPersonalNutrition() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAllPersonalNutrition()
+    }
+
+    fun getResponse(keyword:String) {
+        viewModelScope.launch  {
+            try {
+                val responseReturned = repository.getResponse(keyword)
+                retrofitResponse.value = responseReturned
+
+            } catch (e: Exception) {
+                Log.i("Error ", "Response failed")
+            }
+        }
     }
 
     // Activity
