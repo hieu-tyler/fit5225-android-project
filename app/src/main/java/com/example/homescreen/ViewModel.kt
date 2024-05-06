@@ -2,9 +2,7 @@ package com.example.homescreen
 
 import android.app.Application
 import android.content.ContentValues
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -16,13 +14,12 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.UserActivity
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
-import com.example.homescreen.nutrition.FoodSearchResponse
+import com.example.homescreen.nutrition.FoodAPI
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.UserProfile
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class ViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: Repository
@@ -37,7 +34,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
     val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
-    val retrofitResponse: MutableState<FoodSearchResponse> = mutableStateOf((FoodSearchResponse()))
+    val retrofitResponse: MutableState<List<FoodAPI>> = mutableStateOf((emptyList()))
 
     // Activity
     val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()
@@ -103,10 +100,11 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch  {
             try {
                 val responseReturned = repository.getResponse(keyword)
+                Log.i("Response", "Response : $responseReturned")
                 retrofitResponse.value = responseReturned
 
             } catch (e: Exception) {
-                Log.i("Error ", "Response failed")
+                Log.i("Error ", "Response failed : $e")
             }
         }
     }

@@ -1,9 +1,6 @@
 package com.example.homescreen
 
 import android.app.Application
-import androidx.room.Delete
-import androidx.room.Query
-import androidx.room.Update
 import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.exercise_report.UserActivity
@@ -14,8 +11,8 @@ import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.nutrition.PersonalNutritionDAO
 import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.health_metrics.UserHealthMetricsDAO
+import com.example.homescreen.nutrition.FoodAPI
 import com.example.homescreen.nutrition.FoodRetrofit
-import com.example.homescreen.nutrition.FoodSearchResponse
 import com.example.homescreen.profile.UserProfile
 import com.example.homescreen.profile.UserProfileDAO
 import kotlinx.coroutines.Dispatchers
@@ -49,10 +46,10 @@ class Repository(application: Application) {
     private val searchService = FoodRetrofit.retrofitService
     private val API_KEY = "PUBQhZ5p5CufNYJrC80wsw==NufwNlb4B2Gid3eO"
 
-    suspend fun getResponse(keyword: String): FoodSearchResponse {
+    suspend fun getResponse(keyword: String): List<FoodAPI> {
         return searchService.getFoodFact(
-            API_KEY,
-            keyword
+            keyword,
+            API_KEY
         )
     }
     val allUsers: Flow<List<UserProfile>> = userProfileDAO.getAllUsers()
