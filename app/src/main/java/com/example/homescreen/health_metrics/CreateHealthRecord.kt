@@ -1,6 +1,5 @@
 package com.example.homescreen.health_metrics
 
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,15 +17,11 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -40,13 +35,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Calendar
@@ -176,7 +166,7 @@ fun HealthMetricsSettingsScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
             Button(
-                onClick = { onSaveMetrics(UserHealthMetrics(Date(entryDate), weight, height, waist, bmi, systolicBP, diastolicBP)) },
+                onClick = { onSaveMetrics(UserHealthMetrics(Date(entryDate), weight, height, waist, systolicBP, diastolicBP)) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Records")

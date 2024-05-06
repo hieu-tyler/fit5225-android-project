@@ -4,15 +4,27 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.homescreen.Routes
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.WriteBatch
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 @RequiresApi(64)
@@ -62,28 +74,71 @@ fun HealthScreen() {
         }
     }
 
+    var userHealthMetrics by remember { mutableStateOf<UserHealthMetrics?>(null) }
+
+    // Helper function to fetch latest health metrics
+    fun fetchHealthMetrics() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+            val db = Firebase.firestore
+            val userDoc = db.collection("users").document(userId)
+
+            // Assume each metric is stored as a separate document in a sub-collection
+            val healthData = userDoc.collection("HealthRecords")
+            val metrics = UserHealthMetrics(Date(), 0f, 0f, 0f, 0f, 0f)
+
+            // Retrieve each metric
+            listOf("Weight", "Height", "Waist Circumference", "Systolic Blood Pressure", "Diastolic Blood Pressure").forEach { type ->
+                healthData.whereEqualTo("recordType", type)
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .limit(1)
+                    .get()
+                    .await()
+                    .documents.firstOrNull()?.let { doc ->
+                        val value = doc.getDouble("value") ?: return@let
+                        when (type) {
+                            "Weight" -> metrics.weight = value.toFloat()
+                            "Height" -> metrics.height = value.toFloat()
+                            "Waist Circumference" -> metrics.waist = value.toFloat()
+                            "Systolic Blood Pressure" -> metrics.systolicBP = value.toFloat()
+                            "Diastolic Blood Pressure" -> metrics.diastolicBP = value.toFloat()
+                        }
+                    }
+            }
+
+            // Update state
+            userHealthMetrics = metrics
+        }
+    }
+
+    // Fetch metrics when Composable enters composition
+    LaunchedEffect(true) {
+        fetchHealthMetrics()
+    }
+
     Column {
-        val sampleUserHealthMetrics = UserHealthMetrics(
-            entryDate = Date(),
-            weight = 60F,
-            height = 170F,
-            bmi = 20F,
-            waist = 105F,
-            systolicBP = 120F,
-            diastolicBP = 80F,
-        )
         // Nested NavHost
         NavHost(navController = subNavController, startDestination = Routes.HealthMetrics.value) {
             composable(Routes.HealthMetrics.value) {
-                UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
-                    actualExerciseTime = 30, userHealthMetricsNewest = sampleUserHealthMetrics, subNavController)
+                userHealthMetrics?.let { it1 ->
+                    UserHealthDashboard(stepsTaken = 5500, actualExerciseFreq = 2,
+                        actualExerciseTime = 30,
+                        userHealthMetricsNewest = it1,
+                        subNavController)
+                }
             }
             composable("HealthMetricsSettingsScreen") {
-                HealthMetricsSettingsScreen(
-                    userHealthMetrics = sampleUserHealthMetrics,
-                    onSaveMetrics = { metrics -> saveMetrics(metrics) },
-                    subNavController
-                )
+                userHealthMetrics?.let { it1 ->
+                    HealthMetricsSettingsScreen(
+                        userHealthMetrics = it1,
+                        onSaveMetrics = { metrics ->
+                            saveMetrics(metrics)
+                            subNavController.popBackStack()
+                            fetchHealthMetrics()
+                                        },
+                        subNavController
+                    )
+                }
             }
         }
     }

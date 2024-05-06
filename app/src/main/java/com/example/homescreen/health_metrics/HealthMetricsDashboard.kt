@@ -11,30 +11,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import kotlinx.coroutines.tasks.await
 
 @Composable
-fun HealthMetricsDashboard(userHealthMetricsNewest: UserHealthMetrics) {
+fun HealthMetricsDashboard(userHealthMetricsNewest: UserHealthMetrics?) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
     ) {
-        HealthMetricCard(label = "Weight", value = "${userHealthMetricsNewest.weight} kg")
-        HealthMetricCard(label = "BMI", value = "Calculating BMI...")
-        HealthMetricCard(label = "Waist", value = "${userHealthMetricsNewest.waist} cm")
-        HealthMetricCard(label = "Systolic BP", value = "${userHealthMetricsNewest.systolicBP} mmHg")
-        HealthMetricCard(label = "Diastolic BP", value = "${userHealthMetricsNewest.diastolicBP} mmHg")
+        HealthMetricCard(label = "Weight", value = "${userHealthMetricsNewest?.weight} kg")
+        HealthMetricCard(label = "BMI", value = "${userHealthMetricsNewest?.bmi} kg/m^2")
+        HealthMetricCard(label = "Waist", value = "${userHealthMetricsNewest?.waist} cm")
+        HealthMetricCard(label = "Systolic BP", value = "${userHealthMetricsNewest?.systolicBP} mmHg")
+        HealthMetricCard(label = "Diastolic BP", value = "${userHealthMetricsNewest?.diastolicBP} mmHg")
     }
 }
 
@@ -71,45 +65,6 @@ fun UserHealthDashboard(
     userHealthMetricsNewest: UserHealthMetrics,
     navController: NavController
 ) {
-    var bmi by remember { mutableStateOf<String?>(null) }
-
-    // Helper function to calculate BMI
-    fun calculateBMI(weight: Double, height: Double): Double {
-        if (height == 0.0) return 0.0
-        val heightInMeters = height / 100  // Convert height from cm to meters
-        return weight / (heightInMeters * heightInMeters)
-    }
-
-    // Suspend function to fetch latest weight and height
-    suspend fun fetchLatestWeightAndHeight(): Pair<Double, Double>? {
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return null
-
-        val weightSnapshot = db.collection("users").document(userId).collection("HealthRecords")
-            .whereEqualTo("recordType", "Weight")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(1)
-            .get()
-            .await()
-        val latestWeight = weightSnapshot.documents.firstOrNull()?.getDouble("value") ?: return null
-
-        val heightSnapshot = db.collection("users").document(userId).collection("HealthRecords")
-            .whereEqualTo("recordType", "Height")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(1)
-            .get()
-            .await()
-        val latestHeight = heightSnapshot.documents.firstOrNull()?.getDouble("value") ?: return null
-
-        return Pair(latestWeight, latestHeight)
-    }
-
-    // Fetch and calculate BMI when Composable enters the composition
-    LaunchedEffect(true) {
-        val (weight, height) = fetchLatestWeightAndHeight() ?: return@LaunchedEffect
-        bmi = calculateBMI(weight, height).toString()
-    }
-
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -185,14 +140,14 @@ fun UserHealthDashboard(
 //                }
 //            }
 //        }
+        HealthMetricsDashboard(userHealthMetricsNewest = userHealthMetricsNewest)
+        Spacer(modifier = Modifier.height(8.dp))
+        // Bottom Cards - Horizontal Arrangement
         Button(
             onClick = { navController.navigate("HealthMetricsSettingsScreen") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Create New Health Record")
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        // Bottom Cards - Horizontal Arrangement
-        HealthMetricsDashboard(userHealthMetricsNewest = userHealthMetricsNewest)
     }
 }

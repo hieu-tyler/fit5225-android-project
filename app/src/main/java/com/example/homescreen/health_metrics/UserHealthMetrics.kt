@@ -4,10 +4,12 @@ import java.util.Date
 
 data class UserHealthMetrics(
     val entryDate: Date,
-    val weight: Float,
-    val height: Float,
-    val bmi: Float,
-    val waist: Float,
-    val systolicBP: Float,
-    val diastolicBP: Float,
-)
+    var weight: Float,
+    var height: Float,
+    var waist: Float,
+    var systolicBP: Float,
+    var diastolicBP: Float
+) {
+    val bmi: Float
+        get() = if (height > 0) weight / ((height / 100) * (height / 100)) else 0f
+}
