@@ -1,5 +1,6 @@
 package com.example.homescreen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,10 +35,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.homescreen.ui.theme.HomeScreenTheme
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun LoginScreen(navController: NavController, onLoginClicked: (String, String) -> Unit) {
+fun LoginScreen(navController: NavController, loginWithEmailPassword: (String, String) -> Unit) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
@@ -79,7 +81,7 @@ fun LoginScreen(navController: NavController, onLoginClicked: (String, String) -
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onLoginClicked(email, password) },
+            onClick = { loginWithEmailPassword(email, password, navController) },
             modifier = Modifier
                 .height(46.dp)
                 .width(190.dp)
@@ -91,9 +93,9 @@ fun LoginScreen(navController: NavController, onLoginClicked: (String, String) -
             Text("Forgot Password?")
         }
         Row {
-            TextButton(onClick = { navController.navigate("register")},
+            TextButton(onClick = { navController.navigate(Routes.Registration.value) },
             ) {
-                Text("Don't have an account? Sign Up!")
+                Text("Don't have an account? Register here!")
             }
         }
         // Google Sign-In Button
@@ -116,10 +118,22 @@ fun LoginScreen(navController: NavController, onLoginClicked: (String, String) -
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun Login() {
-//    HomeScreenTheme {
-//        LoginScreen({ _, _ -> })
-//    }
-//}
+fun loginWithEmailPassword(email: String, password: String,
+                           navController: NavController) {
+    val auth = FirebaseAuth.getInstance()
+    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            Log.d("Login Success", "User email: $email")
+            Log.d("NavController", "Current back stack entry: ${navController.currentBackStackEntry}")
+            if (navController.currentBackStackEntry != null) {
+                navController.navigate(Routes.HealthMetrics.value) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            }
+        } else {
+            Log.e("Login Error", task.exception?.message ?: "Unknown Error")
+        }
+    }
+}

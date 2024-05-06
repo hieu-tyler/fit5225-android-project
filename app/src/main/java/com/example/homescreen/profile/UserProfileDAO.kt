@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserProfileDAO {
+    @Query("SELECT * FROM userProfile WHERE userId = :userId")
+    fun getUserById(userId: String): UserProfile
+
     @Query("SELECT * FROM userProfile")
     fun getAllUsers(): Flow<List<UserProfile>>
 
