@@ -146,24 +146,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         repository.deleteAllUserActivity()
     }
 
-    // Health Metrics
-    fun getUserHealthMetrics(userId: String): LiveData<List<UserHealthMetrics>> {
-        return repository.getUserHealthMetrics(userId).asLiveData()
-    }
-
-    fun insertUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        val newId = repository.insertUserHealthMetrics(metrics)
-        Log.d("ViewModel", "New record ID: $newId")
-    }
-
-    fun updateUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        repository.updateUserHealthMetrics(metrics)
-    }
-
-    fun deleteUserHealthMetrics(metrics: UserHealthMetrics) = viewModelScope.launch(Dispatchers.IO) {
-        repository.deleteUserHealthMetrics(metrics)
-    }
-
     // User Profile
     fun loadUserProfile(userId: String) {
         viewModelScope.launch {
