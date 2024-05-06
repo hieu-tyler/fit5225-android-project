@@ -31,18 +31,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.homescreen.ViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.json.JSONArray
 import java.time.LocalDate
-import java.util.Locale
+import kotlin.math.roundToInt
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -61,9 +58,13 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
     // Fetch foods from the ViewModel when the composable is first launched
     LaunchedEffect(Unit) {
         // Handle Food
+        Log.d(ContentValues.TAG, "Food crawling")
+
         if (viewModel.allFoods.value?.isEmpty() == true) {
+            Log.d(ContentValues.TAG, "Food initialising")
             if (foods.isEmpty()) {
                 try {
+                    Log.d(ContentValues.TAG, "Food inserting")
                     val defaultFoods = prepareFoodList(viewModel)
                     viewModel.insertFoods(defaultFoods)
                 } catch (e: SQLiteConstraintException) {
@@ -71,21 +72,30 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
                 }
             }
         }
+        Log.d(ContentValues.TAG, "Quantity ${quantityMap.values}")
         if (quantityMap.isEmpty()) {
+            Log.d(ContentValues.TAG, "Quantity initialising")
             quantityMap.apply {
                 foods.forEach { food -> put(food, 0) }
             }
         }
-    }
-    LaunchedEffect(allPersonalNutrition) {
         for (nutrition in allPersonalNutrition) {
             val currentFood = foods.find {it.name == nutrition.foodName}
             if (currentFood != null && category == nutrition.category) {
-                quantityMap[currentFood] = quantityMap[currentFood]!! + 1
+                quantityMap[currentFood] = quantityMap[currentFood]!! + nutrition.quantity
                 Log.d(ContentValues.TAG, "Quantity $currentFood updated - ${quantityMap[currentFood]}")
             }
         }
     }
+//    LaunchedEffect(allPersonalNutrition) {
+//        for (nutrition in allPersonalNutrition) {
+//            val currentFood = foods.find {it.name == nutrition.foodName}
+//            if (currentFood != null && category == nutrition.category) {
+//                quantityMap[currentFood] = quantityMap[currentFood]!! + 1
+//                Log.d(ContentValues.TAG, "Quantity $currentFood updated - ${quantityMap[currentFood]}")
+//            }
+//        }
+//    }
 
     Scaffold(
         topBar = {
@@ -134,8 +144,12 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
             }
 
             else if (showCreate && !showForm) {
-                CreateNutritionForm(onCloseForm = {
-                    showCreate = false; selectedFood = null; showForm = false })
+                CreateNutritionForm(
+                    viewModel,
+                    onCloseForm = {
+                        showCreate = false
+                        selectedFood = null
+                        showForm = false })
             }
 
             else if (!showForm && selectedFood == null){
@@ -231,28 +245,13 @@ fun getDefaultFoodName(): String {
     return listOf(fruitsString, proteinString, vegetableString).joinToString(separator = " ")
 }
 
-// TODO: Clean getFoodFactApi function
-suspend fun getFoodFactApi(foodName: String): Response {
-    return withContext(Dispatchers.IO) {
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .url("https://api.api-ninjas.com/v1/nutrition?query=${foodName}")
-            .get()
-            .addHeader("X-Api-Key", "PUBQhZ5p5CufNYJrC80wsw==NufwNlb4B2Gid3eO")
-            .build()
-
-        client.newCall(request).execute()
-    }
-}
-
 suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
     val foodName = getDefaultFoodName()
     viewModel.getResponse(foodName)
     val response = viewModel.retrofitResponse
 
     val foodEntities = mutableListOf<Food>()
-    for (foodAPI in response.value.items) {
+    for (foodAPI in response.value) {
         val name = foodAPI.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         val imageUrl = name.lowercase().replace(" ", "_")
         val calories = foodAPI.calories
@@ -265,12 +264,11 @@ suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
         val food = Food(
             name = name,
             imageUrl = imageUrl,
-            calories = calories,
+            calories = calories.roundToInt(),
             protein = protein,
             carbs = carbs,
             fats = fats
         )
-        Log.d(ContentValues.TAG, name)
         foodEntities.add(food)
     }
     return foodEntities

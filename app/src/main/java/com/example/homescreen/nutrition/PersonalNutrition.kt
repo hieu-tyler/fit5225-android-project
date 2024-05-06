@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
     foreignKeys = [ForeignKey(entity = Food::class,
         parentColumns = ["name"],
         childColumns = ["foodName"],
-        onDelete = ForeignKey.CASCADE)])
+        onDelete = ForeignKey.NO_ACTION)])
 data class PersonalNutrition(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
