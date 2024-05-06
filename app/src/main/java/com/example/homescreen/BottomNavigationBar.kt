@@ -102,7 +102,7 @@ fun HomeScreen(viewModel: ViewModel) {
             composable(Routes.HealthMetrics.value) {
                 val userId = getCurrentUserId()
                 if (userId != null) {
-                    HealthScreen(userId, viewModel)
+                    HealthScreen()
                 }
             }
 

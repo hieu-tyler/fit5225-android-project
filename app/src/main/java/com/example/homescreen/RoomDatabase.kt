@@ -9,8 +9,6 @@ import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.exercise_report.UserActivity
 import com.example.homescreen.exercise_report.UserActivityDAO
-import com.example.homescreen.health_metrics.UserHealthMetrics
-import com.example.homescreen.health_metrics.UserHealthMetricsDAO
 import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.PersonalNutrition
@@ -24,7 +22,6 @@ import com.example.homescreen.profile.UserProfileDAO
         Food::class,
         Activity::class,
         UserProfile::class,
-        UserHealthMetrics::class ,
         PersonalNutrition::class,
         UserActivity::class
                ],
@@ -40,8 +37,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userActivityDao() : UserActivityDAO
 
     abstract fun userProfileDao(): UserProfileDAO
-
-    abstract fun healthMetricsDao(): UserHealthMetricsDAO
 
     companion object {
         @Volatile

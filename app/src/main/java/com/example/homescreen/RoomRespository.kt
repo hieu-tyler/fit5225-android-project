@@ -12,8 +12,6 @@ import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.nutrition.PersonalNutritionDAO
-import com.example.homescreen.health_metrics.UserHealthMetrics
-import com.example.homescreen.health_metrics.UserHealthMetricsDAO
 import com.example.homescreen.nutrition.FoodRetrofit
 import com.example.homescreen.nutrition.FoodSearchResponse
 import com.example.homescreen.profile.UserProfile
@@ -32,8 +30,6 @@ class Repository(application: Application) {
         AppDatabase.getDatabase(application).userActivityDao()
     private var personalNutritionDao : PersonalNutritionDAO =
         AppDatabase.getDatabase(application).personalNutritionDao()
-    private var userHealthMetricsDAO: UserHealthMetricsDAO =
-        AppDatabase.getDatabase(application).healthMetricsDao()
     private var userProfileDAO : UserProfileDAO =
         AppDatabase.getDatabase(application).userProfileDao()
 
@@ -130,23 +126,6 @@ class Repository(application: Application) {
 
     suspend fun deleteAllUserActivity() {
         userActivityDao.deleteAllUserActivity()
-    }
-
-    // Health Metrics
-    fun getUserHealthMetrics(userId: String): Flow<List<UserHealthMetrics>> {
-        return userHealthMetricsDAO.getUserHealthMetrics(userId)
-    }
-
-    suspend fun insertUserHealthMetrics(metrics: UserHealthMetrics) {
-        userHealthMetricsDAO.insertUserHealthMetrics(metrics)
-    }
-
-    suspend fun updateUserHealthMetrics(metrics: UserHealthMetrics) {
-        userHealthMetricsDAO.updateUserHealthMetrics(metrics)
-    }
-
-    suspend fun deleteUserHealthMetrics(metrics: UserHealthMetrics) {
-        userHealthMetricsDAO.deleteUserHealthMetrics(metrics)
     }
 
     // User profile
