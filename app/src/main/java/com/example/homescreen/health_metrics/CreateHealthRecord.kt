@@ -150,16 +150,16 @@ fun HealthMetricsSettingsScreen(
                 label = "Waist Circumference: ${waist.toInt()} cm",
                 value = waist,
                 onValueChange = { waist = it },
-                valueRange = 40f..150f
+                valueRange = 20f..80f
             )
             FloatMetricSlider(
-                label = "Systolic Blood Pressure: ${systolicBP.toInt()} cm",
+                label = "Systolic Blood Pressure: ${systolicBP.toInt()} mm Hg",
                 value = systolicBP,
                 onValueChange = { systolicBP = it },
                 valueRange = 50f..250f
             )
             FloatMetricSlider(
-                label = "Diastolic Blood Pressure: ${diastolicBP.toInt()} cm",
+                label = "Diastolic Blood Pressure: ${diastolicBP.toInt()} mm Hg",
                 value = diastolicBP,
                 onValueChange = { diastolicBP = it },
                 valueRange = 30f..200f
