@@ -86,20 +86,6 @@ fun HealthScreen() {
                     subNavController
                 )
             }
-//            composable("ExerciseGoalSettingsScreen") {
-//                ExerciseGoalSettingsScreen(
-//                    userHealthMetrics = sampleUserHealthMetrics,
-//                    onSaveMetrics = {},
-//                    subNavController
-//                )
-//            }
-//            composable("StepsGoalSettingsScreen") {
-//                StepsGoalSettingsScreen(
-//                    userHealthMetrics = sampleUserHealthMetrics,
-//                    onSaveMetrics = {},
-//                    subNavController
-//                )
-//            }
         }
     }
 }
