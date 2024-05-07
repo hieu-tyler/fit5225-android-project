@@ -1,9 +1,6 @@
 package com.example.homescreen
 
 import android.app.Application
-import androidx.room.Delete
-import androidx.room.Query
-import androidx.room.Update
 import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.exercise_report.UserActivity
@@ -64,10 +61,6 @@ class Repository(application: Application) {
 
     suspend fun updateFood(food: Food) {
         foodDao.updateFood(food)
-    }
-
-    suspend fun deleteAllFood() {
-        foodDao.deleteAllFoods()
     }
 
     // PersonalNutrition

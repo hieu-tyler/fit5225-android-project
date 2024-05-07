@@ -8,6 +8,7 @@ data class Food(
     @PrimaryKey
     val name: String,
     val imageUrl: String,
+    val imageString: String? = null,
     val calories: Int,
     val protein: Float,
     val carbs: Float,
