@@ -75,7 +75,7 @@ fun NutritionFormView(navController: NavController, food: Food) {
                 .padding(64.dp)
         ) {
             Image(
-                painter = if (resourceId == 0) painterResource(resourceId) else rememberImagePainter(data = food.imageString),
+                painter = if (resourceId != 0) painterResource(resourceId) else rememberImagePainter(food.imageString),
                 contentDescription = "Food Image",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -136,7 +136,7 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
     var carbs by remember { mutableStateOf("") }
     var fats by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
-    var imageString by remember { mutableStateOf("") }
+    var imageString by remember {mutableStateOf("")}
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
 
@@ -147,10 +147,7 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
         uri?.let { imageUri ->
             // Call uploadImage with the selected image URI
             uploadImage(imageUri)
-
-//            imageString = convertImageUriToBase64(context.contentResolver, imageUri)
             imageString = imageUri.toString()
-
         }
     }
 
@@ -169,7 +166,11 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
         Row {
             // Image preview
             Image(
-                painter = rememberImagePainter(imageUrl),
+                painter = if (imageUrl == "") {
+                    rememberImagePainter(data = imageString)
+                } else {
+                    rememberImagePainter(imageUrl)
+                },
                 contentDescription = "Food Image",
                 modifier = Modifier
                     .size(128.dp)
@@ -340,12 +341,7 @@ fun FoodListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter =
-                if (resourceId == 0) {
-                    rememberImagePainter(data = food.imageString)
-                } else {
-                    rememberImagePainter(resourceId)
-                },
+                painter = if (resourceId != 0) rememberImagePainter(resourceId) else rememberImagePainter(food.imageString),
                 contentDescription = "Food Image",
                 modifier = Modifier
                     .size(72.dp)
