@@ -82,8 +82,7 @@ fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, us
     var editingLastName by remember { mutableStateOf(false) }
     val gender = listOf("Male", "Female")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedGenderGoogle by rememberSaveable { mutableStateOf(userProfile?.selectedGender ?: gender[0]) }
-    var selectedGender by remember { mutableStateOf(userProfile!!.selectedGender) }
+    var selectedGender by rememberSaveable { mutableStateOf(userProfile?.selectedGender ?: gender[0]) }
     var phone by remember { mutableStateOf(userProfile!!.phone) }
     var editingPhone by remember { mutableStateOf(false) }
     val calendar = Calendar.getInstance()
@@ -91,19 +90,13 @@ fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, us
         initialSelectedDateMillis = Instant.now().toEpochMilli()
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
-    var birthDateGoogle by rememberSaveable { mutableStateOf(userProfile?.birthDate?.time ?: calendar.timeInMillis) }
-    var birthDate by remember { mutableStateOf(userProfile!!.birthDate) }
+    var birthDate by rememberSaveable { mutableStateOf(userProfile?.birthDate?.time ?: calendar.timeInMillis) }
     var allowLocation by remember { mutableStateOf(userProfile!!.allowLocation) }
     var allowActivityShare by remember { mutableStateOf(userProfile!!.allowActivityShare) }
     var allowHealthDataShare by remember { mutableStateOf(userProfile!!.allowHealthDataShare) }
-    var isGoogleUser = false
     var showSnackbar by rememberSaveable { mutableStateOf(false) }
     var snackbarMessage by rememberSaveable { mutableStateOf("") }
     val isSetFormValid = isSetFormValid(firstName, lastName, phone)
-
-    if (userProfile!!.firstName != "NA") {
-        isGoogleUser = true
-    }
 
     Column(
         modifier = Modifier
@@ -193,122 +186,6 @@ fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, us
                     }
                 }
             }
-        }
-
-        if (isGoogleUser) {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Gender: ",
-                    style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(12.dp))
-                ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = { isExpanded = it }) {
-                    TextField(
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                            .focusProperties {
-                                canFocus = false
-                            }
-                            .padding(bottom = 8.dp),
-                        readOnly = true,
-                        value = selectedGenderGoogle,
-                        onValueChange = {},
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Black,
-                            unfocusedIndicatorColor = Color.Black
-                        )
-                    )
-                    ExposedDropdownMenu(
-                        expanded = isExpanded,
-                        onDismissRequest = { isExpanded = false })
-                    {
-                        gender.forEach { selectionOption ->
-                            DropdownMenuItem(
-                                text = { Text(selectionOption) },
-                                onClick = {
-                                    selectedGenderGoogle = selectionOption
-                                    isExpanded = false
-                                },
-                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                            )
-                        }
-                    }
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 14.dp)
-            ) { Text("Date of Birth:", style = MaterialTheme.typography.titleMedium) }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedButton(
-                    onClick = { showDatePicker = true },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(46.dp)
-                ) { Text(text = "Click here") }
-                Spacer(modifier = Modifier.width(12.dp))
-                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
-                Text(
-                    text = "${formatter.format(Date(birthDateGoogle))}",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (showDatePicker) {
-                DatePickerDialog(
-                    onDismissRequest = { showDatePicker = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showDatePicker = false
-                            birthDateGoogle = datePickerState.selectedDateMillis!!
-                        }) { Text(text = "OK") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDatePicker = false }) { Text(text = "Cancel") }
-                    }
-                ) { DatePicker(state = datePickerState) }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-        else {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    "Gender:",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    selectedGender,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 12.dp, top = 11.dp)
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 14.dp)
-            ) {
-                Text(
-                    "Date of Birth:",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
-                Text(
-                    formatter.format(birthDate),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 12.dp, top = 11.dp)
-                )
-            }
-        }
-
-        Column {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -347,6 +224,90 @@ fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, us
                     }
                 }
             }
+
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Gender: ",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                ExposedDropdownMenuBox(
+                    expanded = isExpanded,
+                    onExpandedChange = { isExpanded = it }) {
+                    TextField(
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                            .focusProperties {
+                                canFocus = false
+                            }
+                            .padding(bottom = 8.dp),
+                        readOnly = true,
+                        value = selectedGender,
+                        onValueChange = {},
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Black,
+                            unfocusedIndicatorColor = Color.Black
+                        )
+                    )
+                    ExposedDropdownMenu(
+                        expanded = isExpanded,
+                        onDismissRequest = { isExpanded = false })
+                    {
+                        gender.forEach { selectionOption ->
+                            DropdownMenuItem(
+                                text = { Text(selectionOption) },
+                                onClick = {
+                                    selectedGender = selectionOption
+                                    isExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 14.dp)
+            ) { Text("Date of Birth:", style = MaterialTheme.typography.titleMedium) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(46.dp)
+                ) { Text(text = "Click here") }
+                Spacer(modifier = Modifier.width(12.dp))
+                val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
+                Text(
+                    text = "${formatter.format(Date(birthDate))}",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showDatePicker = false
+                            birthDate = datePickerState.selectedDateMillis!!
+                        }) { Text(text = "OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) { Text(text = "Cancel") }
+                    }
+                ) { DatePicker(state = datePickerState) }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically,
@@ -389,8 +350,8 @@ fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, us
                         firstName = firstName,
                         lastName = lastName,
                         phone = phone,
-                        selectedGender = if (isGoogleUser) selectedGenderGoogle else profile.selectedGender,
-                        birthDate = if (isGoogleUser) Date(birthDateGoogle) else profile.birthDate,
+                        selectedGender = selectedGender,
+                        birthDate = Date(birthDate),
                         allowLocation = allowLocation,
                         allowActivityShare = allowActivityShare,
                         allowHealthDataShare = allowHealthDataShare
