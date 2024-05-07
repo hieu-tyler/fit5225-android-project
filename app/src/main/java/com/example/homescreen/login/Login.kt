@@ -229,24 +229,12 @@ fun PasswordResetDialog(initialEmail: String, onDismiss: () -> Unit, viewModel: 
 fun handleSignInResult(task: Task<GoogleSignInAccount>, viewModel: ViewModel, navController: NavController) {
     try {
         val account = task.getResult(ApiException::class.java)
-        val userProfile = UserProfile(
-            userId = "",
-            email = account.email ?: "",
-            firstName = account.givenName ?: "",
-            lastName = account.familyName ?: "",
-            password = "",
-            selectedGender = "",
-            phone = "",
-            birthDate = Date(),
-            allowLocation = false,
-            allowActivityShare = false,
-            allowHealthDataShare = false,
-            isGoogleUser = true  // Set this flag true here
-        )
-        viewModel.firebaseAuthWithGoogle(account.idToken!!, userProfile) {
-            navController.navigate(Routes.HealthMetrics.value) {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
+        viewModel.fetchOrCreateUserProfile(account) { userProfile ->
+            viewModel.firebaseAuthWithGoogle(account.idToken!!, userProfile) {
+                navController.navigate(Routes.HealthMetrics.value) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
                 }
             }
         }

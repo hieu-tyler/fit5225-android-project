@@ -18,12 +18,14 @@ import com.example.homescreen.nutrition.FoodAPI
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Date
 
 class ViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: Repository
@@ -62,6 +64,31 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                     Log.e("FirebaseAuth", "Firebase authentication failed", task.exception)
                 }
             }
+    }
+    fun fetchOrCreateUserProfile(account: GoogleSignInAccount, onSuccess: (UserProfile) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val existingProfile = repository.getUserProfileByEmail(account.email ?: "")
+            if (existingProfile != null) {
+                onSuccess(existingProfile)
+            } else {
+                val newUserProfile = UserProfile(
+                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                    email = account.email ?: "",
+                    firstName = account.givenName ?: "",
+                    lastName = account.familyName ?: "",
+                    password = "",
+                    selectedGender = "",
+                    phone = "",
+                    birthDate = Date(),
+                    allowLocation = false,
+                    allowActivityShare = false,
+                    allowHealthDataShare = false,
+                    isGoogleUser = true
+                )
+                insertUser(newUserProfile)
+                onSuccess(newUserProfile)
+            }
+        }
     }
 
     // Reset password

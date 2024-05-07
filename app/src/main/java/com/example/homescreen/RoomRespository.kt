@@ -127,6 +127,9 @@ class Repository(application: Application) {
             userProfileDAO.getUserById(userId)
         }
     }
+    fun getUserProfileByEmail(email: String): UserProfile? {
+        return userProfileDAO.getUserProfileByEmail(email)
+    }
     suspend fun insertUser(userProfile: UserProfile) {
         userProfileDAO.insertUser(userProfile)
     }

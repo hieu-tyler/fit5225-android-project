@@ -12,6 +12,9 @@ interface UserProfileDAO {
     @Query("SELECT * FROM user_profile WHERE userId = :userId")
     fun getUserById(userId: String): UserProfile
 
+    @Query("SELECT * FROM user_profile WHERE email = :email LIMIT 1")
+    fun getUserProfileByEmail(email: String): UserProfile?
+
     @Query("SELECT * FROM user_profile")
     fun getAllUsers(): Flow<List<UserProfile>>
 
