@@ -322,20 +322,17 @@ fun PieChartCalories(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, pro
     val carbPercentage = (carbs / maxLimit) / totalPercentage
     val fatPercentage = (fat / maxLimit) / totalPercentage
     val proteinPercentage = (protein / maxLimit) / totalPercentage
-//    val remainPercentage = 1f - (carbPercentage + fatPercentage + proteinPercentage)
 
     val pieEntries = listOf(
         PieEntry(carbPercentage * 100, "Carbs"),
         PieEntry(fatPercentage * 100, "Fat"),
         PieEntry(proteinPercentage * 100, "Protein"),
-//        PieEntry(remainPercentage * 100, "")
     )
     val pieDataSet = PieDataSet(pieEntries, "")
     val colors = mutableListOf<Int>()
     colors.add(Color.LightGray.toArgb())
     colors.add(Color.Green.toArgb())
     colors.add(Color.Blue.toArgb())
-//    colors.add(Color.White.toArgb())
     pieDataSet.colors = colors
     val pieData = PieData(pieDataSet)
     pieDataSet.xValuePosition =
