@@ -122,6 +122,12 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            Text(
+                text = "Nutrition Plans",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            )
+
             BreakfastCard(navController, breakfastCalories)
             Spacer(modifier = Modifier.height(8.dp))
             LunchCard(navController, lunchCalories)

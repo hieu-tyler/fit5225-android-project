@@ -146,7 +146,7 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
     ) { uri: Uri? ->
         uri?.let { imageUri ->
             // Call uploadImage with the selected image URI
-            uploadImage(imageUri)
+//            uploadImage(imageUri)
             imageString = imageUri.toString()
         }
     }
