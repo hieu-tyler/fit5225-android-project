@@ -5,21 +5,33 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.mapbox.android.core.permissions.PermissionsListener
+import com.mapbox.android.core.permissions.PermissionsManager
 
 class MainActivity : ComponentActivity() {
+
+    lateinit var permissionsManager: PermissionsManager
 
     private val viewModel : ViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             HomeScreenTheme {
                 HomeScreen(viewModel)
             }
         }
+
     }
+
 }
+
+
+
+
 
 // TODO: Clean up this HomeScreen function
 //@SuppressLint("UnrememberedMutableState")

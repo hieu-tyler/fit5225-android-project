@@ -75,7 +75,8 @@ fun HomeScreen(viewModel: ViewModel) {
             navController,
 //            startDestination = Routes.Home.value,
 //            startDestination = Routes.HealthMetrics.value,
-            startDestination = Routes.Login.value,
+//            startDestination = Routes.Login.value,
+            startDestination = Routes.ExerciseNav.value,
             Modifier.padding(paddingValues)
         ) {
 //            composable(Routes.Home.value) {
