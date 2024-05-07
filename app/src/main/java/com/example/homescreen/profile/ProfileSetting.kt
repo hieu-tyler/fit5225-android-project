@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,10 +48,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.homescreen.Routes
 import com.example.homescreen.ViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -61,16 +65,11 @@ import java.util.Locale
 @RequiresApi(0)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileSettingsScreen(
-    navController: NavController,
-    viewModel: ViewModel,
-    userId: String
-) {
+fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, userId: String) {
     // Load the user profile when the composable enters the composition
     LaunchedEffect(userId) {
         viewModel.loadUserProfile(userId)
     }
-
     // Observe UserProfile LiveData and provide a default empty UserProfile if null
     val userProfile by viewModel.userProfile.observeAsState()
     if (userProfile == null) {
@@ -83,7 +82,7 @@ fun ProfileSettingsScreen(
     var editingLastName by remember { mutableStateOf(false) }
     val gender = listOf("Male", "Female")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedGenderGoogle by rememberSaveable { mutableStateOf(gender[0]) }
+    var selectedGenderGoogle by rememberSaveable { mutableStateOf(userProfile?.selectedGender ?: gender[0]) }
     var selectedGender by remember { mutableStateOf(userProfile!!.selectedGender) }
     var phone by remember { mutableStateOf(userProfile!!.phone) }
     var editingPhone by remember { mutableStateOf(false) }
@@ -92,12 +91,14 @@ fun ProfileSettingsScreen(
         initialSelectedDateMillis = Instant.now().toEpochMilli()
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
-    var birthDateGoogle by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
+    var birthDateGoogle by rememberSaveable { mutableStateOf(userProfile?.birthDate?.time ?: calendar.timeInMillis) }
     var birthDate by remember { mutableStateOf(userProfile!!.birthDate) }
     var allowLocation by remember { mutableStateOf(userProfile!!.allowLocation) }
     var allowActivityShare by remember { mutableStateOf(userProfile!!.allowActivityShare) }
     var allowHealthDataShare by remember { mutableStateOf(userProfile!!.allowHealthDataShare) }
     var isGoogleUser = false
+    var showSnackbar by rememberSaveable { mutableStateOf(false) }
+    var snackbarMessage by rememberSaveable { mutableStateOf("") }
     val isSetFormValid = isSetFormValid(firstName, lastName, phone)
 
     if (userProfile!!.firstName != "NA") {
@@ -115,19 +116,14 @@ fun ProfileSettingsScreen(
         Text(
             text = "Profile Settings",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .padding(bottom = 12.dp)
+            modifier = Modifier.padding(top = 12.dp).padding(bottom = 12.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Column {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "First Name: ",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Text(text = "First Name: ", style = MaterialTheme.typography.titleMedium)
                 if (editingFirstName) {
                     OutlinedTextField(
                         value = firstName,
@@ -246,11 +242,7 @@ fun ProfileSettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 14.dp)
-            ) {
-                Text(
-                    "Date of Birth:",
-                    style = MaterialTheme.typography.titleMedium)
-            }
+            ) { Text("Date of Birth:", style = MaterialTheme.typography.titleMedium) }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -369,9 +361,8 @@ fun ProfileSettingsScreen(
             Text("Share Location Data", style = MaterialTheme.typography.titleMedium)
         }
         Row(verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp, horizontal = 12.dp)) {
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp, horizontal = 12.dp)
+        ) {
             Switch(
                 checked = allowActivityShare,
                 onCheckedChange = { allowActivityShare = it },
@@ -406,39 +397,42 @@ fun ProfileSettingsScreen(
                     )
                     viewModel.updateUser(updatedProfile) {
                         Log.d("ProfileUpdate", "Profile updated successfully.")
+                        snackbarMessage = "Profile updated successfully!"
+                        showSnackbar = true
                     }
-                    Log.d("ProfileUpdate", "Successfully updated profile: $updatedProfile")
                 } ?: run {
-                    Log.d("ProfileUpdate", "Profile is null, cannot update.")
+                    Log.d("ProfileUpdate", "Fail to update profile.")
                 }
             },
             enabled = isSetFormValid,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Save Changes")
+        ) { Text("Save Changes") }
+        if (showSnackbar) {
+            Snackbar(
+                action = { Button(onClick = { showSnackbar = false }) { Text("OK") } }
+            ) { Text(snackbarMessage) }
         }
         Spacer(modifier = Modifier.height(12.dp))
-        if (!isGoogleUser) {
-            OutlinedButton(
-                onClick = { signOut(navController) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Log Out")
-            }
-        }
+        // Sign out
+        val context = LocalContext.current
+        OutlinedButton(
+            onClick = {
+                val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build()
+                val googleSignInClient = GoogleSignIn.getClient(context, googleSignInOptions)
+                googleSignInClient.signOut().addOnCompleteListener {
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate(Routes.Login.value) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Log Out") }
     }
 }
 
 fun isSetFormValid(firstName: String, lastName: String, phone: String): Boolean {
     return firstName.isNotEmpty() && lastName.isNotEmpty() && phone.isNotEmpty()
-}
-
-fun signOut(navController: NavController) {
-    val auth = FirebaseAuth.getInstance()
-    auth.signOut()
-    navController.navigate(Routes.Login.value) {
-        popUpTo(navController.graph.startDestinationId) {
-            inclusive = true
-        }
-    }
 }
