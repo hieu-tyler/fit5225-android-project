@@ -2,8 +2,10 @@ package com.example.homescreen
 
 import android.app.Application
 import android.content.ContentValues
+import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.activity.result.IntentSenderRequest
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +21,11 @@ import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.FoodSearchResponse
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.profile.UserProfile
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -29,6 +35,62 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         repository = Repository(application)
+    }
+
+    // Google sign-in
+    private val googleSignInClient: GoogleSignInClient
+
+    init {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(application.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(application, gso)
+    }
+
+    private val _googleSignInIntent = MutableLiveData<Intent>()
+    val googleSignInIntent: LiveData<Intent> = _googleSignInIntent
+
+    fun signInWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        _googleSignInIntent.value = signInIntent
+    }
+//    private val googleSignInClient: GoogleSignInClient by lazy {
+//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//            .requestIdToken(application.getString(R.string.default_web_client_id))
+//            .requestEmail()
+//            .build()
+//        GoogleSignIn.getClient(application, gso)
+//    }
+//
+//    // Trigger sign-in process
+//    fun signInWithGoogle() {
+//        val signInIntent = googleSignInClient.signInIntent
+//        _signInIntent.value = signInIntent
+//    }
+//
+//    private val _signInIntent = MutableLiveData<Intent>()
+//    val signInIntent: LiveData<Intent> = _signInIntent
+//
+    // LiveData to communicate with the UI
+    private val _navigateToHealthMetrics = MutableLiveData<Boolean>()
+    val navigateToHealthMetrics: LiveData<Boolean> = _navigateToHealthMetrics
+
+    fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        FirebaseAuth.getInstance().signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("FirebaseAuth", "Firebase authentication successful")
+                    _navigateToHealthMetrics.value = true
+                } else {
+                    Log.e("FirebaseAuth", "Firebase authentication failed", task.exception)
+                }
+            }
+    }
+
+    fun resetNavigationTrigger() {
+        _navigateToHealthMetrics.value = false
     }
 
     // Reset password
