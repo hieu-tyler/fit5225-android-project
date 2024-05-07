@@ -3,10 +3,7 @@ package com.example.homescreen
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
-import android.os.Build
 import android.util.Log
-import androidx.activity.result.IntentSenderRequest
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -16,7 +13,6 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.UserActivity
-import com.example.homescreen.health_metrics.UserHealthMetrics
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.FoodAPI
 import com.example.homescreen.nutrition.PersonalNutrition
@@ -38,7 +34,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     // Google sign-in
     private val googleSignInClient: GoogleSignInClient
-
     init {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(application.getString(R.string.default_web_client_id))
@@ -46,41 +41,22 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             .build()
         googleSignInClient = GoogleSignIn.getClient(application, gso)
     }
-
     private val _googleSignInIntent = MutableLiveData<Intent>()
     val googleSignInIntent: LiveData<Intent> = _googleSignInIntent
-
     fun signInWithGoogle() {
+        Log.d("signInWithGoogle", "signInWithGoogle")
         val signInIntent = googleSignInClient.signInIntent
         _googleSignInIntent.value = signInIntent
     }
-//    private val googleSignInClient: GoogleSignInClient by lazy {
-//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//            .requestIdToken(application.getString(R.string.default_web_client_id))
-//            .requestEmail()
-//            .build()
-//        GoogleSignIn.getClient(application, gso)
-//    }
-//
-//    // Trigger sign-in process
-//    fun signInWithGoogle() {
-//        val signInIntent = googleSignInClient.signInIntent
-//        _signInIntent.value = signInIntent
-//    }
-//
-//    private val _signInIntent = MutableLiveData<Intent>()
-//    val signInIntent: LiveData<Intent> = _signInIntent
-//
-    // LiveData to communicate with the UI
-    private val _navigateToHealthMetrics = MutableLiveData<Boolean>()
-    val navigateToHealthMetrics: LiveData<Boolean> = _navigateToHealthMetrics
 
-    fun firebaseAuthWithGoogle(idToken: String) {
+    private val _navigateToHealthMetrics = MutableLiveData<Boolean>()
+    fun firebaseAuthWithGoogle(idToken: String, userProfile: UserProfile, onSuccess: () -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Log.d("FirebaseAuth", "Firebase authentication successful")
+                    updateUser(userProfile, onSuccess)
+                    Log.d("Google userProfile", "$userProfile")
                     _navigateToHealthMetrics.value = true
                 } else {
                     Log.e("FirebaseAuth", "Firebase authentication failed", task.exception)
@@ -88,31 +64,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
-    fun resetNavigationTrigger() {
-        _navigateToHealthMetrics.value = false
-    }
-
     // Reset password
     private val _statusMessage = MutableLiveData<String>()
-    val statusMessage: LiveData<String> = _statusMessage
-
-    val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
-    val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
-    val retrofitResponse: MutableState<List<FoodAPI>> = mutableStateOf((emptyList()))
-
-    // Activity
-    val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()
-    val allNames: LiveData<List<String>> = repository.allNames.asLiveData()
-
-    // User_Activity
-    private val _userProfile = MutableLiveData<UserProfile>()
-    val userProfile: MutableLiveData<UserProfile> = _userProfile
-    val allUsers: LiveData<List<UserProfile>> = repository.allUsers.asLiveData()
-
-    val allUserActivities: LiveData<List<UserActivity>> = repository.allUserActivities.asLiveData()
-    val allDistances: LiveData<List<Float>> = repository.allDistances.asLiveData()
-
-    // Reset password
     fun sendPasswordResetEmail(email: String) {
         val auth = FirebaseAuth.getInstance()
         auth.sendPasswordResetEmail(email)
@@ -124,6 +77,21 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
     }
+
+    val allFoods: LiveData<List<Food>> = repository.allFoods.asLiveData()
+    val allPersonalNutrition: LiveData<List<PersonalNutrition>> = repository.allPersonalNutrition.asLiveData()
+    val retrofitResponse: MutableState<List<FoodAPI>> = mutableStateOf((emptyList()))
+
+    // Activity
+    val allActivities: LiveData<List<Activity>> = repository.allActivities.asLiveData()
+    val allNames: LiveData<List<String>> = repository.allNames.asLiveData()
+    val allUserActivities: LiveData<List<UserActivity>> = repository.allUserActivities.asLiveData()
+    val allDistances: LiveData<List<Float>> = repository.allDistances.asLiveData()
+
+    // User profile
+    private val _userProfile = MutableLiveData<UserProfile>()
+    val userProfile: MutableLiveData<UserProfile> = _userProfile
+    val allUsers: LiveData<List<UserProfile>> = repository.allUsers.asLiveData()
 
     fun insertFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertFood(food)
@@ -213,15 +181,27 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     // User Profile
     fun loadUserProfile(userId: String) {
         viewModelScope.launch {
-            val profile = repository.getUserProfile(userId)
-            _userProfile.value = profile!!
+            try {
+                val profile = repository.getUserProfile(userId)
+                _userProfile.value = profile!!
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Failed to load user profile", e)
+            }
         }
     }
     fun insertUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertUser(userProfile)
     }
-    fun updateUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
-        repository.updateUser(userProfile)
+    fun updateUser(userProfile: UserProfile, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                repository.updateUser(userProfile)
+                _userProfile.postValue(userProfile)
+                onSuccess()
+            } catch (e: Exception) {
+                Log.e("UpdateUser", "Failed to update user: ${e.message}")
+            }
+        }
     }
     fun deleteUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteUser(userProfile)

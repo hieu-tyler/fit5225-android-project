@@ -36,19 +36,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.example.homescreen.profile.UserProfile
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Date
 
 @Composable
 fun LoginScreen(loginWithEmailPassword: (String, String, (String) -> Unit) -> Unit,
@@ -59,62 +58,24 @@ fun LoginScreen(loginWithEmailPassword: (String, String, (String) -> Unit) -> Un
     var showResetPasswordDialog by remember { mutableStateOf(false) }
     var loginError by remember { mutableStateOf("") }
 
-    val context = LocalContext.current
+    // Google Sign-In intent handling
     val signInIntent by viewModel.googleSignInIntent.observeAsState()
-
-    // Setup the launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            handleSignInResult(task, viewModel)
+            Log.d("handleSignInResult", "handleSignInResult")
+            handleSignInResult(task, viewModel, navController)
         }
     }
 
-    // Listen for changes in the signInIntent and launch the Google Sign-In process when not null
+    // Trigger Google Sign-In
     LaunchedEffect(signInIntent) {
-        signInIntent?.let { intent ->
-            googleSignInLauncher.launch(intent)
-            navController.navigate(Routes.HealthMetrics.value) {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
-                }
-            }
+        signInIntent?.let {
+            googleSignInLauncher.launch(it)
         }
     }
-
-//    // Observing the navigation LiveData
-//    val navigateToHealthMetrics by viewModel.navigateToHealthMetrics.observeAsState()
-//
-//    // React to changes in navigation trigger
-//    LaunchedEffect(key1 = navigateToHealthMetrics) {
-//        navigateToHealthMetrics?.let {
-//            if (it) {
-//                navController.navigate(Routes.HealthMetrics.value) {
-//                    popUpTo(navController.graph.startDestinationId) {
-//                        inclusive = true
-//                    }
-//                }
-//                viewModel.resetNavigationTrigger()  // Make sure to reset the trigger
-//            }
-//        }
-//    }
-
-//    val context = LocalContext.current
-//    val signInIntent by viewModel.signInIntent.observeAsState()
-//    val navigateToHealthMetrics by viewModel.navigateToHealthMetrics.observeAsState()
-//
-//    // Observe the navigation event
-//    LaunchedEffect(navigateToHealthMetrics) {
-//        if (navigateToHealthMetrics == true) {
-//            navController.navigate(Routes.HealthMetrics.value) {  // Use your actual home route
-//                popUpTo(navController.graph.startDestinationId) {
-//                    inclusive = true
-//                }
-//            }
-//        }
-//    }
 
     if (showResetPasswordDialog) {
         PasswordResetDialog(
@@ -134,7 +95,7 @@ fun LoginScreen(loginWithEmailPassword: (String, String, (String) -> Unit) -> Un
         Text(
             text = "Login to Your Account",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp) // Add some space below the title
+            modifier = Modifier.padding(bottom = 32.dp)
         )
         TextField(
             value = email,
@@ -265,12 +226,31 @@ fun PasswordResetDialog(initialEmail: String, onDismiss: () -> Unit, viewModel: 
     )
 }
 
-fun handleSignInResult(task: Task<GoogleSignInAccount>, viewModel: ViewModel) {
+fun handleSignInResult(task: Task<GoogleSignInAccount>, viewModel: ViewModel, navController: NavController) {
     try {
         val account = task.getResult(ApiException::class.java)
-        Log.d("GoogleLogin", "Google Sign-In successful for: ${account.email}")
-        viewModel.firebaseAuthWithGoogle(account.idToken!!)
+        val userProfile = UserProfile(
+            userId = "",
+            email = account.email ?: "",
+            firstName = account.givenName ?: "",
+            lastName = account.familyName ?: "",
+            password = "",
+            selectedGender = "",
+            phone = "",
+            birthDate = Date(),
+            allowLocation = false,
+            allowActivityShare = false,
+            allowHealthDataShare = false,
+            isGoogleUser = true  // Set this flag true here
+        )
+        viewModel.firebaseAuthWithGoogle(account.idToken!!, userProfile) {
+            navController.navigate(Routes.HealthMetrics.value) {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
     } catch (e: ApiException) {
-        Log.e("GoogleLogin", "signInResult:failed code=${e.statusCode}", e)
+        Log.e("SignIn", "Google sign-in failed", e)
     }
 }
