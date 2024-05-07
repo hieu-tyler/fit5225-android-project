@@ -7,5 +7,5 @@ interface FoodFactService {
     suspend fun getFoodFact(
         @Query("query") foodName: String,
         @Query("X-Api-Key") apiKey: String
-    ): FoodSearchResponse
+    ): List<FoodAPI>
 }

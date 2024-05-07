@@ -12,8 +12,8 @@ import com.example.homescreen.nutrition.FoodDAO
 import com.example.homescreen.nutrition.Food
 import com.example.homescreen.nutrition.PersonalNutrition
 import com.example.homescreen.nutrition.PersonalNutritionDAO
+import com.example.homescreen.nutrition.FoodAPI
 import com.example.homescreen.nutrition.FoodRetrofit
-import com.example.homescreen.nutrition.FoodSearchResponse
 import com.example.homescreen.profile.UserProfile
 import com.example.homescreen.profile.UserProfileDAO
 import kotlinx.coroutines.Dispatchers
@@ -43,12 +43,12 @@ class Repository(application: Application) {
     val allFoods: Flow<List<Food>> = foodDao.getAllFoods()
     val allPersonalNutrition: Flow<List<PersonalNutrition>> = personalNutritionDao.getAllPersonalNutrition()
     private val searchService = FoodRetrofit.retrofitService
-    private val API_KEY = "Here enter your API key"
+    private val API_KEY = "PUBQhZ5p5CufNYJrC80wsw==NufwNlb4B2Gid3eO"
 
-    suspend fun getResponse(keyword: String): FoodSearchResponse {
+    suspend fun getResponse(keyword: String): List<FoodAPI> {
         return searchService.getFoodFact(
-            API_KEY,
-            keyword
+            keyword,
+            API_KEY
         )
     }
     val allUsers: Flow<List<UserProfile>> = userProfileDAO.getAllUsers()
