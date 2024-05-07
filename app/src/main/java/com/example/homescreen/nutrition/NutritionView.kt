@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,7 +75,7 @@ fun NutritionFormView(navController: NavController, food: Food) {
                 .padding(64.dp)
         ) {
             Image(
-                painter = painterResource(resourceId),
+                painter = if (resourceId != 0) painterResource(resourceId) else rememberImagePainter(food.imageString),
                 contentDescription = "Food Image",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -126,10 +125,7 @@ fun NutritionInfoItem(label: String, value: String) {
 }
 
 fun uploadImage(imageUri: Uri) {
-    // Implement logic to upload image to server or cloud storage service
-    // Once the upload is successful, update the imageUrl variable with the URL received from the server
-    // For example:
-    // imageUrl = "https://example.com/image.jpg"
+    // TODO: Implement logic to upload image to server or cloud storage service
 }
 
 @Composable
@@ -140,7 +136,10 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
     var carbs by remember { mutableStateOf("") }
     var fats by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
+    var imageString by remember {mutableStateOf("")}
     val focusRequester = remember { FocusRequester() }
+    val context = LocalContext.current
+
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -148,9 +147,9 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
         uri?.let { imageUri ->
             // Call uploadImage with the selected image URI
             uploadImage(imageUri)
+            imageString = imageUri.toString()
         }
     }
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -167,7 +166,11 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
         Row {
             // Image preview
             Image(
-                painter = rememberImagePainter(imageUrl),
+                painter = if (imageUrl == "") {
+                    rememberImagePainter(data = imageString)
+                } else {
+                    rememberImagePainter(imageUrl)
+                },
                 contentDescription = "Food Image",
                 modifier = Modifier
                     .size(128.dp)
@@ -277,6 +280,7 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
                         val newFood = Food(
                             name = foodName,
                             imageUrl = imageUrl,
+                            imageString = imageString,
                             calories = calories.toIntOrNull() ?: 0,
                             protein = protein.toFloatOrNull() ?: 0f,
                             carbs = carbs.toFloatOrNull() ?: 0f,
@@ -337,7 +341,7 @@ fun FoodListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = rememberImagePainter(resourceId),
+                painter = if (resourceId != 0) rememberImagePainter(resourceId) else rememberImagePainter(food.imageString),
                 contentDescription = "Food Image",
                 modifier = Modifier
                     .size(72.dp)

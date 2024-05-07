@@ -112,11 +112,13 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         }
-                        IconButton(onClick = {
-                            saveNutrition(viewModel, quantityMap, category)
-                            navController.popBackStack()
-                        }) {
-                            Text("Save")
+                        if (!showCreate) {
+                            IconButton(onClick = {
+                                saveNutrition(viewModel, quantityMap, category)
+                                navController.popBackStack()
+                            }) {
+                                Text("Save")
+                            }
                         }
                     },
                     navigationIcon = {
@@ -254,6 +256,7 @@ suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
     for (foodAPI in response.value) {
         val name = foodAPI.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         val imageUrl = name.lowercase().replace(" ", "_")
+        val imageString = ""
         val calories = foodAPI.calories
         val protein = foodAPI.protein_g.toFloat()
         val carbs = foodAPI.carbohydrates_total_g.toFloat()
@@ -264,6 +267,7 @@ suspend fun prepareFoodList(viewModel: ViewModel): List<Food> {
         val food = Food(
             name = name,
             imageUrl = imageUrl,
+            imageString = imageString,
             calories = calories.roundToInt(),
             protein = protein,
             carbs = carbs,
