@@ -297,36 +297,3 @@ fun createUserWithEmailPassword(firstName: String, lastName: String, email: Stri
         }
     }
 }
-
-//fun createUserWithEmailPassword(firstName: String, lastName: String, email: String, password: String,
-//                                selectedGender: String, phone: String, birthDate: Date, navController: NavController) {
-//    val auth = FirebaseAuth.getInstance()
-//    auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-//        if (task.isSuccessful) {
-//            val user = auth.currentUser
-//            val userId = user?.uid // Get the user ID from the Firebase Auth User
-//            val userMap = hashMapOf(
-//                "firstName" to firstName,
-//                "lastName" to lastName,
-//                "gender" to selectedGender,
-//                "phone" to phone,
-//                "birthDate" to birthDate
-//            )
-//            // Store additional details in Firestore
-//            user?.let {
-//                FirebaseFirestore.getInstance().collection("users").document(userId!!)
-//                    .set(userMap)
-//                    .addOnSuccessListener {
-//                        Log.d("Register", "User profile created for $userId")
-//                        // Navigate to the next screen or home screen
-//                        navController.navigate(Routes.HealthMetrics.value)
-//                    }
-//                    .addOnFailureListener { e ->
-//                        Log.w("Register", "Error writing document", e)
-//                    }
-//            }
-//        } else {
-//            Log.e("Register", "Failed to create user: ${task.exception?.message}")
-//        }
-//    }
-//}

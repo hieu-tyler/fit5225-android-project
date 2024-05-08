@@ -53,7 +53,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         val signInIntent = googleSignInClient.signInIntent
         _googleSignInIntent.value = signInIntent
     }
-
     private val _navigateToHealthMetrics = MutableLiveData<Boolean>()
     fun firebaseAuthWithGoogle(idToken: String, userProfile: UserProfile, onSuccess: () -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -61,7 +60,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     updateUser(userProfile, onSuccess)
-                    Log.d("Google userProfile", "$userProfile")
                     _navigateToHealthMetrics.value = true
                 } else {
                     Log.e("FirebaseAuth", "Firebase authentication failed", task.exception)
@@ -130,15 +128,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun uploadImageToFirebase(imageUri: Uri) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val storageRef = FirebaseStorage.getInstance().getReference("uploads/$userId/${imageUri.lastPathSegment}")
-//        storageRef.putFile(imageUri).addOnSuccessListener { taskSnapshot ->
-//            taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
-//                val downloadUrl = uri.toString()
-//                saveImageUriToDatabase(userId, downloadUrl)
-//                updateProfileImageUrl(downloadUrl)
         storageRef.putFile(imageUri).addOnSuccessListener {
             it.metadata?.reference?.downloadUrl?.addOnSuccessListener { uri ->
                 val imageUrl = uri.toString()
-                Log.d("imageUrl in uploadImageToFirebase", "Image uploaded, URL: $imageUrl")
                 saveImageUriToDatabase(userId, imageUrl)
             }
         }.addOnFailureListener {
@@ -146,21 +138,9 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             Log.e("Upload", "Upload failed", it)
         }
     }
-    fun updateProfileImageUrl(imageUrl: String) {
-        val user = FirebaseAuth.getInstance().currentUser
-        val profileUpdates = userProfileChangeRequest {
-            photoUri = Uri.parse(imageUrl)
-        }
-        user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.d("ProfileUpdate", "User profile updated with new image URL.")
-            }
-        }
-    }
     fun saveImageUriToDatabase(userId: String, imageUrl: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d("imageUrl in saveImageUriToDatabase", "$imageUrl")
-            repository.updateProfileImage(userId, imageUrl)
+            repository.updateProfileImage(userId, imageUrl, this)
         }
     }
     fun setImageUri(uri: Uri) {
@@ -269,6 +249,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     fun insertUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertUser(userProfile)
     }
+
     fun updateUser(userProfile: UserProfile, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -280,6 +261,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     fun deleteUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteUser(userProfile)
     }

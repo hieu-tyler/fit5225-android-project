@@ -142,11 +142,14 @@ class Repository(application: Application) {
     suspend fun updateUser(userProfile: UserProfile) {
         userProfileDAO.updateUser(userProfile)
     }
-    fun updateProfileImage(userId: String, imageUrl: String) {
-        Log.d("userId in repository", "$userId")
-        Log.d("imageUrl in repository", "$imageUrl")
-        CoroutineScope(Dispatchers.IO).launch {
-            userProfileDAO.updateProfileImage(userId, imageUrl)
+    fun updateProfileImage(userId: String, imageUrl: String, coroutineScope: CoroutineScope) {
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                userProfileDAO.updateProfileImage(userId, imageUrl)
+                Log.d("UpdateProfileImage", "Update successful for user $userId")
+            } catch (e: Exception) {
+                Log.e("UpdateProfileImage", "Failed to update profile image for user $userId", e)
+            }
         }
     }
 }
