@@ -3,6 +3,7 @@ package com.example.homescreen
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -120,6 +123,40 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     val userProfile: MutableLiveData<UserProfile> = _userProfile
     val allUsers: LiveData<List<UserProfile>> = repository.allUsers.asLiveData()
 
+    private val _profileImageUri = MutableLiveData<Uri>()
+    val profileImageUri: LiveData<Uri> = _profileImageUri
+
+    fun uploadImageToFirebase(imageUri: Uri) {
+        val storageRef = FirebaseStorage.getInstance().getReference("uploads/${imageUri.lastPathSegment}")
+        val uploadTask = storageRef.putFile(imageUri)
+        uploadTask.addOnSuccessListener {
+            // Handle successful uploads
+            storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                // Here you get the download URL for the uploaded file
+                Log.d("Upload", "File uploaded successfully: $downloadUri")
+                updateProfileImageUrl(downloadUri.toString())  // If you want to update the user's profile or database
+            }
+        }.addOnFailureListener {
+            // Handle unsuccessful uploads
+            Log.e("Upload", "Upload failed", it)
+        }
+    }
+    fun updateProfileImageUrl(imageUrl: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val profileUpdates = userProfileChangeRequest {
+            photoUri = Uri.parse(imageUrl)
+        }
+        user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.d("ProfileUpdate", "User profile updated with new image URL.")
+            }
+        }
+    }
+    fun setImageUri(uri: Uri) {
+        _profileImageUri.postValue(uri)
+    }
+
+    // Food
     fun insertFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertFood(food)
     }
