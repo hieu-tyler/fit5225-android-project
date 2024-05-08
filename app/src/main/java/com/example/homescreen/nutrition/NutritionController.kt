@@ -56,9 +56,9 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
     val quantityMap = remember { mutableStateMapOf<Food, Int>() }
 
     // Fetch foods from the ViewModel when the composable is first launched
-    LaunchedEffect(Unit) {
+    LaunchedEffect(allPersonalNutrition) {
         // Handle Food
-        Log.d(ContentValues.TAG, "Food crawling")
+        Log.d(ContentValues.TAG, "Nutrition checking")
 
         if (viewModel.allFoods.value?.isEmpty() == true) {
             Log.d(ContentValues.TAG, "Food initialising")
@@ -67,6 +67,10 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
                     Log.d(ContentValues.TAG, "Food inserting")
                     val defaultFoods = prepareFoodList(viewModel)
                     viewModel.insertFoods(defaultFoods)
+                    if (viewModel.allFoods.isInitialized) {
+                        navController.popBackStack()
+                        navController.navigate("foodList/$category")
+                    }
                 } catch (e: SQLiteConstraintException) {
                     Log.d(ContentValues.TAG, "Error SQL Unique Constraints")
                 }
@@ -87,15 +91,6 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
             }
         }
     }
-//    LaunchedEffect(allPersonalNutrition) {
-//        for (nutrition in allPersonalNutrition) {
-//            val currentFood = foods.find {it.name == nutrition.foodName}
-//            if (currentFood != null && category == nutrition.category) {
-//                quantityMap[currentFood] = quantityMap[currentFood]!! + 1
-//                Log.d(ContentValues.TAG, "Quantity $currentFood updated - ${quantityMap[currentFood]}")
-//            }
-//        }
-//    }
 
     Scaffold(
         topBar = {
@@ -114,7 +109,7 @@ fun NutritionListView(navController: NavController, viewModel: ViewModel, catego
                         }
                         if (!showCreate) {
                             IconButton(onClick = {
-                                saveNutrition(viewModel, quantityMap, category)
+                                  saveNutrition(viewModel, quantityMap, category)
                                 navController.popBackStack()
                             }) {
                                 Text("Save")
