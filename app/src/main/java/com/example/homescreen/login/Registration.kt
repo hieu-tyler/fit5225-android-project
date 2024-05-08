@@ -284,7 +284,8 @@ fun createUserWithEmailPassword(firstName: String, lastName: String, email: Stri
                     birthDate = birthDate,
                     allowLocation = false,
                     allowActivityShare = false,
-                    allowHealthDataShare = false
+                    allowHealthDataShare = false,
+                    profileImageUrl = ""
                 )
                 viewModel.insertUser(userProfile)
                 navController.navigate(Routes.Login.value)  // Navigate to login screen after successful registration

@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -154,6 +155,7 @@ fun ProfileSettingsScreen(navController: NavController, viewModel: ViewModel, us
                         contentDescription = "Profile Picture",
                         modifier = Modifier
                             .fillMaxSize()
+                            .background(Color.LightGray, CircleShape)
                             .clip(CircleShape)
                             .align(Alignment.Center)
                     )

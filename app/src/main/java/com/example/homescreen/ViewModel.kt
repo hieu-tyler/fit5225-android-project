@@ -86,7 +86,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                     allowLocation = false,
                     allowActivityShare = false,
                     allowHealthDataShare = false,
-                    isGoogleUser = true
+                    isGoogleUser = true,
+                    profileImageUrl = ""
                 )
                 insertUser(newUserProfile)
                 onSuccess(newUserProfile)
@@ -127,14 +128,18 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     val profileImageUri: LiveData<Uri> = _profileImageUri
 
     fun uploadImageToFirebase(imageUri: Uri) {
-        val storageRef = FirebaseStorage.getInstance().getReference("uploads/${imageUri.lastPathSegment}")
-        val uploadTask = storageRef.putFile(imageUri)
-        uploadTask.addOnSuccessListener {
-            // Handle successful uploads
-            storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                // Here you get the download URL for the uploaded file
-                Log.d("Upload", "File uploaded successfully: $downloadUri")
-                updateProfileImageUrl(downloadUri.toString())  // If you want to update the user's profile or database
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val storageRef = FirebaseStorage.getInstance().getReference("uploads/$userId/${imageUri.lastPathSegment}")
+//        storageRef.putFile(imageUri).addOnSuccessListener { taskSnapshot ->
+//            taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
+//                val downloadUrl = uri.toString()
+//                saveImageUriToDatabase(userId, downloadUrl)
+//                updateProfileImageUrl(downloadUrl)
+        storageRef.putFile(imageUri).addOnSuccessListener {
+            it.metadata?.reference?.downloadUrl?.addOnSuccessListener { uri ->
+                val imageUrl = uri.toString()
+                Log.d("imageUrl in uploadImageToFirebase", "Image uploaded, URL: $imageUrl")
+                saveImageUriToDatabase(userId, imageUrl)
             }
         }.addOnFailureListener {
             // Handle unsuccessful uploads
@@ -150,6 +155,12 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             if (task.isSuccessful) {
                 Log.d("ProfileUpdate", "User profile updated with new image URL.")
             }
+        }
+    }
+    fun saveImageUriToDatabase(userId: String, imageUrl: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.d("imageUrl in saveImageUriToDatabase", "$imageUrl")
+            repository.updateProfileImage(userId, imageUrl)
         }
     }
     fun setImageUri(uri: Uri) {
@@ -247,12 +258,14 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val profile = repository.getUserProfile(userId)
+                Log.d("profile in ViewModel", "$profile")
                 _userProfile.value = profile!!
             } catch (e: Exception) {
                 Log.e("ViewModel", "Failed to load user profile", e)
             }
         }
     }
+
     fun insertUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertUser(userProfile)
     }

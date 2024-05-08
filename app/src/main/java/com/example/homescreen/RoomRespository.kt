@@ -1,6 +1,7 @@
 package com.example.homescreen
 
 import android.app.Application
+import android.util.Log
 import com.example.homescreen.exercise_report.Activity
 import com.example.homescreen.exercise_report.ActivityDAO
 import com.example.homescreen.exercise_report.UserActivity
@@ -13,8 +14,10 @@ import com.example.homescreen.nutrition.FoodAPI
 import com.example.homescreen.nutrition.FoodRetrofit
 import com.example.homescreen.profile.UserProfile
 import com.example.homescreen.profile.UserProfileDAO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class Repository(application: Application) {
@@ -138,5 +141,12 @@ class Repository(application: Application) {
     }
     suspend fun updateUser(userProfile: UserProfile) {
         userProfileDAO.updateUser(userProfile)
+    }
+    fun updateProfileImage(userId: String, imageUrl: String) {
+        Log.d("userId in repository", "$userId")
+        Log.d("imageUrl in repository", "$imageUrl")
+        CoroutineScope(Dispatchers.IO).launch {
+            userProfileDAO.updateProfileImage(userId, imageUrl)
+        }
     }
 }
