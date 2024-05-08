@@ -15,6 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.homescreen.Routes
 import com.example.homescreen.ViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import java.sql.Time
 import java.time.Instant
 
@@ -25,8 +31,7 @@ fun MapScreen(navController: NavController, viewModel: ViewModel) {
     Box (
         modifier = Modifier.fillMaxSize()
     ) {
-
-        MapView()
+        GoogleMapScreen()
 
         FilledTonalButton(
             onClick = { calculateUpdate(viewModel,navController, startTimestamp) },
@@ -37,6 +42,24 @@ fun MapScreen(navController: NavController, viewModel: ViewModel) {
         ) {
             Text(text = "Stop Exercise")
         }
+    }
+}
+
+@Composable
+fun GoogleMapScreen() {
+    val singapore = LatLng(1.35, 103.87)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(singapore, 10f)
+    }
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState
+    ) {
+        Marker(
+            state = MarkerState(position = singapore),
+            title = "Singapore",
+            snippet = "Marker in Singapore"
+        )
     }
 }
 

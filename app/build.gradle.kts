@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -40,6 +41,8 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -49,6 +52,20 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+//    secrets {
+//        // Optionally specify a different file name containing your secrets.
+//        // The plugin defaults to "local.properties"
+//        propertiesFileName = "secrets.properties"
+//
+//        // A properties file containing default secret values. This file can be
+//        // checked in version control.
+//        defaultPropertiesFileName = "local.defaults.properties"
+//
+//        // Configure which keys should be ignored by the plugin by providing regular expressions.
+//        // "sdk.dir" is ignored by default.
+//        ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+//        ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
+//    }
     buildToolsVersion = "34.0.0"
 }
 
@@ -81,6 +98,10 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.google.code.gson:gson:2.10.1")
+    implementation ("com.google.maps.android:maps-compose:4.4.1")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     ksp("androidx.room:room-compiler:2.6.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
