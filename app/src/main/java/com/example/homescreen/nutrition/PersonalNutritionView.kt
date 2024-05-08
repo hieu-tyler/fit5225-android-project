@@ -87,7 +87,7 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
         fat = totalFats.roundToInt()
         totalCalories = breakfastCalories + lunchCalories + dinnerCalories
         Log.d(ContentValues.TAG, "carbs: $carbs, protein $protein, fat $fat, totalCalories $totalCalories")
-        dataReady = true
+        dataReady = allPersonalNutrition.isNotEmpty()
     }
 
     Scaffold(
@@ -102,25 +102,19 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
         ) {
-
-            if (dataReady) {
                 CaloriesStatCard(
                     carbs.toFloat(), carbsLimit,
                     fat.toFloat(), fatLimit,
                     protein.toFloat(), proteinLimit,
-                    totalCalories)
-            } else {
-                // Show loading indicator or placeholder
-                Column(modifier = Modifier
-                    .height(200.dp)
-                    .padding(4.dp)
-                    .fillMaxWidth()
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
+                    totalCalories, dataReady)
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Nutrition Plans",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            )
 
             BreakfastCard(navController, breakfastCalories)
             Spacer(modifier = Modifier.height(8.dp))
@@ -134,7 +128,12 @@ fun PersonalNutritionView(navController: NavController, viewModel: ViewModel) {
 }
 
 @Composable
-fun CaloriesStatCard(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, protein:Float, proteinLimit: Int, totalCalories: Float) {
+fun CaloriesStatCard(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, protein:Float, proteinLimit: Int, totalCalories: Float, dataReady: Boolean) {
+    val maxLimit = maxOf(carbsLimit, fatLimit, proteinLimit)
+    val totalPercentage = (carbs / maxLimit) + (fat / maxLimit) + (protein / maxLimit)
+    val carbPercentage = (carbs / maxLimit) / totalPercentage
+    val fatPercentage = (fat / maxLimit) / totalPercentage
+    val proteinPercentage = (protein / maxLimit) / totalPercentage
     Card (
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -145,12 +144,19 @@ fun CaloriesStatCard(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, pro
             .padding(4.dp)
             .fillMaxWidth()
         ) {
+            if (dataReady)
             PieChartCalories(
-                carbs, carbsLimit,
-                fat, fatLimit,
-                protein, proteinLimit,
+                carbPercentage,
+                fatPercentage,
+                proteinPercentage,
                 totalCalories
             )
+            else Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                CircularProgressIndicator()
+            }
         }
         Row(
             modifier = Modifier
@@ -283,9 +289,11 @@ fun DinnerCard(navController: NavController, dinnerCalories: Float) {
 fun ProgressBarWithPercentage(
     progress: Float
 ) {
-    val indicatorColor = if (progress < 1f) {
+    val indicatorColor = if (progress < 0.7f) {
             Color.Green
-        } else {
+        } else if (progress < 1f) {
+            Color.Yellow
+        }  else {
             Color.Red
         }
     Row(
@@ -316,13 +324,7 @@ fun PercentageText(progress: Float) {
 }
 
 @Composable
-fun PieChartCalories(carbs:Float, carbsLimit: Int, fat:Float, fatLimit: Int, protein:Float, proteinLimit: Int, totalCalories: Float) {
-    val maxLimit = maxOf(carbsLimit, fatLimit, proteinLimit)
-    val totalPercentage = (carbs / maxLimit) + (fat / maxLimit) + (protein / maxLimit)
-    val carbPercentage = (carbs / maxLimit) / totalPercentage
-    val fatPercentage = (fat / maxLimit) / totalPercentage
-    val proteinPercentage = (protein / maxLimit) / totalPercentage
-
+fun PieChartCalories(carbPercentage:Float, fatPercentage: Float, proteinPercentage:Float, totalCalories: Float) {
     val pieEntries = listOf(
         PieEntry(carbPercentage * 100, "Carbs"),
         PieEntry(fatPercentage * 100, "Fat"),
