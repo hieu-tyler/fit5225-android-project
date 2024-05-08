@@ -3,6 +3,7 @@ package com.example.homescreen
 import android.app.Application
 import android.content.ContentValues
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -50,7 +53,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         val signInIntent = googleSignInClient.signInIntent
         _googleSignInIntent.value = signInIntent
     }
-
     private val _navigateToHealthMetrics = MutableLiveData<Boolean>()
     fun firebaseAuthWithGoogle(idToken: String, userProfile: UserProfile, onSuccess: () -> Unit) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -58,7 +60,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     updateUser(userProfile, onSuccess)
-                    Log.d("Google userProfile", "$userProfile")
                     _navigateToHealthMetrics.value = true
                 } else {
                     Log.e("FirebaseAuth", "Firebase authentication failed", task.exception)
@@ -83,7 +84,8 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
                     allowLocation = false,
                     allowActivityShare = false,
                     allowHealthDataShare = false,
-                    isGoogleUser = true
+                    isGoogleUser = true,
+                    profileImageUrl = ""
                 )
                 insertUser(newUserProfile)
                 onSuccess(newUserProfile)
@@ -120,6 +122,32 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     val userProfile: MutableLiveData<UserProfile> = _userProfile
     val allUsers: LiveData<List<UserProfile>> = repository.allUsers.asLiveData()
 
+    private val _profileImageUri = MutableLiveData<Uri>()
+    val profileImageUri: LiveData<Uri> = _profileImageUri
+
+    fun uploadImageToFirebase(imageUri: Uri) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val storageRef = FirebaseStorage.getInstance().getReference("uploads/$userId/${imageUri.lastPathSegment}")
+        storageRef.putFile(imageUri).addOnSuccessListener {
+            it.metadata?.reference?.downloadUrl?.addOnSuccessListener { uri ->
+                val imageUrl = uri.toString()
+                saveImageUriToDatabase(userId, imageUrl)
+            }
+        }.addOnFailureListener {
+            // Handle unsuccessful uploads
+            Log.e("Upload", "Upload failed", it)
+        }
+    }
+    fun saveImageUriToDatabase(userId: String, imageUrl: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateProfileImage(userId, imageUrl, this)
+        }
+    }
+    fun setImageUri(uri: Uri) {
+        _profileImageUri.postValue(uri)
+    }
+
+    // Food
     fun insertFood(food: Food) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertFood(food)
     }
@@ -210,15 +238,18 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val profile = repository.getUserProfile(userId)
+                Log.d("profile in ViewModel", "$profile")
                 _userProfile.value = profile!!
             } catch (e: Exception) {
                 Log.e("ViewModel", "Failed to load user profile", e)
             }
         }
     }
+
     fun insertUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.insertUser(userProfile)
     }
+
     fun updateUser(userProfile: UserProfile, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
@@ -230,6 +261,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     fun deleteUser(userProfile: UserProfile) = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteUser(userProfile)
     }

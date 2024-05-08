@@ -27,6 +27,9 @@ interface UserProfileDAO {
     @Query("UPDATE user_profile SET isGoogleUser = :isGoogle WHERE userId = :userId")
     fun updateIsGoogleUser(userId: String, isGoogle: Boolean)
 
+    @Query("UPDATE user_profile SET profileImageUrl = :imageUrl WHERE userId = :userId")
+    fun updateProfileImage(userId: String, imageUrl: String)
+
     @Delete
     suspend fun deleteUser(userProfile: UserProfile)
 }

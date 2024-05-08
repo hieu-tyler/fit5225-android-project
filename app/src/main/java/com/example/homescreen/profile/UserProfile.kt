@@ -18,5 +18,6 @@ data class UserProfile(
     val allowLocation: Boolean,
     val allowActivityShare: Boolean,
     val allowHealthDataShare: Boolean,
-    val isGoogleUser: Boolean = false
+    val isGoogleUser: Boolean = false,
+    var profileImageUrl: String
 )
