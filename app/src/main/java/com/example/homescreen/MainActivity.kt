@@ -1,5 +1,8 @@
 package com.example.homescreen
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,15 +10,17 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import com.example.homescreen.ui.theme.HomeScreenTheme
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.maps.GoogleMap
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var permissionsManager: PermissionsManager
-
     private val viewModel : ViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -29,7 +34,21 @@ class MainActivity : ComponentActivity() {
 
 }
 
+@Composable
+fun checkPermission() {
 
+    if (ActivityCompat.checkSelfPermission(
+            LocalContext.current,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            LocalContext.current,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+//        ActivityCompat.requestPermissions(Activity(), arrayOf( Manifest.permission.ACCESS_FINE_LOCATION), 101)
+
+    }
+}
 
 
 
