@@ -53,7 +53,13 @@ import com.example.homescreen.ViewModel
 @SuppressLint("DiscouragedApi", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NutritionFormView(navController: NavController, food: Food) {
-    val description by remember { mutableStateOf("The banana (Musa genus) is a remarkable fruit, cherished across the globe for its flavor, nutritional value, and year-round availability.") }
+    val description by remember { mutableStateOf(
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt " +
+                "ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco " +
+                "laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum" +
+                " dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia " +
+                "deserunt mollit anim id est laborum."
+    ) }
     val context = LocalContext.current
     val resourceId: Int = context.resources.getIdentifier(food.imageUrl, "drawable", context.packageName)
 
@@ -146,7 +152,7 @@ fun CreateNutritionForm(viewModel: ViewModel, onCloseForm: () -> Unit) {
     ) { uri: Uri? ->
         uri?.let { imageUri ->
             // Call uploadImage with the selected image URI
-            uploadImage(imageUri)
+//            uploadImage(imageUri)
             imageString = imageUri.toString()
         }
     }

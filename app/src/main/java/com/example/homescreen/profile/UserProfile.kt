@@ -17,22 +17,7 @@ data class UserProfile(
     val birthDate: Date,
     val allowLocation: Boolean,
     val allowActivityShare: Boolean,
-    val allowHealthDataShare: Boolean
-){
-    companion object {
-        // Provides a default, empty instance of UserProfile
-        fun empty(): UserProfile = UserProfile(
-            userId = "",
-            firstName = "",
-            lastName = "",
-            email = "",
-            password = "",
-            selectedGender = "",
-            phone = "",
-            birthDate = Date(),
-            allowLocation = false,
-            allowActivityShare = false,
-            allowHealthDataShare = false
-        )
-    }
-}
+    val allowHealthDataShare: Boolean,
+    val isGoogleUser: Boolean = false,
+    var profileImageUrl: String
+)

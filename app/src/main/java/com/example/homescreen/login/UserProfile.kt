@@ -12,5 +12,6 @@ data class UserProfile(
     val birthDate: Date,
     val allowLocation: Boolean = false,
     val allowActivityShare: Boolean = false,
-    val allowHealthDataShare: Boolean = false
+    val allowHealthDataShare: Boolean = false,
+    val isGoogleUser: Boolean = false
 )

@@ -56,8 +56,11 @@ fun RegistrationScreen(
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
+    var emailValid by rememberSaveable { mutableStateOf(true) }
     var password by rememberSaveable { mutableStateOf("") }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
+    var passwordError by rememberSaveable { mutableStateOf("") }
     val gender = listOf("Male", "Female")
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     var selectedGender by rememberSaveable { mutableStateOf(gender[0]) }
@@ -68,7 +71,7 @@ fun RegistrationScreen(
     )
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var birthDate by rememberSaveable { mutableStateOf(calendar.timeInMillis) }
-    val isFormValid = isFormValid(firstName, lastName, email, password, phone)
+    val isRegFormValid = isRegFormValid(firstName, lastName, email, password, phone)
 
     Column(
         modifier = Modifier
@@ -80,7 +83,12 @@ fun RegistrationScreen(
         Text(
             text = "Create Your Account",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Text(
+            text = "All fields are required!",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
         TextField(
             value = firstName,
@@ -98,15 +106,21 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = {
+                email = it
+                emailValid = isValidEmail(email) },
+            label = { Text("Email Address") },
+            modifier = Modifier.fillMaxWidth(),
+            isError = !emailValid
         )
+        if (!emailValid) {
+            Text("Invalid email address", color = androidx.compose.ui.graphics.Color.Red)
+        }
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Password: at least 8 characters") },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val icon = if (isPasswordVisible) painterResource(id = R.drawable.eye) else painterResource(id = R.drawable.hidden)
@@ -118,6 +132,36 @@ fun RegistrationScreen(
                     )
                 }
             },
+            modifier = Modifier.fillMaxWidth(),
+            isError = passwordError.isNotEmpty()
+        )
+        if (passwordError.isNotEmpty()) {
+            Text(passwordError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password") },
+            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val icon = if (isPasswordVisible) painterResource(id = R.drawable.eye) else painterResource(id = R.drawable.hidden)
+                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    Icon(
+                        painter = icon,
+                        contentDescription = "Show or hide password",
+                        modifier = Modifier.height(22.dp)
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            isError = confirmPassword != password && confirmPassword.isNotEmpty()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Phone Number") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -152,12 +196,6 @@ fun RegistrationScreen(
                 }
             }
         }
-        TextField(
-            value = phone,
-            onValueChange = { phone = it },
-            label = { Text("Phone Number") },
-            modifier = Modifier.fillMaxWidth()
-        )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -193,11 +231,18 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(22.dp))
         Button(
             onClick = {
-                if (isFormValid) {
-                    createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate), navController, viewModel)
+                if ((password.length >= 8) && (isRegFormValid)) {
+                    if (password == confirmPassword) {
+                        createUserWithEmailPassword(firstName, lastName, email, password, selectedGender, phone, Date(birthDate), navController, viewModel)
+                        passwordError = ""
+                    } else {
+                        passwordError = "Passwords do not match!"
+                    }
+                } else {
+                    passwordError = "Password must be at least 8 characters long!"
                 }
             },
-            enabled = isFormValid,  // Button is disabled if form is not valid
+            enabled = isRegFormValid,  // Button is disabled if form is not valid
             modifier = Modifier.height(46.dp).width(190.dp)
         ) { Text("Register") }
         Row(
@@ -211,7 +256,11 @@ fun RegistrationScreen(
     }
 }
 
-fun isFormValid(firstName: String, lastName: String, email: String, password: String, phone: String): Boolean {
+fun isValidEmail(email: String): Boolean {
+    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+}
+
+fun isRegFormValid(firstName: String, lastName: String, email: String, password: String, phone: String): Boolean {
     return firstName.isNotEmpty() && lastName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && phone.isNotEmpty()
 }
 
@@ -235,7 +284,8 @@ fun createUserWithEmailPassword(firstName: String, lastName: String, email: Stri
                     birthDate = birthDate,
                     allowLocation = false,
                     allowActivityShare = false,
-                    allowHealthDataShare = false
+                    allowHealthDataShare = false,
+                    profileImageUrl = ""
                 )
                 viewModel.insertUser(userProfile)
                 navController.navigate(Routes.Login.value)  // Navigate to login screen after successful registration
@@ -247,36 +297,3 @@ fun createUserWithEmailPassword(firstName: String, lastName: String, email: Stri
         }
     }
 }
-
-//fun createUserWithEmailPassword(firstName: String, lastName: String, email: String, password: String,
-//                                selectedGender: String, phone: String, birthDate: Date, navController: NavController) {
-//    val auth = FirebaseAuth.getInstance()
-//    auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-//        if (task.isSuccessful) {
-//            val user = auth.currentUser
-//            val userId = user?.uid // Get the user ID from the Firebase Auth User
-//            val userMap = hashMapOf(
-//                "firstName" to firstName,
-//                "lastName" to lastName,
-//                "gender" to selectedGender,
-//                "phone" to phone,
-//                "birthDate" to birthDate
-//            )
-//            // Store additional details in Firestore
-//            user?.let {
-//                FirebaseFirestore.getInstance().collection("users").document(userId!!)
-//                    .set(userMap)
-//                    .addOnSuccessListener {
-//                        Log.d("Register", "User profile created for $userId")
-//                        // Navigate to the next screen or home screen
-//                        navController.navigate(Routes.HealthMetrics.value)
-//                    }
-//                    .addOnFailureListener { e ->
-//                        Log.w("Register", "Error writing document", e)
-//                    }
-//            }
-//        } else {
-//            Log.e("Register", "Failed to create user: ${task.exception?.message}")
-//        }
-//    }
-//}
