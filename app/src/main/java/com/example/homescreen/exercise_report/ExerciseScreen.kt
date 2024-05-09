@@ -32,8 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.homescreen.Routes
 import com.example.homescreen.ViewModel
+import com.mapbox.maps.extension.style.expressions.dsl.generated.distance
+import com.mapbox.maps.extension.style.expressions.dsl.generated.random
 import java.sql.Time
 import java.time.Instant
+import java.util.Random
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,13 +140,14 @@ fun StartExercise(navController: NavController, selectedExercise: String) {
 fun calculateUpdate(viewModel: ViewModel, navController: NavController, startTimestamp: Long) {
     val endTimeStamp = System.currentTimeMillis()
     val activityId = viewModel.getActivityId("Walking")
+    val distance = (1000..5000).random().toFloat()
     viewModel.insertUserActivity(
         UserActivity(
             userId = 0,
             activityId = 1,
-            duration = 30F,
-            distance = 500F,
-            avgPace = 500F/30F,
+            duration = 50F,
+            distance = distance,
+            avgPace = 0F,
             elevation = 3F,
             startTime = Time.from(Instant.ofEpochMilli(startTimestamp)),
             endTime = Time.from(Instant.ofEpochMilli(endTimeStamp)),

@@ -1,6 +1,8 @@
 package com.example.homescreen.exercise_report
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,9 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -48,14 +48,17 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
+import java.time.LocalDate
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewModel) {
 
     val activities by viewModel.allUserActivities.observeAsState(emptyList())
+    val distances by viewModel.allDistances.observeAsState()
 
     Scaffold(
         topBar = {
@@ -83,13 +86,22 @@ fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewM
                 ActivityItemsList(activities = activities)
 
             }
-            Text(
-                text = "Weekly activities distance graph",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
 
-            BarChartScreen()
+            if (distances != null) {
+                Text(
+                    text = "Weekly activities distance graph",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                BarChartScreen(distances)
+            }
+            else {
+                Text(
+                    text = "No activities to show",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            }
         }
     }
 
@@ -170,16 +182,19 @@ fun ActivityItems(index: Int, activity: UserActivity) {
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BarChartScreen() {
+fun BarChartScreen(distances: List<Float>?) {
+    val today = LocalDate.now()
+    val size = distances?.size
     val barEntries = listOf(
-        BarEntry(0f, 1070f),
-        BarEntry(1f, 4050f),
-        BarEntry(2f, 3890f),
-        BarEntry(3f, 5599f),
-        BarEntry(4f, 2300f),
-        BarEntry(5f, 4055f),
-        BarEntry(6f,5100f)
+        BarEntry(0f, size?.coerceAtLeast(1)?.let { distances[it.minus(1)] } ?: 0f),
+        BarEntry(1f, size?.coerceAtLeast(2)?.let { distances[it.minus(2)] } ?: 0f),
+        BarEntry(2f, size?.coerceAtLeast(3)?.let { distances[it.minus(3)] } ?: 0f),
+        BarEntry(3f, size?.coerceAtLeast(4)?.let { distances[it.minus(4)] } ?: 0f),
+        BarEntry(4f, size?.coerceAtLeast(5)?.let { distances[it.minus(5)] } ?: 0f),
+        BarEntry(5f, size?.coerceAtLeast(6)?.let { distances[it.minus(6)] } ?: 0f),
+        BarEntry(6f,size?.coerceAtLeast(7)?.let { distances[it.minus(7)] } ?: 0f)
     )
     val barDataSet = BarDataSet(barEntries, "Steps")
     barDataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
@@ -194,8 +209,14 @@ fun BarChartScreen() {
                 setFitBars(true)
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
                 xAxis.valueFormatter =
-                    IndexAxisValueFormatter(listOf("Sun", "Mon", "Tues", "Wed", "Thurs",
-                        "Fri","Sat"))
+                    IndexAxisValueFormatter(listOf("Today",
+                        "Yesterday",
+                        "${today.minusDays(2).dayOfMonth} / ${today.minusDays(2).month}",
+                        "${today.minusDays(3).dayOfMonth} / ${today.minusDays(3).month}",
+                        "${today.minusDays(4).dayOfMonth} / ${today.minusDays(4).month}",
+                        "${today.minusDays(5).dayOfMonth} / ${today.minusDays(5).month}",
+                        "${today.minusDays(6).dayOfMonth} / ${today.minusDays(6).month}",
+                        ))
                 animateY(4000)
             }
         }
