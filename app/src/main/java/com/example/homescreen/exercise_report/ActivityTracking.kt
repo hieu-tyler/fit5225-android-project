@@ -59,7 +59,7 @@ fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewM
 
     val activities by viewModel.allUserActivities.observeAsState(emptyList())
     val distances by viewModel.allDistances.observeAsState()
-
+    
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -88,7 +88,7 @@ fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewM
 
             }
 
-            if (distances != null) {
+            if (distances != null && distances!!.isNotEmpty()) {
                 Text(
                     text = "Weekly activities distance graph",
                     style = MaterialTheme.typography.headlineSmall,
