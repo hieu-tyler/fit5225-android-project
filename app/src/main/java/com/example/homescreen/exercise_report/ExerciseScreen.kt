@@ -129,7 +129,7 @@ fun StartExercise(navController: NavController, selectedExercise: String) {
     if (selectedExercise == "exercise") {
         Toast.makeText(
             LocalContext.current,
-            "Exercise not selected", Toast.LENGTH_SHORT).show()
+            "Exercise is not selected", Toast.LENGTH_SHORT).show()
     }
     else {
         navController.navigate(Routes.MapScreen.value)
