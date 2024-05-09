@@ -22,13 +22,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -62,8 +62,9 @@ fun ActivityTrackerScreen(navHostController: NavHostController, viewModel: ViewM
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Activity Screen") },
+            CenterAlignedTopAppBar(
+                title = { Text("Activity Screen",
+                    style = MaterialTheme.typography.headlineMedium) },
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
